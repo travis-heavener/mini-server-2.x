@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap&family=Ubuntu&display=swap');
 
 :root {
-    --text-unit: 16px;
     --logo-height: calc( 8*var(--text-unit) );
 }
 
@@ -83,6 +82,7 @@ body {
     box-shadow: 0 0.1em 0.2em -2em #888 inset;
     
     color: #222;
+    font-family: "Ubuntu", sans-serif;
     font-size: calc(1.3 * var(--text-unit));
 }
 

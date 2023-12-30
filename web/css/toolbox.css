@@ -17,3 +17,7 @@ body {
 
     background-color: #f8f8f8;
 }
+
+:root {
+    --text-unit: 16px;
+}

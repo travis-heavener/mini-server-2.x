@@ -5,7 +5,9 @@
         <meta charset="utf-8">
         <title>Mini.me</title>
         
-        <?php include "./php/importAssets.php";?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");?>
+
+        <script src="/js/requireAuth.js"></script>
 
     </head>
     <body>

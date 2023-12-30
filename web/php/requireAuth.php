@@ -72,6 +72,8 @@
         $mysqli->close();
         return;
     } else if (count($rows) > 1) {
+        // the `id` is auto-incremented and thus shouldn't return more than one user
+        // BUT if it does handle this
         remove_cookie(); // remove cookie
         header("Location: /index.php?reason=dup"); // redirect to login
         $mysqli->close();

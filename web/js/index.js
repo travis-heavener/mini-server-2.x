@@ -88,6 +88,12 @@ $(document).ready(() => {
         case "sig": // prompt auth error
             promptUser("Authentication Error", "Session expired due to unexpected authentication mismatch, please log in again.");
             break;
+        case "inv": // prompt user id not in users table
+            promptUser("User Verification Error", "The user could not be found in the database (try logging in again or contacting a system administrator).");
+            break;
+        case "dup": // prompt user id not in users table
+            promptUser("User Verification Error", "User database lookup returned more than 1 result, contact a system administrator.");
+            break;
     }
 });
 

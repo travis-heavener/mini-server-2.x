@@ -7,9 +7,6 @@
 
     // happy worm favicon
     echo "<link rel=\"icon\" href=\"/assets/favicon.ico\">";
-
-    // js-cookie (I'm lazy and this looks really cool)
-    echo "<script src=\"https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js\"></script>";
     
     // global css & such
     echo "<link rel=\"stylesheet\" href=\"/css/toolbox.css\"></script>";

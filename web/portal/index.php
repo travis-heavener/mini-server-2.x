@@ -15,5 +15,9 @@
 
         <p>my account</p>
 
+        <?php
+            echo $_COOKIE["ms-user-auth"];
+        ?>
+
     </body>
 </html>

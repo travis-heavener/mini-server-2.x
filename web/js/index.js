@@ -48,6 +48,11 @@ const backAnim = {
     }
 };
 
+function hideUserPrompt() {
+    $(".user-prompt").each(function() {  this.parentElement.removeChild(this);  });
+    window.history.replaceState({}, document.title, window.location.href.replace(window.location.search, ""));
+}
+
 // document onready events
 $(document).ready(() => {
     toggleAnim();
@@ -55,6 +60,35 @@ $(document).ready(() => {
     // handle field pattern formatting
     $("#email-input").attr("pattern", "[a-zA-Z0-9\._\\-]+@[a-zA-Z0-9\._\\-]+\\.[a-zA-Z]{2,4}$");
     $("#password-input").attr("pattern", "^\.{6,}$");
+
+    // if we've redirected, display the reason (ie. session timeout, signature mismatch)
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const promptUser = (title, text) => {
+        const wrapper = document.createElement("div");
+        $(wrapper).addClass("user-prompt");
+        $(wrapper).click(function(e) {
+            e.target === this && hideUserPrompt();
+        });
+
+        $(wrapper).append(`
+            <div>
+                <h1>${title}</h1>
+                <p>${text}</p>
+                <button onclick="hideUserPrompt()">Close</button>
+            </div>
+        `);
+        $("body").append(wrapper);
+    };
+
+    switch (urlParams.get("reason")) {
+        case "exp": // prompt session timeout
+            promptUser("Session Timeout", "The current session has expired,<br>please log in again.");
+            break;
+        case "sig": // prompt auth error
+            promptUser("Authentication Error", "Session expired due to unexpected authentication mismatch, please log in again.");
+            break;
+    }
 });
 
 function toggleAnim() {

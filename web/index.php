@@ -15,7 +15,7 @@
         <div id="content">
             <img id="logo" src="/assets/happy-worm.png" alt="Happy Worm logo.">
 
-            <h1 id="title">Welcome Home</h1>
+            <h1 id="title">Welcome</h1>
 
             <form id="login-form" method="post" action="/php/login.php">
                 <div id="email-field" class="field">

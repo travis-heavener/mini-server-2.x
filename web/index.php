@@ -20,11 +20,11 @@
             <form id="login-form" method="post" action="/php/login.php">
                 <div id="email-field" class="field">
                     <img class="field-icon" src="/assets/mail-icon.png" alt="Email icon.">
-                    <input id="email-input" name="email" type="email" placeholder="Email" required>
+                    <input id="email-input" name="email" type="email" placeholder="Email" required autocomplete="email">
                 </div>
                 <div id="password-field" class="field">
                     <img class="field-icon" src="/assets/password-icon.png" alt="Password key icon.">
-                    <input id="password-input" name="pass" type="password" placeholder="Password" required>
+                    <input id="password-input" name="pass" type="password" placeholder="Password" required autocomplete="current-password">
                 </div>
                 <input id="submit-btn" type="submit" value="Log In">
             </form>

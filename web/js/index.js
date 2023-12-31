@@ -24,3 +24,21 @@ $(document).ready(() => {
             break;
     }
 });
+
+function submit() {
+    let data = new FormData($("#login-form")[0]);
+    data = JSON.stringify(Object.fromEntries(data));
+    $.ajax({
+        "url": "/php/login.php",
+        "method": "POST",
+        "data": data,
+        "contentType": "application/json",
+        "success": function(data2) {
+            window.open("/portal/", "_self");
+        },
+        "error": function(e) {
+            console.error(e);
+        }
+    });
+    return false;
+}

@@ -4,14 +4,15 @@
     }
 
     // verify post request
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        echo "Invalid request method: expected POST.";
-        return;
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        echo "Invalid request method: expected POST, got " . $_SERVER["REQUEST_METHOD"] . ".";
+        exit();
     }
     
     // extract field data
-    $email = $_POST["email"];
-    $pass = $_POST["pass"];
+    $post_data = json_decode(file_get_contents('php://input'));
+    $email = $post_data->email;
+    $pass = $post_data->pass;
 
     // load envs
     $envs = parse_ini_file("../../config/mysql.env");
@@ -33,13 +34,13 @@
     if (count($rows) == 0) {
         echo "Invalid credentials.";
         $mysqli->close();
-        return;
+        exit();
     }
 
     if (count($rows) > 1) {
         echo "Duplicate email entries.";
         $mysqli->close();
-        return;
+        exit();
     }
     
     // if the user exists, check their password
@@ -49,7 +50,7 @@
     if (!$is_match) {
         echo "Invalid credentials.";
         $mysqli->close();
-        return;
+        exit();
     }
 
     // knowing that the login is valid, update last_login
@@ -75,8 +76,4 @@
 
     // store token in cookies
     $worked = setcookie("ms-user-auth", $token, time() + $token_lifespan, "/");
-    echo $worked;
-
-    // navigate to /portal/index.php
-    header("Location: /portal/");
 ?>

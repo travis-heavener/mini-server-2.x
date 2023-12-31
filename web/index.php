@@ -17,7 +17,7 @@
 
             <h1 id="title">Welcome</h1>
 
-            <form id="login-form" method="post" action="/php/login.php">
+            <form id="login-form" action="javascript:submit()" enctype="multipart/form-data">
                 <div id="email-field" class="field">
                     <img class="field-icon" src="/assets/mail-icon.png" alt="Email icon.">
                     <input id="email-input" name="email" type="email" placeholder="Email" required autocomplete="email">

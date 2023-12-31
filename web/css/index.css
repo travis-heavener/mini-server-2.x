@@ -55,6 +55,7 @@ body {
     
     margin: 0 0.25em;
     margin-bottom: calc(2 * var(--text-unit));
+    padding: 0.2em 0.1em;
     
     max-width: 80%;
     max-height: calc(2.5 * var(--text-unit));
@@ -171,112 +172,4 @@ body {
     border-radius: 28px;
 
     cursor: pointer;
-}
-
-/* user prompt window stuff */
-
-.user-prompt {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-
-    background-color: #0006;
-        
-    cursor: pointer;
-}
-
-.user-prompt > div {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-
-    --padding-h: calc(0.75 * var(--text-unit));
-    --height: calc(17 * var(--text-unit) - 2 * var(--padding-h));
-    --width: calc(2 * var(--height)); /* aspect ratio of 2 */
-    padding: var(--padding-h) 0;
-
-    width: var(--width);
-    height: var(--height);
-
-    background-color: #f8f8f8;
-    border: calc(0.4 * var(--text-unit)) solid #bbb;
-    border-radius: 8.33%/16.67%;
-
-    animation-name: promptAppear;
-    animation-duration: 0.3s;
-    animation-timing-function: ease-out;
-    animation-iteration-count: 1;
-
-    cursor: default;
-}
-
-.user-prompt > div > h1 {
-    display: flex;
-    margin: 0 var(--text-unit);
-
-    color: #181818;
-    font-family: "Poppins", sans-serif;
-    font-size: calc(2 * var(--text-unit));
-    font-weight: 500;
-    text-align: center;
-}
-
-.user-prompt > div > p {
-    display: flex;
-    margin: 0 var(--text-unit);
-
-    color: #444;
-    font-family: "Poppins", sans-serif;
-    font-size: calc(1.125 * var(--text-unit));
-    font-weight: 500;
-    text-align: center;
-}
-
-.user-prompt > div > button {
-    display: flex;
-    justify-self: flex-end;
-    
-    padding: 0.4em 0.8em;
-    
-    background-color: #0e860e;
-    border: none;
-    box-shadow: 0.125em 0.125em 0em #085f08;
-    border-radius: 1em;
-    
-    color: #f8f8f8;
-    font-family: "Poppins", sans-serif;
-    font-size: calc(1.125 * var(--text-unit));
-    font-weight: 500;
-    text-align: center;
-    
-    cursor: pointer;
-    transition: 0.3s all;
-}
-
-.user-prompt > div > button:hover {
-    filter: brightness(118%);
-}
-
-.user-prompt > div > button:active {
-    box-shadow: none;
-    transform: translateX(0.125em) translateY(0.125em);
-}
-
-@keyframes promptAppear {
-    from {
-        opacity: 0;
-        transform: translateY(-10vh);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0vh);
-    }
 }

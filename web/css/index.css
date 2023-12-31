@@ -29,7 +29,6 @@ body {
 #logo {
     height: var(--logo-height);
     object-fit: contain;
-    image-rendering: pixelated; /* prevent blur from resizing up */
 }
 
 #title {

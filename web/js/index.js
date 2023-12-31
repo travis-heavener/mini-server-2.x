@@ -33,11 +33,15 @@ function submit() {
         "method": "POST",
         "data": data,
         "contentType": "application/json",
-        "success": function(data2) {
-            window.open("/portal/", "_self");
+        "success": function(res) {
+            if (res.trim()) {
+                promptUser("Login Error", "The supplied credentials are invalid.");
+            } else {
+                window.open("/portal/", "_self");
+            }
         },
         "error": function(e) {
-            console.error(e);
+            promptUser("Login Error", "An internal server error occured, try contacting an administrator if this continues to occur.");
         }
     });
     return false;

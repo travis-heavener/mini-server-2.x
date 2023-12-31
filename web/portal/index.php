@@ -21,12 +21,9 @@
         </div>
 
         <div id="apps-content">
-            <div class="app-icon"></div>
-            <div class="app-icon"></div>
-            <div class="app-icon"></div>
-            <div class="app-icon"></div>
-            <div class="app-icon"></div>
-            <div class="app-icon"></div>
+            <div id="apps-grid">
+                <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/portal/createIcons.php"); ?>
+            </div>
         </div>
 
         <div id="footer-content">

@@ -9,8 +9,9 @@ Satisfy all
 # Custom ErrorDocument to prevent default 403 from hinting that an asset exists
 ErrorDocument 403 /errors/404.html
 
-# remove index.php & such after in url
+# remove index.php & such after in url (https://stackoverflow.com/a/9619319)
 Options +FollowSymLinks -MultiViews
+
 # Turn mod_rewrite on
 RewriteEngine On
 RewriteBase /

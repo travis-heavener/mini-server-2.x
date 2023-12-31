@@ -3,7 +3,7 @@
     <head>
         
         <meta charset="utf-8">
-        <title>Mini.me | My Account</title>
+        <title>Mini.me | Dashboard</title>
         
         <?php
             include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");

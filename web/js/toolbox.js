@@ -22,13 +22,18 @@ const backAnim = {
             this.rot++;
             this.rot %= 360;
 
-            $("body").css({
-                "background-image": `
-                    linear-gradient(${(225 + this.rot) % 360}deg, #535edbcc, #0000 80%),
-                    linear-gradient(${(135 + this.rot) % 360}deg, #ff0c, #0000 80%),
-                    linear-gradient(${(330 + this.rot) % 360}deg, #eb1d1dcc, #0000 80%)
-                `.trim()
-            });
+            if (!$("head > style#body-anim").length) {
+                $("head").append("<style id='body-anim'></style>");
+            }
+
+            $("style#body-anim").html(
+                `body {
+                    background-image:
+                        linear-gradient(${(225 + this.rot) % 360}deg, #535edbcc, #0000 80%),
+                        linear-gradient(${(135 + this.rot) % 360}deg, #ff0c, #0000 80%),
+                        linear-gradient(${(330 + this.rot) % 360}deg, #eb1d1dcc, #0000 80%)
+                }`
+            );
         }, this.freq);
 
         this.isRunning = true;

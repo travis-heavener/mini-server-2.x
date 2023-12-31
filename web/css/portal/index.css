@@ -1,2 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap&family=Ubuntu&display=swap');
 
+body {
+    
+}
+
+#left-content {
+    width: var(--left-width);
+    height: 100vh;
+
+    background-color: #3641ba;
+}
+
+#center-content {
+    width: var(--center-width);
+    height: 100vh;
+
+    background-color: #e5e7ff;
+}

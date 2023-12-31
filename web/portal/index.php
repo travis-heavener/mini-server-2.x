@@ -6,18 +6,21 @@
         <title>Mini.me | My Account</title>
         
         <?php
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");
             include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");
         ?>
+
+        <link rel="stylesheet" href="/css/portal/index.css">
 
     </head>
     <body>
 
-        <p>my account</p>
+        <div id="anim-controls">
+            <p id="anim-desc">Animate:</p>
+            <input type="checkbox" id="anim-checkbox" onclick="toggleAnim(this)" title="Toggle background animation">
+        </div>
 
-        <?php
-            echo $_COOKIE["ms-user-auth"];
-        ?>
+        <script src="/js/portal/index.js"></script>
 
     </body>
 </html>

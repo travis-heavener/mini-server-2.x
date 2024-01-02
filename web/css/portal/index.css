@@ -18,7 +18,7 @@ body {
     align-items: center;
     justify-content: space-between;
 
-    padding: 0 calc(0.4 * var(--text-unit));
+    padding: 0 calc(1.5 * var(--text-unit));
 
     height: var(--header-height);
 

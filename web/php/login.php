@@ -15,7 +15,7 @@
     $pass = $post_data->pass;
 
     // load envs
-    $envs = parse_ini_file("../../config/mysql.env");
+    $envs = parse_ini_file(dirname($_SERVER["DOCUMENT_ROOT"]) . "/config/mysql.env");
 
     // check that the user exists
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);

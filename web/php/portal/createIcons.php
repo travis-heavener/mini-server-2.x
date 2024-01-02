@@ -2,8 +2,8 @@
     // create icons for portal page
     function create_icon($type, $title, $desc, $icon_path) {
         return "
-            <div class='app-container'>
-                <div id='$type' class='app-badge' title='$desc'>
+            <div class='app-container noselect'>
+                <div id='$type' class='app-badge'>
                     <img class='app-icon' src='$icon_path' alt='$title icon.'>
                 </div>
                 <h1 class='app-title'>$title</h1>

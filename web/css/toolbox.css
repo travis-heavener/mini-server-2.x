@@ -8,7 +8,20 @@ html {
     position: relative;
     min-width: 100vw;
     min-height: 100vh;
+
+    --header-height: calc(3.875 * var(--text-unit));
+    --footer-height: calc(2.6 * var(--text-unit));
 }
+
+/* thanks https://stackoverflow.com/a/4407335 */
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+  }
 
 body {
     width: 100%;
@@ -165,4 +178,66 @@ body {
     border-radius: 28px;
 
     cursor: pointer;
+}
+
+/* header content */
+
+#header-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 calc(1.5 * var(--text-unit));
+
+    height: var(--header-height);
+
+    background-color: #4f59cc;
+}
+
+#header-content > img {
+    width: auto;
+    height: 88%;
+    aspect-ratio: 1;
+
+    object-fit: cover;
+
+    cursor: pointer;
+    transition: 0.2s filter;
+}
+
+#header-content > #my-account-img {
+    clip-path: circle(50%); /* fix circular hitbox (also clips image, this isn't an issue though) */
+}
+
+#header-content > img:hover {
+    filter: brightness(110%);
+}
+
+#header-content > img:active {
+    filter: brightness(95%);
+}
+
+/* footer content */
+
+#footer-content {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    align-items: center;
+
+    padding: 0 calc(0.4 * var(--text-unit));
+    height: var(--footer-height);
+
+    background-color: #fff5;
+}
+
+#footer-content > p {
+    display: inline;
+    color: #111;
+    font-family: "Poppins", sans-serif;
+    font-size: calc(0.88 * var(--text-unit));
+    font-weight: 500;
 }

@@ -5,43 +5,6 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-
-    --header-height: calc(3.875 * var(--text-unit));
-    --footer-height: calc(2.6 * var(--text-unit));
-}
-
-/* header content */
-
-#header-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 calc(1.5 * var(--text-unit));
-
-    height: var(--header-height);
-
-    background-color: #4f59cc;
-}
-
-#header-content > img {
-    width: auto;
-    height: 88%;
-    aspect-ratio: 1;
-
-    object-fit: cover;
-
-    cursor: pointer;
-    transition: 0.2s filter;
-}
-
-#header-content > #my-account-img {
-    clip-path: circle(50%); /* fix circular hitbox (also clips image, this isn't an issue though) */
-}
-
-#header-content > img:hover {
-    filter: brightness(115%);
 }
 
 /* apps selection content */
@@ -83,6 +46,8 @@ body {
     flex-direction: column;
     align-items: center;
     row-gap: calc(2*var(--border-size));
+
+    transition: 0.2s transform, 0.2s filter;
 }
 
 .app-badge {
@@ -95,24 +60,31 @@ body {
     height: calc(var(--item-size) - 2*var(--border-size));
     aspect-ratio: 1;
     
-    background-color: #fff3;
+    background-color: #f8f8f83a;
     border-radius: 25%;
     border: var(--border-size) solid #111;
     box-shadow: 0 1.5px 14px #000c;
     
-    transition: 0.2s transform, 0.2s filter;
-    
     cursor: pointer;
+    transition: 0.2s background-color;
 }
 
-.app-badge:hover {
-    transform: scale(1.05) translateY( calc(-0.025 * calc(var(--item-size) - 2*var(--border-size))) );
-    filter: brightness(115%);
+.app-container:hover {
+    transform: scale(1.045);
+    filter: brightness(105%);
 }
 
-.app-badge:active {
-    transform: scale(0.98) translateY( calc(0.01 * calc(var(--item-size) - 2*var(--border-size))) );
-    filter: brightness(90%);
+.app-container:hover > .app-badge {
+    background-color: #f8f8f853;
+}
+
+.app-container:active {
+    transform: scale(0.97);
+    filter: brightness(95%);
+}
+
+.app-container:active > .app-badge {
+    background-color: #bbb4;
 }
 
 .app-icon {
@@ -127,35 +99,12 @@ body {
     font-family: "Poppins", sans-serif;
     font-weight: 600;
     text-align: center;
-}
 
-/* footer content */
-
-#footer-content {
-    position: relative;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-    align-items: center;
-
-    padding: 0 calc(0.4 * var(--text-unit));
-    height: var(--footer-height);
-
-    background-color: #fff5;
-}
-
-#footer-content > p {
-    display: inline;
-    color: #111;
-    font-family: "Poppins", sans-serif;
-    font-size: calc(0.88 * var(--text-unit));
-    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s color;
 }
 
 /* override default toolbox styling for anim-controls */
 #anim-controls {
-    height: 25px;
     top: -35px;
-    right: 15px;
 }

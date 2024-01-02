@@ -15,10 +15,10 @@
     </head>
     <body>
 
-        <div id="header-content">
-            <img id="logo-img" src="/assets/happy-worm.png" alt="Happy worm icon." title="Home" onclick="window.open('/portal/index.php', '_self')">
-            <img id="my-account-img" src="/assets/profile-icon.png" alt="My Account icon." title="My Account" onclick="window.open('/portal/account/index.php', '_self')">
-        </div>
+        <?php 
+            $show_waffle = false;
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php");
+        ?>
 
         <div id="apps-content">
             <div id="apps-grid">
@@ -26,23 +26,10 @@
             </div>
         </div>
 
-        <div id="footer-content">
-            <?php
-                // pick random footnote
-                $notes = [
-                    "Made with ❤.",
-                    "Est. 2023.",
-                    "Never share your password.",
-                    "<a href='mailto:travis.heavener@gmail.com'>travis.heavener@gmail.com</a> for inquiries."
-                ];
-                echo "<p>" . $notes[array_rand($notes)] ."</p>";
-            ?>
-
-            <div id="anim-controls">
-                <p id="anim-desc">Animate:</p>
-                <input type="checkbox" id="anim-checkbox" onclick="toggleAnim(this)" title="Toggle background animation">
-            </div>
-        </div>
+        <?php
+            $show_anim_ctrls = true;
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php");
+        ?>
 
         <script src="/js/portal/index.js"></script>
 

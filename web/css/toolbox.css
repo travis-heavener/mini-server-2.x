@@ -202,9 +202,10 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
 
     padding: 0 calc(1.5 * var(--text-unit));
+    column-gap: calc(1.5 * var(--text-unit));
 
     height: var(--header-height);
 
@@ -220,6 +221,10 @@ body {
 
     cursor: pointer;
     transition: 0.2s filter;
+}
+
+#header-content > #logo-img {
+    margin-right: auto; /* fix to left-hand side */
 }
 
 #header-content > #my-account-img {

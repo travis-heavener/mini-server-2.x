@@ -1,4 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&family=Ubuntu&display=swap');
+/* font specs */
+
+@font-face {
+    font-family: Poppins;
+    src: url("/assets/fonts/Poppins-Medium.woff");
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: Ubuntu;
+    src: url("/assets/fonts/Ubuntu-Regular.woff");
+    font-weight: 400;
+}
+
+/* end font specs */
+
 
 *, html {
     margin: 0;
@@ -35,7 +50,6 @@ body {
 :root {
     --text-unit: 16px;
 }
-
 
 /* user prompt window stuff */
 

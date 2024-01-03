@@ -2,7 +2,7 @@
     // create apps headers
     echo "
         <div id='header-content'>
-            <img id='logo-img' src='/assets/happy-worm.png' type=\"image/png\" alt='Happy worm icon.' onclick='window.location.href = \"/portal/index.php\"'>
+            <img id='logo-img' src='/assets/happy-worm.png' type=\"image/png\" alt='Happy worm icon.' onclick=\"window.location.href = '/portal/index.php'\">
     ";
 
     // show either apps waffle or my account icon

@@ -6,6 +6,7 @@
 
     // preloads fonts
     echo "<link rel='preload' href='/assets/fonts/Poppins-Medium.woff' as='font' type='font/woff' crossorigin>";
+    echo "<link rel='preload' href='/assets/fonts/Poppins-Bold.woff' as='font' type='font/woff' crossorigin>";
     echo "<link rel='preload' href='/assets/fonts/Ubuntu-Regular.woff' as='font' type='font/woff' crossorigin>";
 
     // jQuery

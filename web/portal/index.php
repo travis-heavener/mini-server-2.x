@@ -10,7 +10,7 @@
             include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");
         ?>
 
-        <link rel="stylesheet" href="/css/portal/index.css">
+        <link rel="stylesheet" href="/css/portal/index.css" type="text/css">
 
     </head>
     <body>
@@ -31,7 +31,7 @@
             include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php");
         ?>
 
-        <script src="/js/portal/index.js"></script>
+        <script src="/js/portal/index.js" type="text/javascript"></script>
 
     </body>
 </html>

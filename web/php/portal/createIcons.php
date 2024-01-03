@@ -4,7 +4,7 @@
         return "
             <div class='app-container noselect'>
                 <div id='$name-icon' class='app-badge'>
-                    <img class='app-icon' src='/assets/app-icons/$name.png' alt='$title icon.'>
+                    <img class='app-icon' src='/assets/app-icons/$name.png' type='image/png' alt='$title icon.'>
                 </div>
                 <h1 class='app-title'>$title</h1>
             </div>

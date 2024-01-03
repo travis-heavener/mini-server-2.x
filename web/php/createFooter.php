@@ -16,7 +16,7 @@
         echo "
             <div id='anim-controls'>
                 <p id='anim-desc'>Animate:</p>
-                <input type='checkbox' id='anim-checkbox' onclick='toggleAnim(this)' title='Toggle background animation'>
+                <input type='checkbox' checked='true' id='anim-checkbox' onclick='toggleAnim(this)' title='Toggle background animation'>
             </div>
         ";
     }

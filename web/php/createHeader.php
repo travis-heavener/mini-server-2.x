@@ -8,11 +8,11 @@
     // show either apps waffle or my account icon
     if ($show_waffle) {
         echo "
-            <img id='waffle-img' src='/assets/waffle.png' alt='Dashboard icon.' onclick='window.location.href = \"/portal/index.php\"'>
+            <img id='waffle-img' src='/assets/app-icons/waffle.png' alt='Dashboard icon.' onclick='window.location.href = \"/portal/index.php\"'>
         ";
     } else {
         echo "
-            <img id='my-account-img' src='/assets/profile-icon.png' alt='My Account icon.' onclick='window.location.href = \"/portal/account/index.php\"'>
+            <img id='my-account-img' src='/assets/app-icons/profile.png' alt='My Account icon.' onclick='window.location.href = \"/portal/account/index.php\"'>
         ";
     }
 

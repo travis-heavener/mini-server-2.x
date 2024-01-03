@@ -15,4 +15,5 @@
     echo create_icon("dvds", "Film Library");
     echo create_icon("fire", "Fireplace");
     echo create_icon("clock", "Clock");
+    echo create_icon("todo", "To-Do");
 ?>

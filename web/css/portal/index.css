@@ -108,5 +108,5 @@ body {
 
 /* override default toolbox styling for anim-controls */
 #anim-controls {
-    top: -35px;
+    top: calc(var(--footer-height)/2 - 12.5px);
 }

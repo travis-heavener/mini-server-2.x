@@ -37,7 +37,7 @@ function submit() {
             if (res.trim()) {
                 promptUser("Login Error", "The supplied credentials are invalid.");
             } else {
-                window.open("/portal/", "_self");
+                window.open("/portal/index.php", "_self");
             }
         },
         "error": function(e) {

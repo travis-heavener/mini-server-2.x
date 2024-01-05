@@ -8,6 +8,9 @@
         <?php
             include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
             include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");
+
+            // actually call to check the auth
+            $user_data = check_auth();
         ?>
 
         <link rel="stylesheet" href="/css/portal/index.css" type="text/css">

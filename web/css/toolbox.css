@@ -7,6 +7,12 @@
 }
 
 @font-face {
+    font-family: Poppins;
+    src: url("/assets/fonts/Poppins-Bold.woff");
+    font-weight: 700;
+}
+
+@font-face {
     font-family: Ubuntu;
     src: url("/assets/fonts/Ubuntu-Regular.woff");
     font-weight: 400;

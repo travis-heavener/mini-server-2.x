@@ -16,12 +16,16 @@ body {
     margin-left: auto;
     margin-right: auto;
 
-    padding: calc(1.25 * var(--text-unit)) calc(1.875 * var(--text-unit));
+    padding: calc(1.25 * var(--text-unit)) calc(1.5 * var(--text-unit));
 
     width: 100%;
     min-height: calc( 100vh - var(--header-height) - var(--footer-height) );
 
     background-color: #f8f8f888;
+}
+
+#account-info > form {
+    width: min(calc(20 * var(--text-unit)), 100%);
 }
 
 #account-info > h1 {
@@ -50,13 +54,64 @@ body {
     font-weight: 400;
 }
 
+#account-info input:not([type=submit]) {
+    padding: 0.075em 0.2em;
+    width: max( calc(10 * var(--text-unit)), 75% );
+
+    border: 1px solid #111;
+    border-radius: 3px;
+}
+
+#account-info input[type=submit] {
+    margin: 0.5em 0;
+    padding: 0.1325em 0.65em;
+    
+    color: #111;
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    
+    background-color: #eaeaea;
+    border: 2px solid #111;
+    border-radius: 6px;
+    
+    cursor: pointer;
+    transition: 0.3s background-color;
+}
+
+#account-info input[type=submit][disabled] {
+    background-color: #d3d3d3;
+    cursor: default;
+}
+
+#account-info input[type=submit]:not([disabled]):hover {
+    background-color: #fafafa;
+}
+
+#account-info input[type=submit]:not([disabled]):active {
+    background-color: #d8d8d8;
+}
+
+#pass-update-form input:not([type=submit]) {
+    width: max( calc(9 * var(--text-unit)), 75% );
+}
+
+@media screen and (orientation: portrait) {
+    .account-detail {  flex-direction: column;  }
+    .account-detail input:not([type=submit]) {  margin-bottom: 0.3em;  }
+}
+@media screen and (orientation: landscape) {
+    .account-detail {  flex-direction: row;  }
+}
+
 .account-detail {
     display: flex;
-    flex-direction: row;
-    gap: 1em;
+    justify-content: space-between;
+
+    width: 100%;
 }
 
 /* override default toolbox styling for anim-controls */
 #anim-controls {
-    top: calc(var(--footer-height)/2 - 12.5px);
+    /* top: calc(var(--footer-height)/2 - 12.5px); */
+    top: -35px;
 }

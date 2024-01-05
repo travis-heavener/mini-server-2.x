@@ -26,7 +26,7 @@
         <div id="account-info">
             <h1>My Account</h1>
 
-            <form id="account-info-form" action="javascript:submit()" enctype="multipart/form-data">
+            <form id="account-info-form" action="javascript:submitInfo()" enctype="multipart/form-data">
                 <?php
                     function create_detail($label, $key, $value, $pattern, $is_disabled) {
                         $is_disabled = $is_disabled ? "disabled" : "";
@@ -43,10 +43,28 @@
                     echo create_detail("Last", "last", $user_data["last"], ".*", false);
                     echo create_detail("Email", "email", $user_data["email"], "[a-zA-Z0-9\._\\-]+@[a-zA-Z0-9\._\\-]+\\.[a-zA-Z]{2,4}$", false);
                 ?>
-                <input type="submit" value="Update">
+                <input id="account-info-submit" type="submit" value="Save" disabled>
             </form>
             
             <h2>Password</h2>
+            
+            <form id="pass-update-form" action="javascript:submitPass()" enctype="multipart/form-data">
+                <?php
+                function create_pass_field($label, $key, $autofill) {
+                    return "
+                        <div class='account-detail'>
+                            <p>$label: </p>
+                            <input type='password' id='$key-input' name='$key' pattern='^.{6,}$' autocomplete='$autofill'>
+                        </div>
+                    ";
+                }
+                    echo create_pass_field("Current", "current-pass", "current-password");
+                    echo create_pass_field("New", "new-pass", "new-password");
+                    echo create_pass_field("Confirm", "confirmed-pass", "new-password");
+                ?>
+                <input id="pass-update-submit" type="submit" value="Save" disabled>
+            </form>
+
             <h2>Danger Zone</h2>
         </div>
 

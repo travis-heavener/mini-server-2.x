@@ -48,6 +48,8 @@ body {
     flex-direction: column;
     align-items: center;
     row-gap: calc(2*var(--border-size));
+    
+    max-width: min-content;
 
     transition: 0.2s transform, 0.2s filter;
 }
@@ -108,5 +110,6 @@ body {
 
 /* override default toolbox styling for anim-controls */
 #anim-controls {
-    top: calc(var(--footer-height)/2 - 12.5px);
+    /* top: calc(var(--footer-height)/2 - 12.5px); */
+    top: -35px;
 }

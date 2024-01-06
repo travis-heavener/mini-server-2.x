@@ -22,7 +22,7 @@ $(document).ready(() => {
     const update = (offsetSec=0) => {
         // determine the clock's needle rotations
         const tsLocal = Date.now() - (new Date().getTimezoneOffset()*6e4); // seconds since local epoch (1/1/1970 w/ LOCAL time)
-        const secSinceTwelve = (tsLocal % 4.32e7) / 1000 + offsetSec;
+        const secSinceTwelve = (tsLocal % 4.32e7) / 1000 + offsetSec + 1;
         
         // update each needle individually (easier to clamp bc of modulo limitations in CSS calc & operation unit restrictions)
         $("#live-hour-needle").css("transform", `rotate(${secSinceTwelve / 120}deg)`);
@@ -34,6 +34,12 @@ $(document).ready(() => {
     update(-1);
     setTimeout(update, 1); // add really small delay to allow animation to kick in
 
+    // delay the initial start so we are on near-whole seconds
+    const delay = 1000 - new Date().getMilliseconds();
+
     // start interval (delay doesn't matter here)
-    setInterval(update, 1000);
+    setTimeout(() => {
+        update();
+        setInterval(update, 1000);
+    }, delay);
 });

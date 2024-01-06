@@ -64,8 +64,6 @@
                 ?>
                 <input id="pass-update-submit" type="submit" value="Save" disabled>
             </form>
-
-            <h2>Danger Zone</h2>
         </div>
 
         <?php

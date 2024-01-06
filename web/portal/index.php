@@ -8,10 +8,9 @@
             include($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
             
             $user_data = check_auth(); // actually call to check the auth
-            echo format_title("Portal"); // add document title
+            echo format_title("Dashboard"); // add document title
         ?>
 
-        <title>Mini - Dashboard</title>
         <link rel="stylesheet" href="index.css" type="text/css">
 
     </head>

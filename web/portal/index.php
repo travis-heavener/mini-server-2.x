@@ -13,7 +13,7 @@
             $user_data = check_auth();
         ?>
 
-        <link rel="stylesheet" href="/css/portal/index.css" type="text/css">
+        <link rel="stylesheet" href="index.css" type="text/css">
 
     </head>
     <body>
@@ -34,7 +34,7 @@
             include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php");
         ?>
 
-        <script src="/js/portal/index.js" type="text/javascript"></script>
+        <script src="index.js" type="text/javascript"></script>
 
     </body>
 </html>

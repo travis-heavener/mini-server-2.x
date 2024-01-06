@@ -7,7 +7,7 @@
         
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");?>
 
-        <link rel="stylesheet" href="/css/index.css" type="text/css">
+        <link rel="stylesheet" href="index.css" type="text/css">
 
     </head>
     <body>
@@ -35,7 +35,7 @@
             <input type="checkbox" checked="true" id="anim-checkbox" onclick="toggleAnim(this)" title="Toggle background animation">
         </div>
 
-        <script src="/js/index.js" type="text/javascript"></script>
+        <script src="index.js" type="text/javascript"></script>
 
     </body>
 </html>

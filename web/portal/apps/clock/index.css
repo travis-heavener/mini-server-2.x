@@ -177,6 +177,10 @@ body {
     position: absolute;
 }
 
+#live-clock-digital {
+    
+}
+
 @media screen and (orientation: portrait) {
     #live-clock-container {
         --size: min(calc(24 * var(--text-unit)), 80vw, 50vh);

@@ -2,10 +2,10 @@
 <html lang="en">
     <head>
         
-        <meta charset="utf-8">
-        <title>Mini.me</title>
-        
-        <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");?>
+        <?php
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
+            echo format_title("Login"); // add document title
+        ?>
 
         <link rel="stylesheet" href="index.css" type="text/css">
 

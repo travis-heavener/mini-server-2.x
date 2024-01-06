@@ -4,6 +4,13 @@
      * adds all necessary HTML tags for content (ie. jQuery, global .js files, etc.)
      */
 
+    function format_title($title) {
+        return "<title>Mini - $title</title>";
+    }
+
+    // declare encoding
+    echo "<meta charset='utf-8'>";
+
     // preloads fonts
     echo "<link rel='preload' href='/assets/fonts/Poppins-Medium.woff' as='font' type='font/woff' crossorigin>";
     echo "<link rel='preload' href='/assets/fonts/Poppins-Bold.woff' as='font' type='font/woff' crossorigin>";

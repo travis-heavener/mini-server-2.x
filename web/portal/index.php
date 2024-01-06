@@ -2,17 +2,15 @@
 <html lang="en">
     <head>
         
-        <meta charset="utf-8">
-        <title>Mini.me | Dashboard</title>
-        
         <?php
             include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php");
-
-            // actually call to check the auth
-            $user_data = check_auth();
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
+            
+            $user_data = check_auth(); // actually call to check the auth
+            echo format_title("Portal"); // add document title
         ?>
 
+        <title>Mini - Dashboard</title>
         <link rel="stylesheet" href="index.css" type="text/css">
 
     </head>

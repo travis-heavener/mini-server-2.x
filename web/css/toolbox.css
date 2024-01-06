@@ -18,6 +18,12 @@
     font-weight: 400;
 }
 
+@font-face {
+    font-family: "Digital-7";
+    src: url("/assets/fonts/Digital-7.woff");
+    font-weight: 400;
+}
+
 /* end font specs */
 
 

@@ -15,6 +15,7 @@
     echo "<link rel='preload' href='/assets/fonts/Poppins-Medium.woff' as='font' type='font/woff' crossorigin>";
     echo "<link rel='preload' href='/assets/fonts/Poppins-Bold.woff' as='font' type='font/woff' crossorigin>";
     echo "<link rel='preload' href='/assets/fonts/Ubuntu-Regular.woff' as='font' type='font/woff' crossorigin>";
+    echo "<link rel='preload' href='/assets/fonts/Digital-7.woff' as='font' type='font/woff' crossorigin>";
 
     // jQuery
     echo "<script src='https://code.jquery.com/jquery-3.7.1.min.js' integrity='sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=' crossorigin='anonymous'></script>";

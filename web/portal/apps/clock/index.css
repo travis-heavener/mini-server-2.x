@@ -35,21 +35,65 @@ body {
     height: 100%;
 }
 
-#clock-menu > img {
-    max-width: 80%;
-    max-height: 80%;
-    object-fit: contain;
+.mode-icon {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10%;
+    
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
 
     cursor: pointer;
+}
+
+.mode-icon > img {
+    max-width: 80%;
+    max-height: 80%;
+
+    object-fit: contain;
     transition: 0.3s filter, 0.3s transform;
 }
 
-#clock-menu > img:hover {
+#live-clock-icon > img { /* improve hitbox :) */
+    clip-path: circle(50%);
+}
+
+#digital-icon > img { /* improve hitbox :) */
+    clip-path: polygon(0% 18%, 100% 18%, 100% 82%, 0% 82%);
+}
+
+.icon-selector {
+    display: none;
+
+    width: 10%;
+    height: 80%;
+
+    background-color: #f8f8f8;
+    border-radius: 50%/6.25%;
+
+    box-shadow: 0 0 calc(0.5 * var(--text-unit)) #555;
+
+    animation: 0.3s ease-out iconSelectorGrowVert;
+}
+
+@keyframes iconSelectorGrowVert {
+    from {  transform: scaleY(0);  }
+    to {  transform: scaleY(1);  }
+}
+@keyframes iconSelectorGrowHoriz {
+    from {  transform: scaleX(0);  }
+    to {  transform: scaleX(1);  }
+}
+
+.mode-icon:hover > img {
     filter: brightness(105%);
     transform: scale(1.025) rotate(7deg);
 }
 
-#clock-menu > img:active {
+.mode-icon:active > img {
     filter: brightness(98%);
     transform: scale(0.97) rotate(-6deg);
 }
@@ -71,14 +115,29 @@ body {
         height: calc(5 * var(--text-unit)) !important;
     }
 
-    #clock-menu > img {
-        max-width: 20vw;
+    .mode-icon {
+        width: auto;
+        height: 100%;
+
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .icon-selector {
+        width: 80%;
+        height: 10%;
+
+        border-radius: 6.25%/50%;
+        animation: 0.3s ease-out iconSelectorGrowHoriz;
     }
 }
 
 /************* individual modes *************/
 
 .clock-mode {
+    --border-thickness: 8px;
+
     display: none;
     width: 100%;
     height: 100%;
@@ -87,14 +146,12 @@ body {
 /******* live clock mode *******/
 
 #live-content {
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
 }
 
 #live-clock-container {
-    --border-thickness: 8px;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -168,10 +225,6 @@ body {
     position: absolute;
 }
 
-#live-clock-digital {
-    
-}
-
 @media screen and (orientation: portrait) {
     #live-clock-container {
         --size: min(calc(24 * var(--text-unit)), 80vw, 50vh);
@@ -184,16 +237,78 @@ body {
     }
     
     #live-content {
-        /* center visually on horizontal axis */
-        margin-right: calc(4.5 * var(--text-unit));
+        /* center visually on horizontal axis, 100% of #clock-menu width */
+        margin-right: calc(6 * var(--text-unit));
     }
 }
 
-/******* stopwatch mode *******/
+/******* digital clock mode *******/
 
-#stopwatch-content {}
+#digital-content {
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
 
-#timer-content {}
+#digital-clock-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    padding: 2.5%;
+
+    --ratio: 0.43637;
+    --height: calc(var(--ratio) * var(--length));
+    
+    width: var(--length);
+    height: var(--height);
+
+    background-color: #444;
+    border: var(--border-thickness) solid #111;
+    border-radius: calc(0.09 * var(--length));
+    box-shadow: 0 0 calc(5*var(--border-thickness)) #000 inset;
+
+    color: #e29c34;
+    font-family: "Digital-7";
+}
+
+#digital-main {
+    display: flex;
+    flex: 3;
+    justify-content: center;
+    align-items: center;
+    
+    font-size: calc(0.3 * var(--height));
+}
+
+#digital-clock-container h1 {
+    filter: drop-shadow(0 0 calc(1.125 * var(--border-thickness)) #c68626);
+}
+
+#digital-side {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    font-size: calc(0.15 * var(--height));
+}
+
+@media screen and (orientation: portrait) {
+    #digital-clock-container {
+        --length: min(90vw, calc(30vh/var(--ratio)));
+    }
+}
+
+@media screen and (orientation: landscape) {
+    #digital-clock-container {
+        --length: min(60vw, calc(60vh/var(--ratio)));
+        /* center visually on horizontal axis, 100% of #clock-menu width */
+        margin-right: calc(6 * var(--text-unit));
+    }
+}
 
 /* override default toolbox styling for anim-controls */
 #anim-controls {

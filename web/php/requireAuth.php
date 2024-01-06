@@ -1,4 +1,38 @@
 <?php
+
+    // PERMISSIONS STUFF
+
+    /*
+    1: yes, 0: no
+    all permissions would have a permissions value of the sum of each 2^(bit #)
+    */
+
+    $PERMS = [
+        ["gallery", "Gallery"],
+        ["dvds",    "Film Library"],
+        ["fire",    "Fireplace"],
+        ["clock",   "Clock"],
+        ["notes",   "Notes"],
+        ["admin",   "Admin Panel"]
+    ];
+
+    function verify_perms($user_data, $perm_name) {
+        global $PERMS;
+        $has_access = false;
+        for ($i = 0; $i < count($PERMS); $i++) {
+            if ($PERMS[$i][0] == $perm_name && ((0b1 << $i) & $user_data["permissions"]) > 0) { // we have access to the perm
+                $has_access = true;
+            }
+        }
+
+        if (!$has_access) {
+            header("Location: /portal/index.php"); // redirect to user dashboard
+            exit();
+        }
+    }
+
+    // cookies & auth stuff
+
     function base64url_decode($string) {
         return base64_decode(str_replace(['-','_'], ['+','/'], $string));
     }

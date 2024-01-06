@@ -8,6 +8,7 @@
             include($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
 
             $user_data = check_auth(); // actually call to check the auth
+            verify_perms($user_data, "clock"); // verify the user has access to this page
             echo format_title("Clock"); // add document title
         ?>
 

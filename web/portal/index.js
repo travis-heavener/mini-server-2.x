@@ -10,6 +10,9 @@ function launchApp(name) {
         case "notes":
             location.href = "/portal/apps/notes/index.php";
             break;
+        case "admin":
+            location.href = "/portal/apps/admin/index.php";
+            break;
         default:
             console.log("Unknown app/service:", name);
             break;

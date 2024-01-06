@@ -21,12 +21,23 @@
     1   dvds
     2   fire
     3   clock
-    4   todo
+    4   notes
     */
 
-    echo create_icon("gallery", "Gallery");
-    echo create_icon("dvds", "Film Library");
-    echo create_icon("fire", "Fireplace");
-    echo create_icon("clock", "Clock");
-    echo create_icon("notes", "Notes");
+    $PERMS = [
+        ["gallery", "Gallery"],
+        ["dvds",    "Film Library"],
+        ["fire",    "Fireplace"],
+        ["clock",   "Clock"],
+        ["notes",   "Notes"]
+    ];
+
+    $user_perms = $user_data["permissions"];
+
+    for ($i = 0; $i < count($PERMS); $i++) {
+        if (((0b1 << $i) & $user_perms) > 0) { // we have access to the perm
+            $perm = $PERMS[$i];
+            echo create_icon($perm[0], $perm[1]);
+        }
+    }
 ?>

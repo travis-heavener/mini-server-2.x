@@ -93,7 +93,6 @@ body {
 }
 
 #live-clock-container {
-    --sec-since-twelve: 0;
     --border-thickness: 8px;
 
     display: flex;
@@ -111,38 +110,30 @@ body {
 }
 
 #live-hour-needle {
-    position: absolute;
-
     --length: calc(0.3 * var(--size));
     --thickness: calc(0.1 * var(--length));
-
-    width: var(--thickness);
-    height: var(--length);
-
     background-color: #111;
-    transform: rotate(calc(360deg * var(--sec-since-twelve) / 43200)) translateY(calc(-0.5 * var(--length)));
 }
 
 #live-min-needle {
-    --length: calc(0.4 * var(--size));
-    --thickness: calc(0.06 * var(--length));
-
-    width: var(--thickness);
-    height: var(--length);
-
+    --length: calc(0.35 * var(--size));
+    --thickness: calc(0.065 * var(--length));
     background-color: #202020;
-    transform: rotate(calc(360deg * var(--sec-since-twelve) / 3600)) translateY(calc(-0.5 * var(--length)));
 }
 
 #live-sec-needle {
     --length: calc(0.4 * var(--size));
     --thickness: calc(0.022 * var(--length));
+    background-color: #b00;
+}
 
+.live-needle {
     width: var(--thickness);
     height: var(--length);
 
-    background-color: #b00;
-    transform: rotate(calc(360deg * var(--sec-since-twelve) / 60)) translateY(calc(-0.5 * var(--length)));
+    transform-origin: 50% 100%;
+    translate: 0 calc(-0.5 * var(--length));
+    transition: 1s linear transform;
 }
 
 #live-center-dot {

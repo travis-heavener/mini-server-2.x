@@ -34,9 +34,6 @@
             <div id="clock-body">
                 <div id="live-content" class="clock-mode noselect">
                     <div id="live-clock-container">
-                        <div id="live-sec-needle" class="live-needle"></div>
-                        <div id="live-min-needle" class="live-needle"></div>
-                        <div id="live-hour-needle" class="live-needle"></div>
                         <div id="live-center-dot" class="live-needle"></div>
                     </div>
                 </div>

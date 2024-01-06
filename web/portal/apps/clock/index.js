@@ -11,21 +11,29 @@ $(document).ready(() => {
         $("#live-clock-container").append(marker);
     }
 
+    // add clock hands (prevents them from freaking out when first rotating)
+    $("#live-clock-container").prepend(`
+        <div id="live-sec-needle" class="live-needle"></div>
+        <div id="live-min-needle" class="live-needle"></div>
+        <div id="live-hour-needle" class="live-needle"></div>
+    `);
+
     // calculate and start interval
-    const delay = 1000 - Date.now() % 1000; // how many ms since last whole second
-    const update = () => {
+    const update = (offsetSec=0) => {
         // determine the clock's needle rotations
         const tsLocal = Date.now() - (new Date().getTimezoneOffset()*6e4); // seconds since local epoch (1/1/1970 w/ LOCAL time)
-        const secSinceTwelve = ~~((tsLocal % 4.32e7) / 1000); // bit operator round
+        const secSinceTwelve = (tsLocal % 4.32e7) / 1000 + offsetSec;
         
-        $("#live-clock-container").css("--sec-since-twelve", secSinceTwelve+1); // ADD 1 SECOND, IT'S A SECOND OFF ON EACH DEVICE?? LOL
+        // update each needle individually (easier to clamp bc of modulo limitations in CSS calc & operation unit restrictions)
+        $("#live-hour-needle").css("transform", `rotate(${secSinceTwelve / 120}deg)`);
+        $("#live-min-needle").css("transform", `rotate(${secSinceTwelve / 10}deg)`);
+        $("#live-sec-needle").css("transform", `rotate(${secSinceTwelve * 6}deg)`);
     };
 
-    // start interval and queue after delay
-    update(); // initial call
-    setTimeout(() => {
-        $(".live-needle").css("transition", "1s linear transform"); // add animation
-        update(); // call after delay (on second)
-        setInterval(update, 1000); // call on each subsequent SECOND
-    }, delay);
+    // initially set each needle's position
+    update(-1);
+    setTimeout(update, 1); // add really small delay to allow animation to kick in
+
+    // start interval (delay doesn't matter here)
+    setInterval(update, 1000);
 });

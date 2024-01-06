@@ -3,10 +3,6 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-
-    background-image: linear-gradient(225deg, #535edbcc, #0000 80%),
-        linear-gradient(135deg, #ff0c, #0000 80%),
-        linear-gradient(330deg, #eb1d1dcc, #0000 80%);
 }
 
 /* clock content */
@@ -308,9 +304,4 @@ body {
         /* center visually on horizontal axis, 100% of #clock-menu width */
         margin-right: calc(6 * var(--text-unit));
     }
-}
-
-/* override default toolbox styling for anim-controls */
-#anim-controls {
-    top: calc(var(--footer-height)/2 - 12.5px);
 }

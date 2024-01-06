@@ -5,15 +5,17 @@
         <?php
             include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
             include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
-            
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
+
             $user_data = check_auth(); // actually call to check the auth
             echo format_title("Clock"); // add document title
         ?>
 
         <!-- preload icons for smoother load -->
         <link rel="preload" fetchpriority="high" href="/assets/apps/clock/live-clock.png" as="image">
-        <link rel="preload" fetchpriority="high" href="/assets/apps/clock/stopwatch.png" as="image">
-        <link rel="preload" fetchpriority="high" href="/assets/apps/clock/timer.png" as="image">
+        <link rel="preload" fetchpriority="high" href="/assets/apps/clock/digital-clock.png" as="image">
+        <!-- <link rel="preload" fetchpriority="high" href="/assets/apps/clock/stopwatch.png" as="image"> -->
+        <!-- <link rel="preload" fetchpriority="high" href="/assets/apps/clock/timer.png" as="image"> -->
 
         <link rel="stylesheet" href="index.css" type="text/css">
 
@@ -58,9 +60,7 @@
             </div>
         </div>
 
-        <?php
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php");
-        ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 
         <script src="index.js" type="text/javascript"></script>
 

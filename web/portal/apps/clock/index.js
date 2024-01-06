@@ -5,8 +5,6 @@ const CLOCK = {
 };
 
 $(document).ready(() => {
-    toggleAnim();
-
     // add clock markings
     for (let i = 0; i < 60; i++) {
         const marker = document.createElement("DIV");

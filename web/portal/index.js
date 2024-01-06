@@ -1,8 +1,3 @@
-// document onready events
-$(document).ready(() => {
-    toggleAnim();
-});
-
 // app click functions
 function launchApp(name) {
     switch (name) {

@@ -1,7 +1,5 @@
 // document onready events
 $(document).ready(() => {
-    toggleAnim();
-
     // enable update button after input is changed
     $("#first-input").on("input propertychange", () => $("#account-info-submit")[0].disabled = false);
     $("#last-input").on("input propertychange", () => $("#account-info-submit")[0].disabled = false);

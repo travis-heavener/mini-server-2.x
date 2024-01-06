@@ -5,7 +5,8 @@
         <?php
             include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
             include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
-            
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
+
             $user_data = check_auth(); // actually call to check the auth
             echo format_title("My Account"); // add document title
         ?>
@@ -64,10 +65,7 @@
             </form>
         </div>
 
-        <?php
-            $show_anim_ctrls = true;
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php");
-        ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 
         <script src="index.js" type="text/javascript"></script>
 

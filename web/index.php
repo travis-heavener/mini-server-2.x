@@ -4,6 +4,7 @@
         
         <?php
             include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
+            include($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
             echo format_title("Login"); // add document title
         ?>
 
@@ -28,11 +29,6 @@
                 </div>
                 <input id="submit-btn" type="submit" value="Log In">
             </form>
-        </div>
-
-        <div id="anim-controls">
-            <p id="anim-desc">Animate:</p>
-            <input type="checkbox" checked="true" id="anim-checkbox" onclick="toggleAnim(this)" title="Toggle background animation">
         </div>
 
         <script src="index.js" type="text/javascript"></script>

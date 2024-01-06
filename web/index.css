@@ -3,18 +3,9 @@
 }
 
 body {
-    position: absolute; /* fixes the animate checkbox on bottom while scrolling */
+    position: absolute;
     height: auto;
     min-height: 100%;
-
-    background-image: linear-gradient(225deg, #535edbcc, #0000 80%),
-        linear-gradient(135deg, #ff0c, #0000 80%),
-        linear-gradient(330deg, #eb1d1dcc, #0000 80%);
-    
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: fixed;
 }
 
 #content {

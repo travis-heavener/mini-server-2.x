@@ -16,10 +16,7 @@
     </head>
     <body>
 
-        <?php 
-            $show_waffle = false;
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php");
-        ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php") ?>
 
         <div id="apps-content">
             <div id="apps-grid">

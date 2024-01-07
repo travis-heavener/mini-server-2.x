@@ -17,10 +17,7 @@
     </head>
     <body>
 
-        <?php 
-            $show_waffle = false;
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php");
-        ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php") ?>
 
         <div id="account-info">
             <h1>My Account</h1>

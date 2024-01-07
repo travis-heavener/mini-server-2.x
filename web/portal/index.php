@@ -20,7 +20,7 @@
 
         <div id="apps-content">
             <div id="apps-grid">
-                <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/portal/createIcons.php"); ?>
+                <?php include("createIcons.php"); ?>
             </div>
         </div>
 

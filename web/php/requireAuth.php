@@ -8,19 +8,20 @@
     */
 
     $PERMS = [
-        ["gallery", "Gallery"],
-        ["dvds",    "Film Library"],
-        ["fire",    "Fireplace"],
-        ["clock",   "Clock"],
-        ["notes",   "Notes"],
-        ["admin",   "Admin Panel"]
+        ["gallery", "Gallery",          "gallery/index.php"],
+        ["dvds",    "Film Library",     "movies/index.php"],
+        ["fire",    "Fireplace",        "fireplace/index.php"],
+        ["clock",   "Clock",            "clock/index.php"],
+        ["notes",   "Notes",            "notes/index.php"],
+        ["admin",   "Admin Panel",      "admin/index.php"]
     ];
 
-    function verify_perms($user_data, $perm_name) {
+    function verify_perms($user_data) {
         global $PERMS;
         $has_access = false;
+        $path = $_SERVER["SCRIPT_NAME"];
         for ($i = 0; $i < count($PERMS); $i++) {
-            if ($PERMS[$i][0] == $perm_name && ((0b1 << $i) & $user_data["permissions"]) > 0) { // we have access to the perm
+            if ("/portal/apps/" . $PERMS[$i][2] == $path && ((0b1 << $i) & $user_data["permissions"]) > 0) { // we have access to the perm
                 $has_access = true;
             }
         }

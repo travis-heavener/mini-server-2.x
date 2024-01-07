@@ -1,7 +1,5 @@
 // document onready events
 $(document).ready(() => {
-    toggleAnim();
-
     // handle field pattern formatting
     $("#email-input").attr("pattern", "[a-zA-Z0-9\._\\-]+@[a-zA-Z0-9\._\\-]+\\.[a-zA-Z]{2,4}$");
     $("#password-input").attr("pattern", "^\.{6,}$");

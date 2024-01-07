@@ -74,7 +74,7 @@
         }
         
         // load envs
-        $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/mysql.env");
+        $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
         
         // check that the signature matches
         $check_sig = hash_hmac("sha256", "$headers.$body", $envs["AUTH_SECRET"]);

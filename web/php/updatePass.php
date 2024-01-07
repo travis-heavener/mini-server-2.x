@@ -22,7 +22,7 @@
     $user_data = check_auth();
 
     // load envs
-    $envs = parse_ini_file(dirname($_SERVER["DOCUMENT_ROOT"]) . "/config/mysql.env");
+    $envs = parse_ini_file(dirname($_SERVER["DOCUMENT_ROOT"]) . "/config/.env");
     
     // connect to database
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);

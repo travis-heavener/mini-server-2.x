@@ -44,25 +44,19 @@
 
                         // get preview text
                         $path = $envs["NOTE_PATH"] . dechex($id) . ".txt";
-                        $ref = fopen($path, "rb");
-                        $preview = fread($ref, 1024);
-                        $preview = str_replace("\n", "<br>", $preview);
-                        fclose($ref);
+                        $preview = "";
+
+                        if (is_readable($path)) {
+                            $ref = fopen($path, "rb");
+                            $preview = fread($ref, 1024);
+                            $preview = str_replace("\n", "<br>", $preview);
+                            fclose($ref);   
+                        } else {
+                            $preview = "<em>Error: file could not be retrieved.</em>";
+                        }
 
                         echo "
-                            <div class='note-icon noselect' data-id='$id' onclick=\"focusNote(parseInt($(this).attr('data-id')))\">
-                                <div class='note-data'>
-                                    <h1 class='note-title'>$name</h1>
-                                    <h2 class='note-datetime'>$last_date</h2>
-                                    <h2 class='note-datetime'>$last_time</h2>
-                                </div>
-                                <div class='note-preview'>
-                                    <p>$preview</p>
-                                </div>
-                            </div>
-                        ";
-                        echo "
-                            <div class='note-icon noselect' data-id='$id' onclick=\"focusNote(parseInt($(this).attr('data-id')))\">
+                            <div class='note-icon noselect' data-id='$id' onclick=\"redirectToNote(parseInt($(this).attr('data-id')))\">
                                 <div class='note-data'>
                                     <h1 class='note-title'>$name</h1>
                                     <h2 class='note-datetime'>$last_date</h2>

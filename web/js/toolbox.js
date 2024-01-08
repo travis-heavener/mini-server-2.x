@@ -1,17 +1,22 @@
 /*************** START USER PROMPTS ***************/
 
-const promptUser = (title, text) => {
+const promptUser = (title, text, resetUrlParams=true, callback=()=>{}) => {
     const wrapper = document.createElement("div");
     $(wrapper).addClass("user-prompt");
+    $(wrapper).attr("data-reset", resetUrlParams);
+    $(wrapper).attr("data-resolves-modal", true);
     $(wrapper).click(function(e) {
-        e.target === this && hideUserPrompt();
+        if ($(e.target).attr("data-resolves-modal") === "true") {
+            hideUserPrompt();
+            callback();
+        }
     });
 
     $(wrapper).append(`
         <div>
             <h1>${title}</h1>
             <p>${text}</p>
-            <button onclick="hideUserPrompt()">Close</button>
+            <button data-resolves-modal="true" onclick="hideUserPrompt()">Close</button>
         </div>
     `);
     $("body").append(wrapper);
@@ -19,9 +24,11 @@ const promptUser = (title, text) => {
 
 function hideUserPrompt() {
     $(".user-prompt").each(function() {
+        const willReset = $(this).attr("data-reset") === "true";
+        if (willReset) // consequently reloads the page and thus escapes the function
+            window.history.replaceState({}, document.title, window.location.href.replace(window.location.search, ""));
         this.parentElement.removeChild(this);
     });
-    window.history.replaceState({}, document.title, window.location.href.replace(window.location.search, ""));
 }
 
 /*************** END USER PROMPTS ***************/

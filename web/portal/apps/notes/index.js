@@ -14,11 +14,25 @@ function focusMenu() {
     $("#notes-menu").css("display", "flex");
 }
 
+// rewrite url to then call focusNote
+function redirectToNote(noteId) {
+    window.location.href = window.location.href + (window.location.href.includes("?") ? "&" : "?") + "n=" + noteId;
+}
+
 function focusNote(noteId) {
-    // $path = $envs["NOTE_PATH"] . dechex($id) . ".txt";
-    console.log(noteId);
-    // AJAX Call
-    // success, show editor
-    // error, remove from url and focusMenu()
-    // window.history.replaceState({}, document.title, window.location.href.replace(window.location.search, ""));
+    $.ajax({
+        "url": "fetchNote.php?id=" + noteId,
+        "method": "GET",
+        "contentType": "application/json",
+        "success": function(res) { // success, show editor
+            const body = JSON.parse(res);
+            console.log(body);
+        },
+        "error": function(e) { // error, remove from url and reload
+            const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+            const title = msg.split("\n")[0];
+            const body = msg.split("\n")[1];
+            promptUser(title, body, true, () => window.location.reload());
+        }
+    });
 }

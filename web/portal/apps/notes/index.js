@@ -115,6 +115,8 @@ function saveNote() {
 }
 
 function deleteNote() {
+    if (!confirm("Are you sure you want to delete this note?")) return;
+
     // ajax call
     $.ajax({
         "url": "deleteNote.php",

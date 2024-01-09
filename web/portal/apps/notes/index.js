@@ -23,6 +23,13 @@ $(document).ready(() => {
 
         // gray out floppy icon
         $("#editor-save").css("filter", "grayscale(1)");
+
+        $(window).on('beforeunload', (e) => {
+            if (__hasNoteChanged) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
     }
 });
 

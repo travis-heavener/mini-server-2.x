@@ -178,6 +178,10 @@ body {
     color: #111;
 }
 
+.user-prompt > div > .button-row > button:last-of-type:not(:hover):not(:active) {
+    box-shadow: 0.125em 0.125em 0em #555;
+}
+
 @keyframes promptAppear {
     from {
         opacity: 0;

@@ -4,8 +4,9 @@ Deny from all
 Allow from 192.168.1.0/24
 Allow from 127.0.0.1
 
-# school internal ip
+# school internal ip (pc/laptop)
 Allow from 128.113.194.92
+Allow from 129.161.91.84
 
 # school phone ip
 Allow from 129.161.243.208

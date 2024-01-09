@@ -16,7 +16,13 @@ $(document).ready(() => {
             }
         });
 
-        $("#editor-body").on("input", (e) => __hasNoteChanged = true);
+        $("#editor-body").on("input", (e) => {
+            __hasNoteChanged = true;
+            $("#editor-save").css("filter", "");
+        });
+
+        // gray out floppy icon
+        $("#editor-save").css("filter", "grayscale(1)");
     }
 });
 
@@ -47,6 +53,7 @@ function saveNote() {
         }),
         "success": function() { // success, show editor
             __hasNoteChanged = false;
+            $("#editor-save").css("filter", "grayscale(1)");
             passivePrompt("Note saved.");
 
             // prevent spam w/ timeout

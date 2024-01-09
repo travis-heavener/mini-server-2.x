@@ -7,6 +7,16 @@ $(document).ready(() => {
         focusMenu();
     } else { // focus a note
         focusNote(noteId);
+
+        // bind keyboard shortcuts
+        $(document).on("keydown", (e) => {
+            if (e.code === "KeyS" && e.ctrlKey) {
+                saveNote();
+                e.preventDefault();
+            }
+        });
+
+        $("#editor-body").on("input", (e) => __hasNoteChanged = true);
     }
 });
 
@@ -19,9 +29,11 @@ function redirectToNote(noteId) {
     window.location.href = window.location.href + (window.location.href.includes("?") ? "&" : "?") + "n=" + noteId;
 }
 
+let __hasNoteChanged = false;
 function saveNote() {
     if ($("#editor-body").css("display") !== "flex") return;
     if ($("#editor-save").attr("data-locked") === "true") return;
+    if (!__hasNoteChanged) return;
 
     // ajax call
     $.ajax({
@@ -34,6 +46,7 @@ function saveNote() {
             "body": $("#editor-text")[0].value
         }),
         "success": function() { // success, show editor
+            __hasNoteChanged = false;
             passivePrompt("Note saved.");
 
             // prevent spam w/ timeout

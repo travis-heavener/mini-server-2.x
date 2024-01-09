@@ -40,4 +40,33 @@ const passivePrompt = (text) => {
     setTimeout(() => div.parentElement.removeChild(div), 4e3 + 1); // wait the 4 second duration plus buffer
 };
 
+const confirmPrompt = (title, text, confirmText="Yes", rejectText="No") => {
+    // create modal
+    const wrapper = document.createElement("div");
+    $(wrapper).addClass("user-prompt");
+    $(wrapper).attr("data-resolve-to", false);
+
+    $(wrapper).append(`
+        <div>
+            <h1>${title}</h1>
+            <p>${text}</p>
+            <div class="button-row">
+                <button data-resolve-to="true">${confirmText}</button>
+                <button data-resolve-to="false">${rejectText}</button>
+            </div>
+        </div>
+    `);
+    $("body").append(wrapper);
+
+    return new Promise((resolve) => {
+        $(wrapper).click(function(e) {
+            const attr = $(e.target).attr("data-resolve-to");
+            if (typeof(attr) === "undefined" || attr === false) return;
+
+            wrapper.parentElement.removeChild(wrapper);
+            resolve(attr === "true");
+        });
+    });
+};
+
 /*************** END USER PROMPTS ***************/

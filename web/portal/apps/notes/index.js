@@ -114,8 +114,10 @@ function saveNote() {
     });
 }
 
-function deleteNote() {
-    if (!confirm("Are you sure you want to delete this note?")) return;
+async function deleteNote() {
+    // if (!confirm("Are you sure you want to delete this note?")) return;
+    const isConfirmed = await confirmPrompt("Confirm Delete", "Are you sure you want to delete this note?");
+    if (!isConfirmed) return;
 
     // ajax call
     $.ajax({

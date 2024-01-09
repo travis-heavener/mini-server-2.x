@@ -46,6 +46,13 @@
         header('HTTP/1.0 403 Forbidden');
         exit("Error: Internal Read Error\nThe file could not be read from the server. Please try again or contact a system administrator.");
     }
+    
+    // check that the text isn't too long
+    if (strlen($body) > $envs["MAX_NOTE_MB"] * 1e6) {
+        $max_note_mb = $envs["MAX_NOTE_MB"];
+        header('HTTP/1.0 403 Forbidden');
+        exit("Error: Text Oversize Error\nThe file could not be saved to the server as it exceeds the maximum allowed size ($max_note_mb MB).");
+    }
 
     // we know the note is valid, so finally we can update
     $statement = $mysqli->prepare("UPDATE `notes` SET `name`=?, `last_edit`=CURRENT_TIMESTAMP WHERE `id`=?");

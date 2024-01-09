@@ -105,6 +105,8 @@ function saveNote() {
             const body = msg.split("\n")[1];
             if (title === "auth_error") {
                 window.location.reload(true);
+            } else if (title === "Text Oversize Error") {
+                promptUser(title, body, false);
             } else {
                 promptUser(title, body, true, () => window.location.reload());
             }

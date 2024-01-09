@@ -49,10 +49,8 @@
     }
 
     // read the text
-    $ref = fopen($path, "rb");
-    $text = fread($ref, filesize($path));
+    $text = file_get_contents($path);
     $row["body"] = $text;
-    fclose($ref);
 
     // return body
     echo json_encode($row);

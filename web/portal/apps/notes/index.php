@@ -13,6 +13,9 @@
         ?>
 
         <link rel="stylesheet" href="index.css" type="text/css">
+        <link rel="preload" as="image" href="/assets/floppy.png">
+        <link rel="preload" as="image" href="/assets/trash.png">
+        <link rel="preload" as="image" href="/assets/exit.png">
 
     </head>
     <body>
@@ -23,7 +26,9 @@
             <div id="editor-body">
                 <div id="editor-top">
                     <textarea id="editor-title" rows="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-                    <img id="editor-save" onclick="saveNote()" class="noselect" src="/assets/floppy.png"></img>
+                    <img id="editor-delete" class="editor-icon" onclick="deleteNote()" class="noselect" src="/assets/trash.png"></img>
+                    <img id="editor-save" class="editor-icon" onclick="saveNote()" class="noselect" src="/assets/floppy.png"></img>
+                    <img id="editor-back" class="editor-icon" onclick="redirectToMenu()" class="noselect" src="/assets/exit.png"></img>
                 </div>
                 <textarea id="editor-text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
             </div>
@@ -33,7 +38,7 @@
                     $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
                     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
                     
-                    $statement = $mysqli->prepare("SELECT `id`, `name`, `last_edit` FROM `notes` WHERE `user_id`=? ORDER BY `last_edit` ASC");
+                    $statement = $mysqli->prepare("SELECT `id`, `name`, `last_edit` FROM `notes` WHERE `user_id`=? ORDER BY `last_edit` DESC");
                     $statement->bind_param("i", $user_data["id"]);
                     $statement->execute();
 
@@ -74,6 +79,13 @@
                             </div>
                         ";
                     }
+
+                    // add blank note creator button
+                    echo "
+                        <div id='note-creator' class='note-icon noselect' onclick='createNote()'>
+                            <p>+</p>
+                        </div>
+                    ";
                 ?>
             </div>
         </div>

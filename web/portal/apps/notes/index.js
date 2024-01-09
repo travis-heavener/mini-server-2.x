@@ -33,6 +33,33 @@ $(document).ready(() => {
     }
 });
 
+let __canCreateNote = true;
+function createNote() {
+    if (!__canCreateNote) return;
+    __canCreateNote = false;
+
+    $.ajax({
+        "url": "createNote.php",
+        "method": "POST",
+        "contentType": "application/json",
+        "success": function(noteId) { // refocus to note
+            redirectToNote(noteId);
+            __canCreateNote = true;
+        },
+        "error": function(e) {
+            const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+            const title = msg.split("\n")[0];
+            const body = msg.split("\n")[1];
+            if (title === "auth_error") {
+                window.location.reload(true);
+            } else {
+                promptUser(title, body, true, () => window.location.reload());
+            }
+            __canCreateNote = true;
+        }
+    });
+}
+
 function focusMenu() {
     $("#notes-menu").css("display", "flex");
 }
@@ -40,6 +67,11 @@ function focusMenu() {
 // rewrite url to then call focusNote
 function redirectToNote(noteId) {
     window.location.href = window.location.href + (window.location.href.includes("?") ? "&" : "?") + "n=" + noteId;
+}
+
+function redirectToMenu() {
+    window.history.replaceState({}, document.title, window.location.href.replace(window.location.search, ""));
+    window.location.reload(true);
 }
 
 let __hasNoteChanged = false;
@@ -66,6 +98,32 @@ function saveNote() {
             // prevent spam w/ timeout
             $("#editor-save").attr("data-locked", true);
             setTimeout(() => $("#editor-save").attr("data-locked", false), 150);
+        },
+        "error": function(e) {
+            const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+            const title = msg.split("\n")[0];
+            const body = msg.split("\n")[1];
+            if (title === "auth_error") {
+                window.location.reload(true);
+            } else {
+                promptUser(title, body, true, () => window.location.reload());
+            }
+        }
+    });
+}
+
+function deleteNote() {
+    // ajax call
+    $.ajax({
+        "url": "deleteNote.php",
+        "method": "DELETE",
+        "contentType": "application/json",
+        "data": JSON.stringify({
+            "note_id": (new URLSearchParams(window.location.search)).get("n")
+        }),
+        "success": function() { // revert to notes picker
+            window.history.replaceState({}, document.title, window.location.href.replace(window.location.search, ""));
+            window.location.reload(true);
         },
         "error": function(e) {
             const msg = e.responseText.substring(7); // remove 'Error: ' from beginning

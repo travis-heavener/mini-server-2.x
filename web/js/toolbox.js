@@ -31,4 +31,13 @@ function hideUserPrompt() {
     });
 }
 
+const passivePrompt = (text) => {
+    const div = document.createElement("DIV");
+    $(div).addClass("passive-prompt");
+    $(div).append("<p>" + text + "</p>");
+    $("body").append(div);
+
+    setTimeout(() => div.parentElement.removeChild(div), 4e3 + 1); // wait the 4 second duration plus buffer
+};
+
 /*************** END USER PROMPTS ***************/

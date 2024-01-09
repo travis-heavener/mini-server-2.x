@@ -20,7 +20,13 @@
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php") ?>
 
         <div id="main-content">
-            <div id="editor-body"></div>
+            <div id="editor-body">
+                <div id="editor-top">
+                    <textarea id="editor-title" rows="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+                    <img id="editor-save" onclick="saveNote()" class="noselect" src="/assets/floppy.png"></img>
+                </div>
+                <textarea id="editor-text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            </div>
             <div id="notes-menu">
                 <?php
                     // load in all the user's notes

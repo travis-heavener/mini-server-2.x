@@ -48,11 +48,15 @@
         setcookie("ms-user-auth", "", time() - 3600, "/");
     }
 
-    function check_auth() {
+    function check_auth($force_return=false) {
         // check the cookie exists
         if (!isset($_COOKIE["ms-user-auth"])) {
             header("Location: /index.php?reason=exp"); // redirect to login
-            exit();
+            if ($force_return) {
+                return;
+            } else {
+                exit();
+            }
         }
 
         $cookie = $_COOKIE["ms-user-auth"];
@@ -70,7 +74,11 @@
         if ($headers_dec->exp <= time()) {
             remove_cookie(); // remove cookie
             header("Location: /index.php?reason=exp"); // redirect to login
-            exit();
+            if ($force_return) {
+                return;
+            } else {
+                exit();
+            }
         }
         
         // load envs
@@ -83,7 +91,11 @@
         if ($check_sig !== $sig) {
             remove_cookie(); // remove cookie
             header("Location: /index.php?reason=sig"); // redirect to login
-            exit();
+            if ($force_return) {
+                return;
+            } else {
+                exit();
+            }
         }
 
         // check that the email is assigned to a user in the users table with the same id
@@ -106,14 +118,22 @@
             remove_cookie(); // remove cookie
             header("Location: /index.php?reason=inv"); // redirect to login
             $mysqli->close();
-            exit();
+            if ($force_return) {
+                return;
+            } else {
+                exit();
+            }
         } else if (count($rows) > 1) {
             // the `id` is auto-incremented and thus shouldn't return more than one user
             // BUT if it does handle this
             remove_cookie(); // remove cookie
             header("Location: /index.php?reason=dup"); // redirect to login
             $mysqli->close();
-            exit();
+            if ($force_return) {
+                return;
+            } else {
+                exit();
+            }
         }
 
         $mysqli->close();

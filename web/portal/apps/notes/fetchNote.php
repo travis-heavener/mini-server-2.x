@@ -3,10 +3,10 @@
         return base64_decode(str_replace(['-','_'], ['+','/'], $string));
     }
 
-    // verify post request
+    // verify get request
     if ($_SERVER["REQUEST_METHOD"] !== "GET") {
-        echo "Invalid request method: expected GET, got " . $_SERVER["REQUEST_METHOD"] . ".";
-        exit();
+        header('HTTP/1.0 403 Forbidden');
+        exit("Error: Invalid request method\nExpected GET, got " . $_SERVER["REQUEST_METHOD"] . ".");
     }
     
     // get note id
@@ -22,7 +22,7 @@
     $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
     
-    $statement = $mysqli->prepare("SELECT `id`, `name`, `last_edit`, `created` FROM `notes` WHERE `user_id`=? AND `id`=? ORDER BY `last_edit` ASC");
+    $statement = $mysqli->prepare("SELECT `id`, `name`, `last_edit`, `created` FROM `notes` WHERE `user_id`=? AND `id`=?");
     $statement->bind_param("ii", $user_id, $note_id);
     $statement->execute();
 

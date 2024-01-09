@@ -163,11 +163,90 @@ body {
 
 #editor-body {
     display: none;
+    flex-direction: column;
+    --top-height: calc(4 * var(--text-unit));
+    --border-radius: 24px;
+
     width: 100%;
     height: 100%;
-    padding: var(--item-size) calc(0.5*var(--item-size));
 
     overflow: auto;
+
+    background-color: #f8f8f8;
+    border: 4px solid #111;
+    border-radius: var(--border-radius);
+}
+
+#editor-body textarea {
+    border: none;
+    resize: none;
+    outline: none;
+}
+
+#editor-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0 calc(0.75 * var(--text-unit));
+
+    width: 100%;
+    height: var(--top-height);
+
+    overflow: hidden;
+
+    background-color: #e4e4e4;
+}
+
+#editor-title {
+    min-width: 50%;
+    max-width: 75%;
+    height: 100%;
+
+    color: #111;
+    line-height: var(--top-height);
+    font-family: "Ubuntu", sans-serif;
+    font-size: calc(2 * var(--text-unit));
+
+    background-color: #0000;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#editor-save {
+    margin: calc(0.15 * var(--top-height));
+    height: 70%;
+    object-fit: contain;
+
+    cursor: pointer;
+
+    transition: 0.2s filter;
+}
+
+#editor-save:hover {
+    filter: brightness(106%);
+}
+
+#editor-save:active {
+    filter: brightness(98%);
+}
+
+#editor-text {
+    padding: calc(0.75 * var(--text-unit));
+    
+    width: 100%;
+    min-height: calc(100% - var(--top-height));
+
+    color: #191919;
+    font-family: "Ubuntu", sans-serif;
+    font-size: var(--text-unit);
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    background-color: #0000;
 }
 
 /********* END EDITOR *********/

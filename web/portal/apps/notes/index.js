@@ -19,6 +19,40 @@ function redirectToNote(noteId) {
     window.location.href = window.location.href + (window.location.href.includes("?") ? "&" : "?") + "n=" + noteId;
 }
 
+function saveNote() {
+    if ($("#editor-body").css("display") !== "flex") return;
+    if ($("#editor-save").attr("data-locked") === "true") return;
+
+    // ajax call
+    $.ajax({
+        "url": "saveNote.php",
+        "method": "POST",
+        "contentType": "application/json",
+        "data": JSON.stringify({
+            "note_id": (new URLSearchParams(window.location.search)).get("n"),
+            "title": $("#editor-title")[0].value,
+            "body": $("#editor-text")[0].value
+        }),
+        "success": function() { // success, show editor
+            passivePrompt("Note saved.");
+
+            // prevent spam w/ timeout
+            $("#editor-save").attr("data-locked", true);
+            setTimeout(() => $("#editor-save").attr("data-locked", false), 150);
+        },
+        "error": function(e) {
+            const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+            const title = msg.split("\n")[0];
+            const body = msg.split("\n")[1];
+            if (title === "auth_error") {
+                window.location.reload(true);
+            } else {
+                promptUser(title, body, true, () => window.location.reload());
+            }
+        }
+    });
+}
+
 function focusNote(noteId) {
     $.ajax({
         "url": "fetchNote.php?id=" + noteId,
@@ -26,7 +60,13 @@ function focusNote(noteId) {
         "contentType": "application/json",
         "success": function(res) { // success, show editor
             const body = JSON.parse(res);
-            console.log(body);
+
+            // write out content
+            $("#editor-title").text(body.name);
+            $("#editor-text").text(body.body);
+
+            // unhide editor
+            $("#editor-body").css("display", "flex");
         },
         "error": function(e) { // error, remove from url and reload
             const msg = e.responseText.substring(7); // remove 'Error: ' from beginning

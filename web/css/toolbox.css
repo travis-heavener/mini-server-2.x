@@ -173,6 +173,40 @@ body {
     }
 }
 
+/* passive prompt */
+
+.passive-prompt {
+    position: absolute;
+    left: 50%;
+
+    transform: translateX(-50%);
+    bottom: 5vh;
+
+    padding: calc(0.4 * var(--text-unit)) calc(0.55 * var(--text-unit));
+    
+    background-color: #f8f8f8;
+    border: 1px solid #111;
+    border-radius: 8px;
+
+    animation: 4s passivePromptAppear linear;
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+.passive-prompt > p {
+    color: #111;
+    font-family: "Ubuntu", sans-serif;
+    font-size: var(--text-unit);
+}
+
+@keyframes passivePromptAppear {
+    0%, 100% {  opacity: 0;  }
+    10%, 90% {  opacity: 1;  }
+    0% {  transform: translate(-50%, 12px);  }
+    100% {  transform: translate(-50%, -12px);  }
+}
+
 /* header content */
 
 #header-content {

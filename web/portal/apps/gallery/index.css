@@ -93,7 +93,7 @@ body {
     overflow: hidden;
 }
 
-.album-icon > .album-icon-img.default-icon {
+.default-icon {
     filter: grayscale(1);
 }
 

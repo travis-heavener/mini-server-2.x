@@ -1,6 +1,9 @@
 // app click functions
 function launchApp(name) {
     switch (name) {
+        case "gallery":
+            location.href = "/portal/apps/gallery/index.php";
+            break;
         case "clock":
             location.href = "/portal/apps/clock/index.php";
             break;

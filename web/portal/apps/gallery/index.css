@@ -1,0 +1,107 @@
+body {
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#main-content {
+    display: flex;
+    flex-direction: row;
+    row-gap: var(--text-unit);
+
+    width: 100%;
+    height: calc( 100vh - var(--header-height) - var(--footer-height) );
+
+    overflow: hidden;
+}
+
+/* album picker styling */
+
+#album-picker {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    row-gap: calc(0.25 * var(--text-unit));
+
+    width: 20%;
+    height: 100%;
+
+    padding: var(--text-unit);
+    
+    background-color: #111e;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.album-icon {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    column-gap: var(--text-unit);
+    padding: calc(0.5 * var(--text-unit));
+
+    width: 100%;
+    height: calc(8 * var(--text-unit));
+
+    border-radius: 20px;
+
+    cursor: pointer;
+    transition: 0.2s background-color;
+}
+
+.album-icon:hover {  background-color: #f8f8f866;  }
+.album-icon:active {  background-color: #f8f8f833;  }
+
+.album-icon > h1 {
+    display: flex;
+    flex: 1;
+
+    color: #f8f8f8;
+    font-family: "Poppins", sans-serif;
+    font-size: calc(1.125 * var(--text-unit));
+    font-weight: 400;
+    
+    text-overflow: ellipsis;
+    text-wrap: wrap;
+    word-wrap: break-word;
+
+    overflow: hidden;
+    display: -webkit-box;
+    line-clamp: 4;
+    -webkit-line-clamp: 4;
+}
+
+.album-icon > .album-icon-img {
+    padding: calc(0.5 * var(--text-unit));
+
+    width: auto;
+    height: calc(6 * var(--text-unit));
+    aspect-ratio: 1;
+    object-fit: cover;
+
+    background-color: #f8f8f8;
+    border-radius: 16px;
+    border: 3px solid #aaa;
+    box-shadow:  1px  1px 6px #0006 inset,
+                -1px -1px 6px #0006 inset;
+
+    overflow: hidden;
+}
+
+.album-icon > .album-icon-img.default-icon {
+    filter: grayscale(1);
+}
+
+/* album content styling */
+
+#album-content {
+    width: 80%;
+    height: 100%;
+
+    background-color: #6668;
+}

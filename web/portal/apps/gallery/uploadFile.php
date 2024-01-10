@@ -6,28 +6,28 @@
     }
 
     // 2. extract body
-    $post_data = json_decode(file_get_contents('php://input'));
-    $album_id = $post_data->album_id;
+    $album_name = $_POST["album-name"];
 
     // 3. verify file type is accepted
     $files_data = [];
     $EXTS = ["jpg", "jpeg", "png", "heic", "avi", "mov", "mkv", "mp4"];
-    for ($i = 0; $i < count($_FILES["user-media"]); $i++) {
-        $name = basename($_FILES["user-media"]["name"][$i]);
+    if ($_FILES["user-media"]["name"][0] === "") {
+        header('HTTP/1.0 403 Forbidden');
+        exit("Error: Invalid File Count\nA minimum of one file must be uploaded.");
+    }
+
+    for ($i = 0; $i < count($_FILES["user-media"]["name"]); $i++) {
+        $name = $_FILES["user-media"]["name"][$i];
         $content = file_get_contents($_FILES["user-media"]["tmp_name"][$i]);
-        $ext = pathinfo($_FILES["userImg"]["name"], PATHINFO_EXTENSION);
+        $MIME = mime_content_type($_FILES["user-media"]["tmp_name"][$i]);
+        $ext = pathinfo($_FILES["user-media"]["name"][$i], PATHINFO_EXTENSION);
 
         if (!in_array(strtolower($ext), $EXTS)) {
             header('HTTP/1.0 403 Forbidden');
             exit("Error: Invalid File Type\nThe file extension \"$ext\" is not allowed.");
         }
 
-        array_push($files_data, [ "name" => $name, "content" => $content ]);
-    }
-
-    if (count($files_data) === 0) {
-        header('HTTP/1.0 403 Forbidden');
-        exit("Error: Invalid File Count\nA minimum of one file must be uploaded.");
+        array_push($files_data, [ "name" => $name, "content" => $content, "MIME" => $MIME ]);
     }
 
     // 4. verify auth
@@ -45,67 +45,43 @@
     $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
 
-    // 6. verify the album exists and belongs to the user
-    $statement = $mysqli->prepare("SELECT * FROM `gallery` WHERE `user_id`=?, `id`=?");
-    $statement->bind_param("ii", $user_data["id"], $album_id);
-    $statement->execute();
-    $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
-    $statement->close();
+    // 6. grab user's secret
+    $key = $user_data["aes"];
 
-    if (count($rows) == 0) {
-        header('HTTP/1.0 403 Forbidden');
-        exit("Error: Invalid Album\nAlbum does not exist with that id.");
-    } else if (count($rows) > 1) {
-        header('HTTP/1.0 403 Forbidden');
-        exit("Error: Duplicate Album\nMore than one album was returned from the database. Please try again or contact a system administrator.");
-    }
-
-    $path = $envs["GALLERY_PATH"] . dechex($album_id) . "/";
-    if (!is_dir($path)) {
-        header('HTTP/1.0 403 Forbidden');
-        exit("Error: Invalid Destination\nThe upload album specified could not be found on the server.");
-    }
-
-    // 7. grab user's secret
-    // ex. secret_16 (or however long the key must be)
-
-    // 8. parse/format incoming files into an assoc array w/ other metadata
+    // 7. parse/format incoming files into an assoc array w/ other metadata
     $cipher = "aes-256-ctr";
     if (!in_array($cipher, openssl_get_cipher_methods())) {
         header('HTTP/1.0 403 Forbidden');
         exit("Error: Invalid Cipher\nThe provided cipher was not recognized by the server.");
     }
 
-    function get_next_id() {
-        // get next id
-        $statement = $mysqli->prepare("SELECT `next_id` FROM `gallery` WHERE `user_id`=?, `id`=?");
-        $statement->bind_param("ii", $user_data["id"], $album_id);
-        $statement->execute();
-        $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
-        $statement->close();
-
-        $next_id = $rows[0]['next_id'];
-
-        // update database
-        $statement = $mysqli->prepare("UPDATE `gallery` SET `next_id`=? WHERE `user_id`=?, `id`=?");
-        $statement->bind_param("iii", $next_id+1, $user_data["id"], $album_id);
-        $statement->execute();
-        $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
-        $statement->close();
-        return $next_id;
-    }
-
     foreach ($files_data as $file) {
-        $data_json = json_encode($file);
-
-        // 9. openssl_encrypt the parsed & formatted json_encode(assoc_array)
+        // 8. insert into table
         $ivlen = openssl_cipher_iv_length($cipher);
         $iv = openssl_random_pseudo_bytes($ivlen);
-        $ciphertext = openssl_encrypt($data_json, $cipher, $secret, 0, $iv);
 
-        // 10. upload file to correct album
-        $next_id = get_next_id();
-        file_put_contents($path . dechex($next_id), $ciphertext);
+        $statement = $mysqli->prepare("INSERT INTO `gallery` (`name`, `user_id`, `album_name`, `MIME`, `vector`) VALUES (?,?,?,?,?)");
+        $statement->bind_param("sisss", $file["name"], $user_data["id"], $album_name, $file["MIME"], $iv);
+        $statement->execute();
+        $statement->close();
+
+        // 9. get id
+        $statement = $mysqli->prepare("SELECT LAST_INSERT_ID()");
+        $statement->execute();
+        $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+        $id = $rows[0]["LAST_INSERT_ID()"];
+        $statement->close();
+
+        $path = $envs["GALLERY_PATH"] . dechex($id) . ".bin";
+        if (file_exists($path)) {
+            header('HTTP/1.0 403 Forbidden');
+            exit("Error: File Already Exists\nAn uploaded file already exists at this path: " . dechex($id) . ".bin.");
+        }
+
+        // 10. openssl_encrypt
+        $ciphertext = openssl_encrypt($file["content"], $cipher, $key, $options=0, $iv);
+        print_r($ciphertext);
+        file_put_contents($path, $ciphertext);
     }
 
     // I think that's it

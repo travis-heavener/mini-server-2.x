@@ -107,7 +107,7 @@
             exit("Failed to connect to database: " . $mysqli -> connect_error);
         }
 
-        $statement = $mysqli->prepare("SELECT `first`, `last`, `pass`, `permissions`, `last_login`, `created` FROM `users` WHERE `id`=? AND `email`=?");
+        $statement = $mysqli->prepare("SELECT `first`, `last`, `pass`, `permissions`, `last_login`, `aes`, `created` FROM `users` WHERE `id`=? AND `email`=?");
         $statement->bind_param("ss", $id, $email);
         $statement->execute();
 

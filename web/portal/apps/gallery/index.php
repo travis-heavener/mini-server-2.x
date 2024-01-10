@@ -23,6 +23,13 @@
             <?php include("createAlbums.php"); ?>
         </div>
 
+        <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
+            <input type="file" name="user-media[]" multiple>
+            <input type="text" name="album-id" value="1">
+            <input type="text" name="album-name" value="My First Name">
+            <input type="submit" value="Submit">
+        </form>
+
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 
         <script src="index.js" type="text/javascript"></script>

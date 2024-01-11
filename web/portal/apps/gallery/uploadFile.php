@@ -55,13 +55,14 @@
         exit("Error: Invalid Cipher\nThe provided cipher was not recognized by the server.");
     }
 
+    $table = "gal__" . dechex($user_data["id"]);
     foreach ($files_data as $file) {
         // 8. insert into table
         $ivlen = openssl_cipher_iv_length($cipher);
         $iv = openssl_random_pseudo_bytes($ivlen);
 
-        $statement = $mysqli->prepare("INSERT INTO `gallery` (`name`, `user_id`, `album_name`, `MIME`, `vector`) VALUES (?,?,?,?,?)");
-        $statement->bind_param("sisss", $file["name"], $user_data["id"], $album_name, $file["MIME"], $iv);
+        $statement = $mysqli->prepare("INSERT INTO `$table` (`name`, `album_name`, `mime`, `vector`) VALUES (?,?,?,?)");
+        $statement->bind_param("ssss", $file["name"], $album_name, $file["MIME"], $iv);
         $statement->execute();
         $statement->close();
 
@@ -72,7 +73,7 @@
         $id = $rows[0]["LAST_INSERT_ID()"];
         $statement->close();
 
-        $path = $envs["GALLERY_PATH"] . dechex($id) . ".bin";
+        $path = $envs["GALLERY_PATH"] . dechex($user_data["id"]) . "_" . dechex($id) . ".bin";
         if (file_exists($path)) {
             header('HTTP/1.0 403 Forbidden');
             exit("Error: File Already Exists\nAn uploaded file already exists at this path: " . dechex($id) . ".bin.");

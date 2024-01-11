@@ -6,10 +6,14 @@
             include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
             include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
             include($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
-
+            
             $user_data = check_auth(); // actually call to check the auth
             verify_perms($user_data); // verify the user has access to this page
             echo format_title("Gallery"); // add document title
+            
+            // check that the user has their own gallery table, create if not
+            include("createUserTable.php");
+            $user_data["gal_table"] = check_user_table($user_data["id"]);
         ?>
 
         <link rel="stylesheet" href="index.css" type="text/css">

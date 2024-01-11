@@ -5,10 +5,8 @@
         $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
         $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
         
-        $statement = $mysqli->prepare(
-            "SELECT `id`, `name`, `album_name`, `MIME`, `vector` FROM `gallery` WHERE `id` IN (SELECT `id` FROM (SELECT MAX(`created`), MAX(`id`) AS `id` FROM `gallery` WHERE `user_id`=? GROUP BY `album_name`)d) ORDER BY `created` DESC"
-        );
-        $statement->bind_param("i", $user_id);
+        $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
+        $statement = $mysqli->prepare("SELECT * FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `gal__1` GROUP BY `album_name`) ORDER BY `created` DESC;");
         $statement->execute();
 
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -16,14 +14,12 @@
         $statement->close();
         $mysqli->close();
 
-        // filter out any duplicate entries ()
-
         // add album previews
         for ($i = 0; $i < count($rows); $i++) {
             // get the file path
             $row = $rows[$i];
-            $path = $envs["GALLERY_PATH"] . dechex($row["id"]) . ".bin";
-            $MIME = $row["MIME"];
+            $path = $envs["GALLERY_PATH"] . dechex($user_id) . "_" . dechex($row["id"]) . ".bin";
+            $MIME = $row["mime"];
             if (file_exists($path) && str_starts_with($MIME, "image")) {
                 $data = file_get_contents($path);
                 $image = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $row["vector"]);
@@ -42,8 +38,9 @@
         $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
         $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
         
-        $statement = $mysqli->prepare("SELECT `id`, `name`, `MIME`, `vector` FROM `gallery` WHERE `user_id`=? AND `album_name`=? ORDER BY `created` DESC");
-        $statement->bind_param("is", $user_id, $album_name);
+        $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
+        $statement = $mysqli->prepare("SELECT `id`, `name`, `mime`, `vector` FROM `$table` WHERE `album_name`=? ORDER BY `created` DESC");
+        $statement->bind_param("s", $album_name);
         $statement->execute();
 
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -78,8 +75,8 @@
         $album = get_full_album($user_data["id"], $user_albums[0]["album_name"]);
 
         foreach ($album as $media) {
-            $path = $envs["GALLERY_PATH"] . dechex($media["id"]) . ".bin";
-            $MIME = $media["MIME"];
+            $path = $envs["GALLERY_PATH"] . dechex($user_data["id"]) . "_" . dechex($media["id"]) . ".bin";
+            $MIME = $media["mime"];
             if (!file_exists($path) || (!str_starts_with($MIME, "image") && !str_starts_with($MIME, "video"))) {
                 echo "<img src='/assets/app-icons/gallery.png' class='default-icon' alt='Album icon image.'>\n";
                 continue;

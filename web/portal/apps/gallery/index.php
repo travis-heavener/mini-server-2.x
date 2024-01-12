@@ -25,6 +25,7 @@
 
         <div id="main-content">
             <?php include("createAlbums.php"); ?>
+            <div id="album-content"></div>
         </div>
 
         <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">

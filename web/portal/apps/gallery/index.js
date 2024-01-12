@@ -1,3 +1,10 @@
+const ALBUM_CONTENT = {
+    "maxAcross": 0,
+    "maxDown": 0,
+    "name": "",
+    "nextIndex": 0
+};
+
 $(document).ready(() => {
     // bind text scroll to all album-icon h1
     $(".album-icon").on("mouseenter", function(e) {
@@ -32,15 +39,31 @@ $(document).ready(() => {
         });
     });
 
+    // determine how many icons fit on the page at a time
+    const getMaxIcons = () => {
+        const size = parseInt( $("#album-content").css("--size").slice(0, -2) ); // get icon size and remove 'px'
+        const gap = parseInt( $("#album-content").css("gap").slice(0, -2) ); // get flex gap and remove 'px'
+        const width = $("#album-content").width(); // width w/o padding or border
+        const height = $("#album-content").height(); // height w/o padding or border
+
+        ALBUM_CONTENT["maxAcross"] = Math.floor((width + gap) / (size + gap)); 
+        ALBUM_CONTENT["maxDown"] = Math.ceil((height + gap) / (size + gap));
+    };
+
+    getMaxIcons();
+
+    // and bind this getMaxIcons method to window resize events
+    $(window).on("resize", getMaxIcons);
+
     // load initial content
+    loadContent();
+
+    // and check for more content that must be loaded when scrolling stops and the bottom row of placeholders is in view
+    $()
 });
 
-function checkScroll() {
-    // determine how many 
-}
-
-function getPhotos(start, end) {
-
+function loadContent(amount) {
+    // 
 }
 
 function uploadFile() {

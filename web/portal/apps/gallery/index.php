@@ -25,15 +25,31 @@
 
         <div id="main-content">
             <?php include("createAlbums.php"); ?>
-            <div id="album-content"></div>
+            <div id="album-content">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
+            </div>
         </div>
 
-        <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
+        <!-- <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
             <input type="file" name="user-media[]" multiple>
             <input type="text" name="album-id" value="1">
             <input type="text" name="album-name" value="My First Name">
             <input type="submit" value="Submit">
-        </form>
+        </form> -->
 
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 

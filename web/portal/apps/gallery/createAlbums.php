@@ -66,32 +66,4 @@
     }
 
     echo "</div>";
-
-    // display first album, if there are albums
-    // echo "<div id='album-content'>";
-    // if (count($user_albums) > 0) {
-    //     $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
-    //     $key = $user_data["aes"];
-    //     $album = get_full_album($user_data["id"], $user_albums[0]["album_name"]);
-
-    //     foreach ($album as $media) {
-    //         $path = $envs["GALLERY_PATH"] . dechex($user_data["id"]) . "_" . dechex($media["id"]) . ".bin";
-    //         $MIME = $media["mime"];
-    //         if (!file_exists($path) || (!str_starts_with($MIME, "image") && !str_starts_with($MIME, "video"))) {
-    //             echo "<img src='/assets/app-icons/gallery.png' class='default-icon' alt='Album icon image.'>\n";
-    //             continue;
-    //         }
-
-    //         $data = file_get_contents($path);
-    //         $raw = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $media["vector"]);
-
-    //         if (str_starts_with($MIME, "image")) { // display image
-    //             $src = "data:$MIME;base64," . base64_encode($raw);
-    //             echo "<img src='$src' class='album-icon-img' alt='Album image.'>";
-    //         } else if (str_starts_with($MIME, "video")) { // display video
-    //             echo "video stuff";
-    //         }
-    //     }
-    // }
-    // echo "</div>";
 ?>

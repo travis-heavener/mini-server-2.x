@@ -25,23 +25,7 @@
 
         <div id="main-content">
             <?php include("createAlbums.php"); ?>
-            <div id="album-content">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-                <img src="/assets/app-icons/gallery.png" class="default-icon" alt="Album content placeholder.">
-            </div>
+            <div id="album-content"></div>
         </div>
 
         <!-- <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">

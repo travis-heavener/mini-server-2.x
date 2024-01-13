@@ -48,7 +48,7 @@
         setcookie("ms-user-auth", "", time() - 3600, "/");
     }
 
-    function check_auth($force_return=false) {
+    function check_auth($force_return=false, $_envs=null, $_mysqli=null) {
         // check the cookie exists
         if (!isset($_COOKIE["ms-user-auth"])) {
             header("Location: /index.php?reason=exp"); // redirect to login
@@ -82,8 +82,8 @@
         }
         
         // load envs
-        $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
-        
+        $envs = ($_envs === null) ? parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env") : $_envs;
+
         // check that the signature matches
         $check_sig = hash_hmac("sha256", "$headers.$body", $envs["AUTH_SECRET"]);
         $check_sig = base64url_encode($check_sig);
@@ -99,7 +99,7 @@
         }
 
         // check that the email is assigned to a user in the users table with the same id
-        $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
+        $mysqli = ($_mysqli === null) ? new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]) : $_mysqli;
         $id = $body_dec -> id;
         $email = $body_dec -> email;
 
@@ -117,26 +117,29 @@
         if (count($rows) == 0) {
             remove_cookie(); // remove cookie
             header("Location: /index.php?reason=inv"); // redirect to login
-            $mysqli->close();
-            if ($force_return) {
+            if ($_mysqli === null)
+                $mysqli->close();
+
+            if ($force_return)
                 return;
-            } else {
+            else
                 exit();
-            }
         } else if (count($rows) > 1) {
             // the `id` is auto-incremented and thus shouldn't return more than one user
             // BUT if it does handle this
             remove_cookie(); // remove cookie
             header("Location: /index.php?reason=dup"); // redirect to login
-            $mysqli->close();
-            if ($force_return) {
+            if ($_mysqli === null)
+                $mysqli->close();
+
+            if ($force_return)
                 return;
-            } else {
+            else
                 exit();
-            }
         }
 
-        $mysqli->close();
+        if ($_mysqli === null)
+            $mysqli->close();
 
         // store user data in disclosed variables
         $user_data = $rows[0];

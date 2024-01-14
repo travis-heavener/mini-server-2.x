@@ -195,6 +195,7 @@ async function loadContent({albumName, page}) {
                 const width = parseInt(xhr.getResponseHeader("MS2_width"));
                 const height = parseInt(xhr.getResponseHeader("MS2_height"));
                 const orientation = parseInt(xhr.getResponseHeader("MS2_orientation"));
+                const isDefaultIcon = !!(xhr.getResponseHeader("MS2_isDefaultIcon") || false);
 
                 console.log(res);
                 console.log(mime, width, height, orientation);
@@ -205,7 +206,7 @@ async function loadContent({albumName, page}) {
 
                     // we have an image, so just replace this one
                     elem.src = src;
-                    $(elem).removeClass("default-icon");
+                    if (!isDefaultIcon) $(elem).removeClass("default-icon");
                     $(elem).attr("alt", "Album image.");
                 } else if (contentType === "application/octet-stream") {
                     // we have a video, so replace this image with a video

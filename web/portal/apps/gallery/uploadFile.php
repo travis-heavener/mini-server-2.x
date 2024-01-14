@@ -42,13 +42,14 @@
     // 4. verify auth
     include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
     $user_data = check_auth(true);
-    $user_id = $user_data["id"];
 
     if (gettype($user_data) !== "array") {
         // tell the page to reload for anything that isn't proper user_data being returned (ie. invalid auth)
         header('HTTP/1.0 403 Forbidden');
         exit("Error: auth_error\nnull.");
     }
+
+    $user_id = $user_data["id"];
 
     // NOW we can store the image/video
     // 5. load mysqli
@@ -59,8 +60,7 @@
     $key = $user_data["aes"];
 
     // 7. parse/format incoming files into an assoc array w/ other metadata
-    $cipher = "aes-256-ctr";
-    if (!in_array($cipher, openssl_get_cipher_methods())) {
+    if (!in_array(CIPHER, openssl_get_cipher_methods())) {
         header('HTTP/1.0 403 Forbidden');
         exit("Error: Invalid Cipher\nThe provided cipher was not recognized by the server.");
     }
@@ -76,20 +76,19 @@
             // compress images to JPEG
             $compressed = rotate_imagejpeg_str($file["content"], $file["orientation"]);
             $compressed_thumb = rotate_imagejpeg_str($file["content"], $file["orientation"]);
-            $compressed_thumb = resize_image($compressed_thumb, $THUMB_SIZE, $THUMB_SIZE, $width, $height);
+            $compressed_thumb = resize_image($compressed_thumb, THUMB_SIZE, THUMB_SIZE, $width, $height);
             $file["MIME"] = "image/jpeg";
         } else if (str_starts_with($file["MIME"], "image")) {
             $compressed = $file["content"];
             $compressed_thumb = rotate_imagejpeg_str($file["content"], $file["orientation"]);
-            $compressed_thumb = resize_image($compressed_thumb, $THUMB_SIZE, $THUMB_SIZE, $width, $height);
+            $compressed_thumb = resize_image($compressed_thumb, THUMB_SIZE, THUMB_SIZE, $width, $height);
         } else {
             $compressed = $file["content"];
             $compressed_thumb = false;
         }
 
         // 8. insert into table
-        $ivlen = openssl_cipher_iv_length($cipher);
-        $iv = openssl_random_pseudo_bytes($ivlen);
+        $iv = openssl_random_pseudo_bytes(IVLEN);
         
         $created = intval( $file["created"] )/1e3;
         $created_ts = date("Y-m-d H:i:s", $created);
@@ -119,12 +118,14 @@
         }
 
         // 10. encrypt via openssl_encrypt and put image & thumbnail in file system
-        $cipher_img = openssl_encrypt($compressed, $cipher, $key, $options=0, $iv);
+        $cipher_img = openssl_encrypt($compressed, CIPHER, $key, $options=0, $iv);
         file_put_contents($image_path, $iv . $cipher_img);
-
+        // content_encrypt($compressed, $image_path, $key, $iv);
+        
         if ($compressed_thumb !== false) {
-            $cipher_thumb = openssl_encrypt($compressed_thumb, $cipher, $key, $options=0, $iv);
+            $cipher_thumb = openssl_encrypt($compressed_thumb, CIPHER, $key, $options=0, $iv);
             file_put_contents($thumb_path, $iv . $cipher_thumb);
+            // content_encrypt($compressed_thumb, $thumb_path, $key, $iv);
         }
     }
 

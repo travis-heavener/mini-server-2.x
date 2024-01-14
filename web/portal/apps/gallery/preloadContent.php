@@ -20,13 +20,14 @@
     // 4. verify auth
     include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
     $user_data = check_auth(true, $envs, $mysqli);
-    $user_id = $user_data["id"];
 
     if (gettype($user_data) !== "array") {
         // tell the page to reload for anything that isn't proper user_data being returned (ie. invalid auth)
         header('HTTP/1.0 403 Forbidden');
         exit("Error: auth_error\nnull.");
     }
+    
+    $user_id = $user_data["id"];
     
     // 5. get data from db
     $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database

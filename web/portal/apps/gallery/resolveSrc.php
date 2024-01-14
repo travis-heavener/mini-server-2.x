@@ -25,13 +25,14 @@
 
     // 4. verify auth
     $user_data = check_auth(true, $envs, $mysqli);
-    $user_id = $user_data["id"];
 
     if (gettype($user_data) !== "array") {
         // tell the page to reload for anything that isn't proper user_data being returned (ie. invalid auth)
         header('HTTP/1.0 403 Forbidden');
         exit("Error: auth_error\nnull.");
     }
+
+    $user_id = $user_data["id"];
     
     // 5. get data from db
     $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
@@ -66,15 +67,11 @@
 
     if (!file_exists($content_path) || (!str_starts_with($MIME, "image") && !str_starts_with($MIME, "video"))) {
         header('Content-type: application/json');
+        header("MS2_isDefaultIcon: true");
         $row["src"] = json_encode(["s"=>"/assets/app-icons/gallery.png"]);
     } else {
-        // get iv from file
-        $content_handle = fopen($content_path, "rb");
-        $iv = fread($content_handle, 16); // iv length of 16 w/ aes-256
-        fclose($content_handle);
-
-        $data = file_get_contents(($is_thumb && str_starts_with($MIME, "image")) ? $thumb_path : $content_path, false, null, 16); // skip iv
-        $raw = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $iv);
+        // decrypt the file w/ toolbox helper function (really proud I wrote that)
+        $raw = content_decrypt(($is_thumb && str_starts_with($MIME, "image")) ? $thumb_path : $content_path, $key);
 
         // handle different source types for image/video
         if (str_starts_with($MIME, "image")) {

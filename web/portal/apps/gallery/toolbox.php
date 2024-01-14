@@ -1,7 +1,10 @@
 <?php
     // helper functions for content scaling & such
 
-    $THUMB_SIZE = 128; // size of image thumbnails, in px
+    define("THUMB_SIZE", 128); // size of image thumbnails, in px
+    define("CIPHER", "aes-256-ctr");
+    define("IVLEN", openssl_cipher_iv_length(CIPHER));
+    define("CHUNK_SIZE", 100_000); // 100KB chunks
     
     // modified from SO, handy function for resizing images (reduces client memory footprint dramatically) (https://stackoverflow.com/a/45479025)
     function resize_image($data, $width, $height, $raw_width, $raw_height) {
@@ -88,4 +91,48 @@
     function gen_thumb_path($root, $user_id, $id) {
         return $root . dechex($user_id) . "_" . dechex($id) . "T.bin";
     }
+
+    function content_encrypt($content_str, $dest, $key, $iv) {
+        // buffer the content from the file to reduce memory footprint
+        $success = false;
+
+        if ($out_handle = fopen($dest, "wb")) {
+            // print IV
+            fwrite($out_handle, $iv);
+
+            // encrypt and print the rest of the data
+            $pos = 0;
+            while (strlen($data = mb_strcut($content_str, $pos, CHUNK_SIZE)) > 0) {
+                // encrypt and output
+                $ciphertext = openssl_encrypt($data, CIPHER, $key, $options=0, $iv);
+                fwrite($out_handle, $ciphertext);
+                $pos += CHUNK_SIZE;
+            }
+
+            fclose($out_handle); // regardless, close the output stream
+        }
+
+        return $success;
+    }
+
+    function content_decrypt($in_file, $key) {
+        // buffer the content from the file to reduce memory footprint
+        $output = false;
+
+        if ($in_handle = fopen($in_file, "rb")) {
+            $output = "";
+            $iv = fread($in_handle, IVLEN); // get IV
+
+            while (!feof($in_handle)) {
+                // encrypt and output
+                $data = fread($in_handle, CHUNK_SIZE);
+                $output = openssl_decrypt($data, CIPHER, $key, $options=0, $iv);
+            }
+
+            fclose($in_handle);
+        }
+
+        return $output;
+    }
+
 ?>

@@ -22,13 +22,8 @@
 
             // get this image as the album cover since it's an image
             if (str_starts_with($MIME, "image") && file_exists($path)) {
-                // get iv from file
-                $content_handle = fopen($path, "rb");
-                $iv = fread($content_handle, 16); // iv length of 16 w/ aes-256
-                fclose($content_handle);
-                
-                $data = file_get_contents($path, false, null, 16); // skip iv
-                $image = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $iv);
+                // decrypt the file w/ toolbox helper function (really proud I wrote that)
+                $image = content_decrypt($path, $key);
                 $src = "data:$MIME;base64," . base64_encode($image);
                 $rows[$i]["preview"] = "<img src='$src' class='album-icon-img' alt='Album icon image.'>";
                 continue;
@@ -44,13 +39,8 @@
                     $path = $envs["GALLERY_PATH"] . dechex($user_id) . "_" . dechex($temp_rows[0]["id"]) . ".bin";
                     $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
                     if (file_exists($path)) {
-                        // get iv from file
-                        $content_handle = fopen($path, "rb");
-                        $iv = fread($content_handle, 16); // iv length of 16 w/ aes-256
-                        fclose($content_handle);
-
-                        $data = file_get_contents($path, false, null, 16); // skip iv
-                        $image = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $iv);
+                        // decrypt the file w/ toolbox helper function (really proud I wrote that)
+                        $image = content_decrypt($path, $key);
                         $MIME = $temp_rows[0]["mime"];
                         $src = "data:$MIME;base64," . base64_encode($image);
                         

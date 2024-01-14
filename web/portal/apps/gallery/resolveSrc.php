@@ -35,7 +35,7 @@
     
     // 5. get data from db
     $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
-    $statement = $mysqli->prepare("SELECT `name`, `mime`, `vector`, `width`, `height`, `orientation` FROM `$table` WHERE `id`=? LIMIT 1;");
+    $statement = $mysqli->prepare("SELECT `name`, `mime`, `width`, `height`, `orientation` FROM `$table` WHERE `id`=? LIMIT 1;");
     $statement->bind_param("i", $id);
     $statement->execute();
     $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -52,7 +52,6 @@
     
     // unencrypt content & add raw data
     $key = $user_data["aes"];
-    $iv = $row["vector"];
     $content_path = gen_media_path($envs["GALLERY_PATH"], $user_id, $id);
     $thumb_path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $id);
     $MIME = $row["mime"];
@@ -69,7 +68,12 @@
         header('Content-type: application/json');
         $row["src"] = json_encode(["s"=>"/assets/app-icons/gallery.png"]);
     } else {
-        $data = file_get_contents(($is_thumb && str_starts_with($MIME, "image")) ? $thumb_path : $content_path);
+        // get iv from file
+        $content_handle = fopen($content_path, "rb");
+        $iv = fread($content_handle, 16); // iv length of 16 w/ aes-256
+        fclose($content_handle);
+
+        $data = file_get_contents(($is_thumb && str_starts_with($MIME, "image")) ? $thumb_path : $content_path, false, null, 16); // skip iv
         $raw = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $iv);
 
         // handle different source types for image/video

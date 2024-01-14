@@ -8,7 +8,7 @@
         $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
         
         $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
-        $statement = $mysqli->prepare("SELECT `id`, `album_name`, `mime`, `vector` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `gal__1` GROUP BY `album_name`) ORDER BY `uploaded` DESC;");
+        $statement = $mysqli->prepare("SELECT `id`, `album_name`, `mime` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `gal__1` GROUP BY `album_name`) ORDER BY `uploaded` DESC;");
         $statement->execute();
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
         $statement->close();
@@ -22,8 +22,13 @@
 
             // get this image as the album cover since it's an image
             if (str_starts_with($MIME, "image") && file_exists($path)) {
-                $data = file_get_contents($path);
-                $image = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $row["vector"]);
+                // get iv from file
+                $content_handle = fopen($path, "rb");
+                $iv = fread($content_handle, 16); // iv length of 16 w/ aes-256
+                fclose($content_handle);
+                
+                $data = file_get_contents($path, false, null, 16); // skip iv
+                $image = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $iv);
                 $src = "data:$MIME;base64," . base64_encode($image);
                 $rows[$i]["preview"] = "<img src='$src' class='album-icon-img' alt='Album icon image.'>";
                 continue;
@@ -39,8 +44,13 @@
                     $path = $envs["GALLERY_PATH"] . dechex($user_id) . "_" . dechex($temp_rows[0]["id"]) . ".bin";
                     $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
                     if (file_exists($path)) {
-                        $data = file_get_contents($path);
-                        $image = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $temp_rows[0]["vector"]);
+                        // get iv from file
+                        $content_handle = fopen($path, "rb");
+                        $iv = fread($content_handle, 16); // iv length of 16 w/ aes-256
+                        fclose($content_handle);
+
+                        $data = file_get_contents($path, false, null, 16); // skip iv
+                        $image = openssl_decrypt($data, "aes-256-ctr", $key, $options=0, $iv);
                         $MIME = $temp_rows[0]["mime"];
                         $src = "data:$MIME;base64," . base64_encode($image);
                         

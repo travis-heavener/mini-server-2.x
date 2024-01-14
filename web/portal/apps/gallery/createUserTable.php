@@ -44,7 +44,6 @@
                     `name` VARCHAR(192) NOT NULL ,
                     `album_name` VARCHAR(32) NOT NULL ,
                     `mime` VARCHAR(20) NOT NULL ,
-                    `vector` BINARY(16) NOT NULL ,
                     `width` MEDIUMINT UNSIGNED NOT NULL ,
                     `height` MEDIUMINT UNSIGNED NOT NULL ,
                     `orientation` BIT(3) NOT NULL ,

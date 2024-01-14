@@ -196,6 +196,7 @@ async function loadContent({albumName, page}) {
                 const height = parseInt(xhr.getResponseHeader("MS2_height"));
                 const orientation = parseInt(xhr.getResponseHeader("MS2_orientation"));
 
+                console.log(res);
                 console.log(mime, width, height, orientation);
 
                 if (contentType === "application/json") {

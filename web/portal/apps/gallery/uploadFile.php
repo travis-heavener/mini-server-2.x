@@ -96,8 +96,8 @@
 
         $orientation = $file["orientation"]-1;
 
-        $statement = $mysqli->prepare("INSERT INTO `$table` (`name`, `album_name`, `mime`, `vector`, `width`, `height`, `orientation`, `created`) VALUES (?,?,?,?,?,?,?,?);");
-        $statement->bind_param("ssssiiis", $file["name"], $album_name, $file["MIME"], $iv, $width, $height, $orientation, $created_ts);
+        $statement = $mysqli->prepare("INSERT INTO `$table` (`name`, `album_name`, `mime`, `width`, `height`, `orientation`, `created`) VALUES (?,?,?,?,?,?,?);");
+        $statement->bind_param("ssssiis", $file["name"], $album_name, $file["MIME"], $width, $height, $orientation, $created_ts);
         $statement->execute();
         $statement->close();
 
@@ -120,11 +120,11 @@
 
         // 10. encrypt via openssl_encrypt and put image & thumbnail in file system
         $cipher_img = openssl_encrypt($compressed, $cipher, $key, $options=0, $iv);
-        file_put_contents($image_path, $cipher_img);
+        file_put_contents($image_path, $iv . $cipher_img);
 
         if ($compressed_thumb !== false) {
             $cipher_thumb = openssl_encrypt($compressed_thumb, $cipher, $key, $options=0, $iv);
-            file_put_contents($thumb_path, $cipher_thumb);
+            file_put_contents($thumb_path, $iv . $cipher_thumb);
         }
     }
 

@@ -28,12 +28,11 @@
             <div id="album-content"></div>
         </div>
 
-        <!-- <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
-            <input type="file" name="user-media[]" multiple>
-            <input type="text" name="album-id" value="1">
+        <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
+            <input type="file" name="user-media[]" multiple accept="image/png, image/jpeg, image/heic, video/mp4, video/mkv, video/quicktime, video/x-msvideo">
             <input type="text" name="album-name" value="My First Name">
             <input type="submit" value="Submit">
-        </form> -->
+        </form>
 
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 

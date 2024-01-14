@@ -21,7 +21,7 @@ $(document).ready(() => {
     */
 
     // load initial content
-    loadContent({"albumName": "Cars", "page": 1});
+    loadContent({"albumName": "My First Name", "page": 1});
 
     // and check for more content that must be loaded when scrolling stops and the bottom row of placeholders is in view
     $()
@@ -74,7 +74,6 @@ function bindTextScroll() {
                     if (Date.now() - lastStopped < DELAY) return;
 
                     h1.scrollTo({left: offset, top: 0, behavior: "smooth"});
-
                     offset += OFFSET_INC;
 
                     if (offset >= h1.scrollWidth - h1.clientWidth) {
@@ -107,7 +106,6 @@ function bindTextScroll() {
                     if (Date.now() - lastStopped < DELAY) return;
 
                     h1.scrollTo({left: 0, top: offset, behavior: "smooth"});
-
                     offset += OFFSET_INC;
 
                     if (offset >= h1.scrollHeight - h1.clientHeight) {
@@ -122,12 +120,124 @@ function bindTextScroll() {
     }
 }
 
-function loadContent({albumName, page}) {
+async function loadContent({albumName, page}) {
     // determine how many rows we can fit
     const bounds = getMaxIcons();
     const imgSize = $("#album-content").css("--size").slice(0, -2); // get image size, remove 'px'
     const amtPerPage = 50;
     const pageOffset = (page-1) * amtPerPage;
+
+    // error handler shorthand
+    const handleError = e => {
+        console.log("failure", e);
+        const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+        const title = msg.split("\n")[0];
+        const body = msg.split("\n")[1];
+
+        if (title === "auth_error") {
+            window.location.reload(true);
+        } else {
+            promptUser(title, body, false);
+        }
+    };
+
+    // get initial information about all incoming data
+    let preloadInfo;
+    try {
+        preloadInfo = await $.ajax({
+            "url": "preloadContent.php",
+            "method": "GET",
+            "headers": {
+                "MS2_offset": pageOffset,
+                "MS2_maxAmt": amtPerPage,
+                "MS2_albumName": albumName
+            },
+            "contentType": "application/json"
+        });
+        preloadInfo = JSON.parse(preloadInfo);
+    } catch (err) {
+        handleError(err);
+        return;
+    }
+
+    const ids = [];
+    for (let info of preloadInfo)
+        ids.push(info.id);
+
+    // display placeholder info & queue an ajax call for each
+    // for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < ids.length; i++) {
+        // create img placeholder
+        let elem = document.createElement("IMG");
+        const id = `album-content-${i}`;
+        elem.id = id;
+        $(elem).addClass("default-icon");
+        $(elem).attr("src", "/assets/app-icons/gallery.png");
+        $(elem).attr("alt", "Album content placeholder.");
+        $("#album-content").append(elem);
+
+        // queue ajax call
+        $.ajax({
+            "url": "resolveSrc.php",
+            "method": "GET",
+            // "dataType": "application/octet-stream",
+            // "contentType": "application/octet-stream",
+            "headers": {
+                "MS2_id": ids[i],
+                "MS2_isThumb": true
+            },
+            "success": (res, status, xhr) => {
+                // replace image body
+                const contentType = xhr.getResponseHeader("content-type");
+                const id = xhr.getResponseHeader("MS2_id");
+                const name = xhr.getResponseHeader("MS2_name");
+                const mime = xhr.getResponseHeader("MS2_mime");
+                const width = parseInt(xhr.getResponseHeader("MS2_width"));
+                const height = parseInt(xhr.getResponseHeader("MS2_height"));
+                const orientation = parseInt(xhr.getResponseHeader("MS2_orientation"));
+
+                console.log(mime, width, height, orientation);
+
+                if (contentType === "application/json") {
+                    // we have an image
+                    const src = res["s"];
+
+                    // we have an image, so just replace this one
+                    elem.src = src;
+                    $(elem).removeClass("default-icon");
+                    $(elem).attr("alt", "Album image.");
+                } else if (contentType === "application/octet-stream") {
+                    // we have a video, so replace this image with a video
+                    console.log(res);
+                    /*
+                    elem.outerHTML = `<video id="${id}" src="${src}" alt="Album video.">`;
+                    elem = $("#" + id); // update reference after changing outerHTML
+
+                    // play on hover
+                    console.log(elem.outerHTML);
+                    $(elem).on("mouseenter", function() {
+                        this.muted = true;
+                        this.play();
+                        
+                        $(this).on("mouseleave", function() {
+                            this.pause();
+                            this.currentTime = 0;
+                        });
+                    });
+                    */
+                } else {
+                    console.warn("Unexpected MIME type: " + mime);
+                }
+
+                // append extra metadata
+                $(elem).attr("data-content-id", id);
+                $(elem).attr("data-fname", name);
+            },
+            "error": err => handleError(err)
+        });
+    }
+
+    return;
 
     for (let i = 0; i < bounds.down; i++) {
         // add placeholder images (to prevent things that load faster from being messed up in terms of order)
@@ -147,15 +257,18 @@ function loadContent({albumName, page}) {
 
         // load in the content in for each row
         $.ajax({
-            "url": "loadContent.php",
+            "url": "preloadContent.php",
             "method": "GET",
             "headers": {
                 "MS2_offset": pageOffset + (bounds.across * i),
                 "MS2_maxAmt": bounds.across,
-                "MS2_albumName": albumName
+                "MS2_albumName": albumName,
+                "MS2_imgWidth": imgSize, // specifying imgWidth allows for image resizing on the backend
+                "MS2_imgHeight": imgSize // specifying imgWidth allows for image resizing on the backend
             },
             "contentType": "application/json",
             "success": function(res) { // success, show editor
+                console.log(res);
                 const {content} = JSON.parse(res);
                 childrenIds.forEach(async (id, index) => {
                     const elem = $("#" + id)[0];
@@ -168,38 +281,46 @@ function loadContent({albumName, page}) {
 
                     // otherwise, inject new HTML
                     const data = content[index];
+                    
                     if (data.mime.startsWith("image")) {
-                        // rescale image (theoretically reduce memory footprint)
-                        const src = await resizeImage(data.src, imgSize, imgSize, 2);
-                        elem.outerHTML = `<img id="${id}" src="${src}" alt="Album image.">`;
-                        // elem.outerHTML = `<img id="${id}" src="${data.src}" alt="Album image.">`;
+                        elem.outerHTML = `<img id="${id}" data-content-id="${data.id}" src="${data.src}" alt="Album image.">`;
                     } else if (data.mime.startsWith("video")) {
-                        elem.outerHTML = `<video id="${id}" src="${data.src}" alt="Album video.">`;
-                        $(elem).on("mouseenter", function() {
-                            this.play();
-                            
-                            $(this).on("mouseleave", function() {
-                                this.pause();
-                                this.currentTime = 0;
+                        // try {
+                            const raw = await getContentSrc(data.id, imgSize, imgSize);
+                            // const byteChars = atob(JSON.parse(raw).src);
+                            // const byteNumbers = new Array(byteChars);
+                            // for (let i = 0; i < byteChars.length; i++) {
+                            //     byteNumbers[i] = byteChars.charAt(i);
+                            // }
+                            // const byteArray = new Uint8Array(byteNumbers);
+                            // const url = URL.createObjectURL( new Blob([byteArray]) );
+
+                            // var byteCharacters = atob(JSON.parse(raw).src);
+                            // var byteNumbers = new Array(byteCharacters.length);
+                            // for (var i = 0; i < byteCharacters.length; i++) {
+                            //     byteNumbers[i] = byteCharacters.charCodeAt(i);
+                            // }
+                            // var byteArray = new Uint8Array(byteNumbers);
+                            // var blob = URL.createObjectURL(new Blob([byteArray]));
+
+                            elem.outerHTML = `<video id="${id}" src="${JSON.parse(raw).src}" alt="Album video.">`;
+                            $(elem).on("mouseenter", function() {
+                                this.play();
+                                
+                                $(this).on("mouseleave", function() {
+                                    this.pause();
+                                    this.currentTime = 0;
+                                });
                             });
-                        });
+                        // } catch (e) {
+                        //     handleError(e);
+                        // }
                     } else {
                         console.warn("Unsupported MIME type: " + data.mime);
                     }
                 });
             },
-            "error": function(e) { // error, remove from url and reload
-                console.log("failure", e);
-                const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
-                const title = msg.split("\n")[0];
-                const body = msg.split("\n")[1];
-
-                if (title === "auth_error") {
-                    window.location.reload(true);
-                } else {
-                    promptUser(title, body, false);
-                }
-            }
+            "error": e => handleError(e)
         });
     }
 
@@ -212,7 +333,6 @@ function loadContent({albumName, page}) {
     // allow the results per page to be toggled via dropdown (ie 25,50,75,100) alongside page pickers
     // default 50, but when changing results per page revert to page 1
     // when uploading files, reload the content on that page of the album, NOT the actual page
-    // stagger loading per rows (using the getMaxIcons results)
 
     // add a plus button fixed to bottom right of album content
     // this brings up a modal that shows an upload button
@@ -235,60 +355,67 @@ function loadContent({albumName, page}) {
     // top toolbar stays on top
 }
 
-// this is really smart thanks SO (https://stackoverflow.com/a/20965997)
-async function resizeImage(uri, width, height, scaleFactor) {
-    width = parseInt(width) * scaleFactor;
-    height = parseInt(height) * scaleFactor;
-
-    const canvas = document.createElement("CANVAS");
-    const ctx = canvas.getContext("2d");
-    
-    canvas.width = width;
-    canvas.height = height;
-    
-    // create and resolve promise for resizing images onload
-    return new Promise((resolve) => {
-        const img = document.createElement("IMG");
-        $(img).attr("src", uri);
-        $(img).on("load", function() {
-            const imgWidth = this.width;
-            const imgHeight = this.height;
-            const ratio = imgWidth/imgHeight;
-
-            // this next bit clips off the overflow to center the image in the bounds (prevent squishing)
-            if (imgWidth >= imgHeight) {
-                const scaledWidth = ratio * height;
-                const overflow = scaledWidth - width;
-                ctx.drawImage(this, -overflow/2, 0, scaledWidth + overflow/2, height);
-            } else {
-                const scaledHeight = width / ratio;
-                const overflow = scaledHeight - height;
-                ctx.drawImage(this, 0, -overflow/2, width, scaledHeight + overflow/2);
-            }
-
-            resolve(canvas.toDataURL('image/jpeg', 0.25));
-        });
-    });
-}
-
 function uploadFile() {
-    let data = new FormData($("form")[0]);
-    $.ajax({
-        "url": "uploadFile.php",
-        "method": "POST",
-        "data": data,
-        "contentType": false,
-        "processData": false,
-        "success": function(res) { // success, show editor
-            console.log("success", res);
-        },
-        "error": function(e) { // error, remove from url and reload
-            console.log("failure", e);
-            const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
-            const title = msg.split("\n")[0];
-            const body = msg.split("\n")[1];
-            promptUser(title, body, false);
+    const form = $("form")[0];
+    const fileInput = $(form).find("input[type='file']")[0];
+    let data = new FormData(form);
+
+    // add file creation timestamps
+    const timestamps = [...fileInput.files].map(val => val.lastModified);
+    data.set("timestamps", JSON.stringify(timestamps));
+
+    // add the file width and heights
+    const dimensions = [...fileInput.files].map(() => null);
+
+    const checkCompletion = () => {
+        if (dimensions.includes(null)) return;
+        data.set("dimensions", JSON.stringify(dimensions));
+
+        $.ajax({
+            "url": "uploadFile.php",
+            "method": "POST",
+            "data": data,
+            "contentType": false,
+            "processData": false,
+            "success": function(res) { // success, show editor
+                console.log("success", res);
+            },
+            "error": function(e) { // error, remove from url and reload
+                console.log("failure", e);
+                const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+                const title = msg.split("\n")[0];
+                const body = msg.split("\n")[1];
+                promptUser(title, body, false);
+            }
+        });
+    };
+
+    for (let i = 0; i < fileInput.files.length; i++) {
+        const file = fileInput.files[i];
+        if (file.type.startsWith("video")) {
+            const dummyVideo = document.createElement("VIDEO");
+            const url = URL.createObjectURL(file);
+            $(dummyVideo).on("loadedmetadata", function() {
+                dimensions[i] = [this.videoWidth, this.videoHeight];
+                URL.revokeObjectURL(url);
+                console.log(i, this.videoWidth, this.videoHeight);
+
+                checkCompletion();
+            });
+            dummyVideo.src = url;
+        } else if (file.type.startsWith("image")) {
+            const dummyImage = document.createElement("IMG");
+            const url = URL.createObjectURL(file);
+            $(dummyImage).on("load", function() {
+                dimensions[i] = [this.width, this.height];
+                URL.revokeObjectURL(url);
+                console.log(i, this.width, this.height);
+
+                checkCompletion();
+            });
+            dummyImage.src = url;
         }
-    });
+    }
+    
     return false;
 }

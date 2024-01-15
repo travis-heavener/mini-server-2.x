@@ -41,9 +41,9 @@
         </div>
 
         <div id="upload-form-content">
-            <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
+            <form id="upload-form" action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
+                <h1>Upload Files</h1>
                 <input type="file" name="user-media[]" multiple accept="<?php include("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
-                <input type="text" name="album-name" value="My First Name">
                 <input type="submit" value="Submit">
             </form>
         </div>

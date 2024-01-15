@@ -20,6 +20,24 @@ $(document).ready(async () => {
         if (e.target === this)
             $(this.parentElement).toggleClass("selected");
     });
+
+    // make file upload areas drag and droppable
+    $("input[type=file]").on("dragenter dragover", e => e.preventDefault());
+    $("input[type=file]").on("drop", function(e) {
+        e.preventDefault();
+
+        // append existing files
+        const transfer = new DataTransfer();
+        for (let file of this.files)
+            transfer.items.add(file);
+
+        // take file and append to files list
+        for (let file of e.originalEvent.dataTransfer.files)
+            transfer.items.add(file);
+
+        // reset the files list
+        this.files = transfer.files;
+    });
 });
 
 const __TEXT_SCROLL_INTERVALS = [];
@@ -373,9 +391,12 @@ async function showForm(formType) {
 }
 
 function uploadFile() {
-    const form = $("form")[0];
+    const form = $("#upload-form")[0];
     const fileInput = $(form).find("input[type='file']")[0];
     let data = new FormData(form);
+
+    // add album name
+    data.set("album-name", ALBUM_CONTENT.name);
 
     // add file creation timestamps
     const timestamps = [...fileInput.files].map(val => val.lastModified);

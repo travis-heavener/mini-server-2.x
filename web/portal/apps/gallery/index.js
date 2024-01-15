@@ -3,41 +3,17 @@ const ALBUM_CONTENT = {
     "currentPage": 1
 };
 
-$(document).ready(() => {
+$(document).ready(async () => {
     // initial binding of text scroll
     bindTextScroll();
     
     // also change text scrolling behavior on portrait/mobile
     screen.orientation.addEventListener("change", bindTextScroll);
 
-    /*
-    // determine how many icons fit on the page at a time
-    
-
-    getMaxIcons();
-
-    // and bind this getMaxIcons method to window resize events
-    $(window).on("resize", getMaxIcons);
-    */
-
     // load initial content
-    loadContent({"albumName": "My First Name", "page": 1});
-
-    // and check for more content that must be loaded when scrolling stops and the bottom row of placeholders is in view
-    $()
+    const albums = await loadAlbums();
+    loadContent({"albumName": albums[0]["album_name"], "page": 1});
 });
-
-function getMaxIcons() {
-    const size = parseInt( $("#album-content").css("--size").slice(0, -2) ); // get icon size and remove 'px'
-    const gap = parseInt( $("#album-content").css("gap").slice(0, -2) ); // get flex gap and remove 'px'
-    const width = $("#album-content").width(); // width w/o padding or border
-    const height = $("#album-content").height(); // height w/o padding or border
-
-    const maxAcross = Math.floor((width + gap) / (size + gap));
-    const maxDown = Math.ceil((height + gap) / (size + gap));
-
-    return {"across": maxAcross, "down": maxDown};
-};
 
 const __TEXT_SCROLL_INTERVALS = [];
 function bindTextScroll() {
@@ -122,24 +98,8 @@ function bindTextScroll() {
 
 async function loadContent({albumName, page}) {
     // determine how many rows we can fit
-    const bounds = getMaxIcons();
-    const imgSize = $("#album-content").css("--size").slice(0, -2); // get image size, remove 'px'
     const amtPerPage = 50;
     const pageOffset = (page-1) * amtPerPage;
-
-    // error handler shorthand
-    const handleError = e => {
-        console.log("failure", e);
-        const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
-        const title = msg.split("\n")[0];
-        const body = msg.split("\n")[1];
-
-        if (title === "auth_error") {
-            window.location.reload(true);
-        } else {
-            promptUser(title, body, false);
-        }
-    };
 
     // get initial information about all incoming data
     let preloadInfo;
@@ -151,21 +111,21 @@ async function loadContent({albumName, page}) {
                 "MS2_offset": pageOffset,
                 "MS2_maxAmt": amtPerPage,
                 "MS2_albumName": albumName
-            },
-            "contentType": "application/json"
+            }
         });
-        preloadInfo = JSON.parse(preloadInfo);
     } catch (err) {
         handleError(err);
         return;
     }
+
+    // parse the response
+    preloadInfo = JSON.parse(preloadInfo);
 
     const ids = [];
     for (let info of preloadInfo)
         ids.push(info.id);
 
     // display placeholder info & queue an ajax call for each
-    // for (let i = 0; i < 1; i++) {
     for (let i = 0; i < ids.length; i++) {
         // create img placeholder
         let elem = document.createElement("IMG");
@@ -177,153 +137,45 @@ async function loadContent({albumName, page}) {
         $("#album-content").append(elem);
 
         // queue ajax call
-        $.ajax({
-            "url": "resolveSrc.php",
-            "method": "GET",
-            // "dataType": "application/octet-stream",
-            // "contentType": "application/octet-stream",
-            "headers": {
-                "MS2_id": ids[i],
-                "MS2_isThumb": true
-            },
-            "success": (res, status, xhr) => {
-                // replace image body
-                const contentType = xhr.getResponseHeader("content-type");
-                const id = xhr.getResponseHeader("MS2_id");
-                const name = xhr.getResponseHeader("MS2_name");
-                const mime = xhr.getResponseHeader("MS2_mime");
-                const width = parseInt(xhr.getResponseHeader("MS2_width"));
-                const height = parseInt(xhr.getResponseHeader("MS2_height"));
-                const orientation = parseInt(xhr.getResponseHeader("MS2_orientation"));
-                const isDefaultIcon = !!(xhr.getResponseHeader("MS2_isDefaultIcon") || false);
-
-                console.log(res);
-                console.log(mime, width, height, orientation);
-
-                if (contentType === "application/json") {
-                    // we have an image
-                    const src = res["s"];
-
-                    // we have an image, so just replace this one
-                    elem.src = src;
-                    if (!isDefaultIcon) $(elem).removeClass("default-icon");
-                    $(elem).attr("alt", "Album image.");
-                } else if (contentType === "application/octet-stream") {
-                    // we have a video, so replace this image with a video
-                    console.log(res);
-                    /*
-                    elem.outerHTML = `<video id="${id}" src="${src}" alt="Album video.">`;
-                    elem = $("#" + id); // update reference after changing outerHTML
-
-                    // play on hover
-                    console.log(elem.outerHTML);
-                    $(elem).on("mouseenter", function() {
-                        this.muted = true;
-                        this.play();
-                        
-                        $(this).on("mouseleave", function() {
-                            this.pause();
-                            this.currentTime = 0;
-                        });
-                    });
-                    */
-                } else {
-                    console.warn("Unexpected MIME type: " + mime);
-                }
-
-                // append extra metadata
-                $(elem).attr("data-content-id", id);
-                $(elem).attr("data-fname", name);
-            },
-            "error": err => handleError(err)
-        });
-    }
-
-    return;
-
-    for (let i = 0; i < bounds.down; i++) {
-        // add placeholder images (to prevent things that load faster from being messed up in terms of order)
-        const childrenIds = [];
-
-        for (let j = 0; j < bounds.across; j++) {
-            const elem = document.createElement("IMG");
-            const id = "album-content-" + (j+1) + "-" + (i+1);
-            $(elem).attr("id", id); // format: album-content-<row+1>-<col+1>
-            $(elem).addClass("default-icon");
-            $(elem).attr("src", "/assets/app-icons/gallery.png");
-            $(elem).attr("alt", "Album content placeholder.");
-
-            childrenIds.push(id);
-            $("#album-content").append(elem);
+        let url, headers;
+        try {
+            const blobInfo = await resolveSrcToBlob(ids[i]);
+            url = blobInfo.url;
+            headers = blobInfo.headers;
+        } catch (err) {
+            handleError(err);
+            return;
         }
 
-        // load in the content in for each row
-        $.ajax({
-            "url": "preloadContent.php",
-            "method": "GET",
-            "headers": {
-                "MS2_offset": pageOffset + (bounds.across * i),
-                "MS2_maxAmt": bounds.across,
-                "MS2_albumName": albumName,
-                "MS2_imgWidth": imgSize, // specifying imgWidth allows for image resizing on the backend
-                "MS2_imgHeight": imgSize // specifying imgWidth allows for image resizing on the backend
-            },
-            "contentType": "application/json",
-            "success": function(res) { // success, show editor
-                console.log(res);
-                const {content} = JSON.parse(res);
-                childrenIds.forEach(async (id, index) => {
-                    const elem = $("#" + id)[0];
+        const mime = headers.mime;
 
-                    // remove placeholders if at the end of album
-                    if (index >= content.length) {
-                        elem.parentElement.removeChild(elem);
-                        return;
-                    }
+        if (mime.startsWith("image")) {
+            // we have an image, so just replace this one
+            elem.src = url;
+            if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
+            $(elem).attr("alt", "Album image.");
+        } else if (mime.startsWith("video")) {
+            // we have a video, so replace this image with a video
+            elem.outerHTML = `<video id="${id}" src="${url}" alt="Album video.">`;
+            elem = $("#" + id); // update reference after changing outerHTML
 
-                    // otherwise, inject new HTML
-                    const data = content[index];
-                    
-                    if (data.mime.startsWith("image")) {
-                        elem.outerHTML = `<img id="${id}" data-content-id="${data.id}" src="${data.src}" alt="Album image.">`;
-                    } else if (data.mime.startsWith("video")) {
-                        // try {
-                            const raw = await getContentSrc(data.id, imgSize, imgSize);
-                            // const byteChars = atob(JSON.parse(raw).src);
-                            // const byteNumbers = new Array(byteChars);
-                            // for (let i = 0; i < byteChars.length; i++) {
-                            //     byteNumbers[i] = byteChars.charAt(i);
-                            // }
-                            // const byteArray = new Uint8Array(byteNumbers);
-                            // const url = URL.createObjectURL( new Blob([byteArray]) );
-
-                            // var byteCharacters = atob(JSON.parse(raw).src);
-                            // var byteNumbers = new Array(byteCharacters.length);
-                            // for (var i = 0; i < byteCharacters.length; i++) {
-                            //     byteNumbers[i] = byteCharacters.charCodeAt(i);
-                            // }
-                            // var byteArray = new Uint8Array(byteNumbers);
-                            // var blob = URL.createObjectURL(new Blob([byteArray]));
-
-                            elem.outerHTML = `<video id="${id}" src="${JSON.parse(raw).src}" alt="Album video.">`;
-                            $(elem).on("mouseenter", function() {
-                                this.play();
-                                
-                                $(this).on("mouseleave", function() {
-                                    this.pause();
-                                    this.currentTime = 0;
-                                });
-                            });
-                        // } catch (e) {
-                        //     handleError(e);
-                        // }
-                    } else {
-                        console.warn("Unsupported MIME type: " + data.mime);
-                    }
+            // play on hover
+            $(elem).on("mouseenter", function() {
+                this.muted = true;
+                this.play();
+                
+                $(this).on("mouseleave", function() {
+                    this.pause();
+                    this.currentTime = 0;
                 });
-            },
-            "error": e => handleError(e)
-        });
+            });
+        } else {
+            console.warn("Unexpected MIME type: " + mime);
+        }
+
+        // append extra metadata
+        $(elem).attr("data-content-id", id);
+        $(elem).attr("data-fname", headers.name);
     }
 
     // finally, update the page we are on
@@ -356,6 +208,99 @@ async function loadContent({albumName, page}) {
     // make album picker icons square, hide cover icons
     // top toolbar stays on top
 }
+
+async function loadAlbums() {
+    // dynamically load in thumbnails for each album picker icon
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            "url": "resolveAlbums.php",
+            "method": "GET",
+            "success": async (res) => {
+                // add each resulting object's metadata to the DOM
+                const body = JSON.parse(res);
+
+                for (let entry of body) {
+                    // parse each item
+                    const albumName = entry["album_name"];
+                    
+                    if (entry.id === null) {
+                        // show default icon
+                        $("#album-picker").append(`
+                            <div class='album-icon noselect'>
+                                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' alt='Album icon image.'>
+                                <h1>${albumName}</h1>
+                            </div>
+                        `);
+                    } else {
+                        const {url, headers} = await resolveSrcToBlob(entry.id);
+                        let previewImg = `<img src="/assets/app-icons/gallery.png" class='album-icon-img default-icon' alt='Album icon image.'>`;
+                        if (!headers.isDefaultIcon)
+                            previewImg = `<img src="${url}" class='album-icon-img' alt='Album icon image.'>`;
+
+                        $("#album-picker").append(`
+                            <div class='album-icon noselect'>
+                                ${previewImg}
+                                <h1>${albumName}</h1>
+                            </div>
+                        `);
+                    }
+                }
+
+                // return the raw JSON response
+                resolve(body);
+            },
+            "error": err => handleError(err)
+        });
+    });
+}
+
+function resolveSrcToBlob(id) {
+    // queue ajax call
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            "url": "resolveSrc.php",
+            "method": "GET",
+            "headers": {
+                "MS2_id": id,
+                "MS2_isThumb": true
+            },
+            "xhrFields": {
+                responseType: "blob" // I've been needing this for literal HOURS
+            },
+            "success": (res, status, xhr) => {
+                // replace image body
+                const headers = {
+                    "id":            xhr.getResponseHeader("MS2_id"),
+                    "name":          xhr.getResponseHeader("MS2_name"),
+                    "mime":          xhr.getResponseHeader("MS2_mime"),
+                    "width":         parseInt(xhr.getResponseHeader("MS2_width")),
+                    "height":        parseInt(xhr.getResponseHeader("MS2_height")),
+                    "orientation":   parseInt(xhr.getResponseHeader("MS2_orientation")),
+                    "isDefaultIcon": !!(xhr.getResponseHeader("MS2_isDefaultIcon") || false)
+                };
+                
+                // generate url from blob
+                const url = URL.createObjectURL(res);
+
+                resolve({"url": url, "headers": headers});
+            },
+            "error": err => handleError(err)
+        });
+    });
+}
+
+function handleError(e) {
+    console.warn("Failure", e);
+    const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+    const title = msg.split("\n")[0];
+    const body = msg.split("\n")[1];
+
+    if (title === "auth_error") {
+        window.location.reload(true);
+    } else {
+        promptUser(title, body, false);
+    }
+};
 
 function uploadFile() {
     const form = $("form")[0];

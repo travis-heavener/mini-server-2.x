@@ -1,0 +1,72 @@
+<?php
+    // create album icons for gallery
+    include("./toolbox.php");
+    
+    function get_user_albums($user_id, $key, $mysqli, $envs) {
+        $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
+        $statement = $mysqli->prepare(
+            "SELECT `id`, `album_name`, `mime` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `gal__1` GROUP BY `album_name`) ORDER BY `uploaded` DESC;
+        ");
+        $statement->execute();
+        $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+        $statement->close();
+
+        // add album previews
+        for ($i = 0; $i < count($rows); $i++) {
+            // get the file path
+            $row = $rows[$i];
+            $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
+            $MIME = $row["mime"];
+
+            // get this image as the album cover since it's an image
+            if (!str_starts_with($MIME, "image")) {
+                // get the next image if the newest album entry is not an image (ie. video)
+                $statement = $mysqli->prepare("SELECT * FROM `gal__1` WHERE `mime` LIKE 'image%' AND `album_name`=? ORDER BY `uploaded` DESC LIMIT 1;");
+                $statement->bind_param("s", $rows[$i]["album_name"]);
+                $statement->execute();
+                $temp_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+                $statement->close();
+                
+                if (count($temp_rows) > 0) {
+                    $path = $envs["GALLERY_PATH"] . dechex($user_id) . "_" . dechex($temp_rows[0]["id"]) . ".bin";
+                    $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
+                    if (file_exists($path)) {
+                        $rows[$i] = $temp_rows[0];
+                        continue;
+                    }
+                }
+            } else if (str_starts_with($MIME, "image") && file_exists($path)) {
+                continue; // we have a hit, so keep everything as-is
+            }
+
+            // base case, placeholder image is inserted
+            $rows[$i]["id"] = null;
+        }
+
+        $mysqli->close();
+        return json_encode($rows);
+    }
+
+    // 1. check for GET
+    if ($_SERVER["REQUEST_METHOD"] !== "GET") {
+        header('HTTP/1.0 403 Forbidden');
+        exit("Error: Invalid request method\nExpected GET, got " . $_SERVER["REQUEST_METHOD"] . ".");
+    }
+
+    // 2. load up mysqli
+    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
+
+    // 3. verify auth
+    include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
+    $user_data = check_auth(true, $envs, $mysqli);
+
+    if (gettype($user_data) !== "array") {
+        // tell the page to reload for anything that isn't proper user_data being returned (ie. invalid auth)
+        header('HTTP/1.0 403 Forbidden');
+        exit("Error: auth_error\nnull.");
+    }
+
+    // 4. return
+    echo get_user_albums($user_data["id"], $user_data["aes"], $mysqli, $envs);
+?>

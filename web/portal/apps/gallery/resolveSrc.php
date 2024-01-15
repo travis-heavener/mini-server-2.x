@@ -66,35 +66,31 @@
     header("MS2_orientation: " . $row["orientation"]+1);
 
     if (!file_exists($content_path) || (!str_starts_with($MIME, "image") && !str_starts_with($MIME, "video"))) {
-        header('Content-type: application/json');
         header("MS2_isDefaultIcon: true");
-        $row["src"] = json_encode(["s"=>"/assets/app-icons/gallery.png"]);
+        echo "";
     } else {
         // decrypt the file w/ toolbox helper function (really proud I wrote that)
         $raw = content_decrypt(($is_thumb && str_starts_with($MIME, "image")) ? $thumb_path : $content_path, $key);
 
         // handle different source types for image/video
         if (str_starts_with($MIME, "image")) {
-            // declare content-type as JSON
-            header('Content-type: application/json');
+            // declare hint for AJAX as to incoming BLOB content-type
+            header("Content-type: $MIME");
 
             if ($is_thumb) {
                 // grab thumbnail
-                $row["src"] = "data:$MIME;base64," . base64_encode($raw);
+                // serve as binary BLOB instead of base64
+                echo $raw;
             } else {
                 // resize each image (also strips metadata, IMPORTANT!!!!)
-                $row["src"] = "data:$MIME;base64," . base64_encode(resize_image($raw, $img_width, $img_height, $row["width"], $row["height"], $row["orientation"]+1));
+                // serve as binary BLOB instead of base64
+                echo resize_image($raw, $img_width, $img_height, $row["width"], $row["height"], $row["orientation"]+1);
             }
-
-            // json encode
-            $row["src"] = json_encode(["s"=>$row["src"]]);
         } else {
-            // declare content-type as blob
-            header('Content-type: application/octet-stream');
-            $row["src"] = $raw;
+            // declare content-type as a video so the raw binary gets converted properly into a BLOB by the XHR in AJAX
+            // 9:45 PM, 1/14/2024, I FINALLY got this to work (been probably 8 days now)
+            header('Content-type: video/mp4');
+            echo $raw;
         }
     }
-
-    // 7. shrink return data & remove IV
-    echo $row["src"];
 ?>

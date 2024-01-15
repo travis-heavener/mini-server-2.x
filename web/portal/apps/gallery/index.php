@@ -24,7 +24,7 @@
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php") ?>
 
         <div id="main-content">
-            <?php include("createAlbums.php"); ?>
+            <div id="album-picker"></div>
             <div id="album-content"></div>
         </div>
 

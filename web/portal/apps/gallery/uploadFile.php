@@ -118,15 +118,10 @@
         }
 
         // 10. encrypt via openssl_encrypt and put image & thumbnail in file system
-        $cipher_img = openssl_encrypt($compressed, CIPHER, $key, $options=0, $iv);
-        file_put_contents($image_path, $iv . $cipher_img);
-        // content_encrypt($compressed, $image_path, $key, $iv);
+        content_encrypt($compressed, $image_path, $key, $iv);
         
-        if ($compressed_thumb !== false) {
-            $cipher_thumb = openssl_encrypt($compressed_thumb, CIPHER, $key, $options=0, $iv);
-            file_put_contents($thumb_path, $iv . $cipher_thumb);
-            // content_encrypt($compressed_thumb, $thumb_path, $key, $iv);
-        }
+        if ($compressed_thumb !== false)
+            content_encrypt($compressed_thumb, $thumb_path, $key, $iv);
     }
 
     // wrap up

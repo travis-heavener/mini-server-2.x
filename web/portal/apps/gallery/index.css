@@ -363,3 +363,9 @@ body {
         font-size: calc(1 * var(--text-unit));
     }
 }
+
+/* form styling */
+
+#upload-form-content {
+    display: none;
+}

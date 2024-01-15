@@ -27,10 +27,10 @@
             <div id="album-picker"></div>
             <div id="album-content">
                 <div id="add-container" class="noselect">
-                    <div id="add-album-icon">
+                    <div id="add-album-icon" onclick="showForm('new-album')">
                         <h1>New Album</h1>
                     </div>
-                    <div id="upload-icon">
+                    <div id="upload-icon" onclick="showForm('upload')">
                         <h1>Upload</h1>
                     </div>
                     <div id="add-btn">
@@ -40,11 +40,13 @@
             </div>
         </div>
 
-        <!-- <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
-            <input type="file" name="user-media[]" multiple accept="<?php include("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
-            <input type="text" name="album-name" value="My First Name">
-            <input type="submit" value="Submit">
-        </form> -->
+        <div id="upload-form-content">
+            <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
+                <input type="file" name="user-media[]" multiple accept="<?php include("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
+                <input type="text" name="album-name" value="My First Name">
+                <input type="submit" value="Submit">
+            </form>
+        </div>
 
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 

@@ -312,13 +312,65 @@ function handleError(e) {
     const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
     const title = msg.split("\n")[0];
     const body = msg.split("\n")[1];
-
-    if (title === "auth_error") {
+    
+    if (title === "silent_error") {
+        return;
+    } else if (title === "auth_error") {
         window.location.reload(true);
     } else {
         promptUser(title, body, false);
     }
 };
+
+/********************* content upload stuff *********************/
+
+async function showForm(formType) {
+    if (formType === "new-album") {
+        // hide content upload form
+        $("#upload-form-content").css("display", "none");
+
+        let albumName;
+        try {
+            // get new album name
+            albumName = await textPrompt("New Album", "Enter an album name between 3 and 32 characters.", 3, 32);
+
+            // verify the name isn't in use
+            const isInUse = await $.ajax({
+                "url": "checkNameUsage.php",
+                "method": "POST",
+                "data": JSON.stringify({
+                    "albumName": albumName
+                })
+            });
+
+            // also check that the album isn't in the dom
+            const doElemsExist = [...$("div[data-album-name=\"" + albumName + "\"]")].length > 0;
+
+            if (isInUse === "true" || doElemsExist) {
+                handleError({"responseText": `Error: Album Name Taken\nThe requested album name \"${albumName}\" is already in use.`});
+                return;
+            }
+        } catch (e) {
+            handleError(e);
+            return;
+        }
+
+
+        // create a new album-icon and bind the edit function to it
+        $("#album-picker").prepend(`
+            <div class="album-icon noselect" data-album-name="${albumName}" onclick="focusAlbum($(this).attr('data-album-name'))">
+                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' alt='Album icon image.'>
+                <h1>${albumName}</h1>
+            </div>
+        `);
+
+        // focus that album
+        focusAlbum(albumName);
+    } else if (formType === "upload") {
+        // show the new album writer
+        $("#upload-form-content").css("display", "flex");
+    }
+}
 
 function uploadFile() {
     const form = $("form")[0];

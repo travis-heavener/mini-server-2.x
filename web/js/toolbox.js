@@ -69,4 +69,48 @@ const confirmPrompt = (title, text, confirmText="Yes", rejectText="No") => {
     });
 };
 
+const textPrompt = (title, text, minLength=0, maxLength=null) => {
+    // create modal
+    const wrapper = document.createElement("div");
+    $(wrapper).addClass("user-prompt");
+
+    $(wrapper).append(`
+        <div>
+            <h1>${title}</h1>
+            <p>${text}</p>
+            <form>
+                <input
+                    type="text" value="" placeholder="Album Name"
+                    pattern="([a-zA-Z0-9][a-zA-Z0-9\\._\\- ]*){${minLength},${maxLength}}$"
+                    minlength="${minLength}" ${maxLength === null ? "" : "maxlength='" + maxLength + "'"}
+                    required
+                >
+                <div class="button-row">
+                    <input type="submit" value="Done">
+                    <button class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    `);
+    $("body").append(wrapper);
+
+    return new Promise((resolve, reject) => {
+        $(wrapper).click(function(e) {
+            if (e.target === wrapper || $(e.target).is("button")) {
+                // invalid text is entered
+                $(wrapper).remove();
+                reject({"responseText": "Error: silent_error"});
+            }
+        });
+        $(wrapper).find("form").attr("action", "javascript:void 0;");
+        $(wrapper).find("form").on("submit", function(e) {
+            // we know the text is of valid length
+            const text = $(wrapper).find("input")[0].value;
+            $(wrapper).remove();
+            resolve(text.trim());
+            return false;
+        });
+    });
+};
+
 /*************** END USER PROMPTS ***************/

@@ -181,6 +181,7 @@ body {
 #album-content::-webkit-scrollbar {  display: none;  }
 
 #album-content > .content-container {
+    position: relative;
     width: var(--size);
     min-width: var(--size);
     height: var(--size);
@@ -209,22 +210,34 @@ body {
     filter: brightness(115%) grayscale(1);
 }
 
-.content-container > .video-overlay {
+.content-container > .play-overlay {
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    width: 100%;
-    height: 100%;
 
-    background-color: #1114;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: #1115;
+
+    pointer-events: none;
+    opacity: 1;
+    transition: 0.1s opacity;
 }
 
-.video-overlay > img {
-    width: 50%;
-    max-width: 50%;
-    height: 50%;
-    max-height: 50%;
+.content-container:hover > .play-overlay,
+.content-container:active > .play-overlay {
+    opacity: 0;
+}
+
+.play-overlay > img {
+    width: 28%;
+    max-width: 28%;
+    height: 28%;
+    max-height: 28%;
 }
 
 @media screen and (orientation: portrait) {

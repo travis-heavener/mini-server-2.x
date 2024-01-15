@@ -180,12 +180,17 @@ body {
 /* Hide scrollbar for Chrome, Safari and Opera */
 #album-content::-webkit-scrollbar {  display: none;  }
 
-#album-content > img,
-#album-content > video {
+#album-content > .content-container {
     width: var(--size);
     min-width: var(--size);
     height: var(--size);
     min-height: var(--size);
+}
+
+.content-container > img,
+.content-container > video {
+    width: 100%;
+    height: 100%;
 
     object-fit: cover;
     object-position: center;
@@ -196,12 +201,30 @@ body {
     transition: 0.25s filter;
 }
 
-#album-content > img:hover {
+.content-container > img:hover {
     filter: brightness(115%);
 }
 
-#album-content > img.default-icon:hover {
+.content-container > img.default-icon:hover {
     filter: brightness(115%) grayscale(1);
+}
+
+.content-container > .video-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    width: 100%;
+    height: 100%;
+
+    background-color: #1114;
+}
+
+.video-overlay > img {
+    width: 50%;
+    max-width: 50%;
+    height: 50%;
+    max-height: 50%;
 }
 
 @media screen and (orientation: portrait) {

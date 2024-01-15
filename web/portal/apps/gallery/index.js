@@ -128,57 +128,64 @@ async function loadContent({albumName, page}) {
     // display placeholder info & queue an ajax call for each
     for (let i = 0; i < ids.length; i++) {
         // create img placeholder
-        let elem = document.createElement("IMG");
+        let elem = document.createElement("IMG"); // hey future self (idiot), don't make this a const (please), when replacing img w/ video this needs to be reassigned
         const id = `album-content-${i}`;
         elem.id = id;
         $(elem).addClass("default-icon");
         $(elem).attr("src", "/assets/app-icons/gallery.png");
         $(elem).attr("alt", "Album content placeholder.");
-        $("#album-content").append(elem);
 
-        // queue ajax call
-        let url, headers;
-        try {
-            const blobInfo = await resolveSrcToBlob(ids[i]);
-            url = blobInfo.url;
-            headers = blobInfo.headers;
-        } catch (err) {
-            handleError(err);
-            return;
-        }
+        const wrapper = document.createElement("DIV");
+        $(wrapper).addClass("content-container");
+        $(wrapper).append(elem);
+        
+        $("#album-content").append(wrapper);
 
-        const mime = headers.mime;
+        // queue ajax call (rather than awaiting, this allows all image placeholders AND thus content to load at once instead of one-by-one)
+        resolveSrcToBlob(ids[i])
+            .then(({url, headers}) => {
+                const mime = headers.mime;
 
-        if (mime.startsWith("image")) {
-            // we have an image, so just replace this one
-            elem.src = url;
-            if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
-            $(elem).attr("alt", "Album image.");
-        } else if (mime.startsWith("video")) {
-            // we have a video, so replace this image with a video
-            elem.outerHTML = `<video id="${id}" src="${url}" alt="Album video.">`;
-            elem = $("#" + id); // update reference after changing outerHTML
+                if (mime.startsWith("image")) {
+                    // we have an image, so just replace this one
+                    elem.src = url;
+                    if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
+                    $(elem).attr("alt", "Album image.");
+                } else if (mime.startsWith("video")) {
+                    // we have a video, so replace this image with a video
+                    elem.outerHTML = `<video id="${id}" src="${url}" alt="Album video.">`;
+                    elem = $("#" + id); // update reference after changing outerHTML
 
-            // play on hover
-            $(elem).on("mouseenter", function() {
-                this.muted = true;
-                this.play();
-                
-                $(this).on("mouseleave", function() {
-                    this.pause();
-                    this.currentTime = 0;
-                });
+                    // play on hover
+                    $(elem).on("mouseenter", function() {
+                        this.muted = true;
+                        this.play();
+                        $(this).on("mouseleave", function() {
+                            this.pause();
+                            this.currentTime = 0;
+                        });
+                    });
+
+                    // append an additional play icon overlay
+                    $(wrapper).append(`
+                        <div class="play-overlay">
+                            <img src="/assets/apps/gallery/play-icon.png">
+                        </div>
+                    `);
+                } else {
+                    console.warn("Unexpected MIME type: " + mime);
+                }
+
+                // append extra metadata
+                $(elem).attr("data-content-id", id);
+                $(elem).attr("data-fname", headers.name);
+            })
+            .catch((err) => {
+                handleError(err);
             });
-        } else {
-            console.warn("Unexpected MIME type: " + mime);
-        }
-
-        // append extra metadata
-        $(elem).attr("data-content-id", id);
-        $(elem).attr("data-fname", headers.name);
     }
 
-    // finally, update the page we are on
+    // update the page we are on
     ALBUM_CONTENT.currentPage = page;
     ALBUM_CONTENT.name = albumName;
 
@@ -209,6 +216,15 @@ async function loadContent({albumName, page}) {
     // top toolbar stays on top
 }
 
+function focusAlbum(albumName) {
+    if (albumName === ALBUM_CONTENT.name && ALBUM_CONTENT.currentPage === 1) return; // prevent reloading all content if we are still on the same page of the same album
+    // remove all the content on the DOM already and load up the new album from page 1
+    $("#album-content").html("");
+
+    // load the new content
+    loadContent({"albumName": albumName, "page": 1});
+}
+
 async function loadAlbums() {
     // dynamically load in thumbnails for each album picker icon
     return new Promise((resolve, reject) => {
@@ -222,23 +238,15 @@ async function loadAlbums() {
                 for (let entry of body) {
                     // parse each item
                     const albumName = entry["album_name"];
-                    
-                    if (entry.id === null) {
-                        // show default icon
-                        $("#album-picker").append(`
-                            <div class='album-icon noselect'>
-                                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' alt='Album icon image.'>
-                                <h1>${albumName}</h1>
-                            </div>
-                        `);
-                    } else {
+                    let previewImg = "<img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' alt='Album icon image.'>";
+
+                    if (entry.id !== null) {
                         const {url, headers} = await resolveSrcToBlob(entry.id);
-                        let previewImg = `<img src="/assets/app-icons/gallery.png" class='album-icon-img default-icon' alt='Album icon image.'>`;
                         if (!headers.isDefaultIcon)
                             previewImg = `<img src="${url}" class='album-icon-img' alt='Album icon image.'>`;
 
                         $("#album-picker").append(`
-                            <div class='album-icon noselect'>
+                            <div class='album-icon noselect' onclick='focusAlbum("${albumName}")'>
                                 ${previewImg}
                                 <h1>${albumName}</h1>
                             </div>

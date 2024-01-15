@@ -25,14 +25,26 @@
 
         <div id="main-content">
             <div id="album-picker"></div>
-            <div id="album-content"></div>
+            <div id="album-content">
+                <div id="add-container" class="noselect">
+                    <div id="add-album-icon">
+                        <h1>New Album</h1>
+                    </div>
+                    <div id="upload-icon">
+                        <h1>Upload</h1>
+                    </div>
+                    <div id="add-btn">
+                        <img src="/assets/apps/gallery/up-caret.png">
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
-            <input type="file" name="user-media[]" multiple accept="image/png, image/jpeg, image/heic, video/mp4, video/mkv, video/quicktime, video/x-msvideo">
+        <!-- <form action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
+            <input type="file" name="user-media[]" multiple accept="<?php include("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
             <input type="text" name="album-name" value="My First Name">
             <input type="submit" value="Submit">
-        </form>
+        </form> -->
 
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 

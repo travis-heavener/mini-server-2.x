@@ -15,7 +15,6 @@
 
     // 3. verify file type is accepted
     $files_data = [];
-    $EXTS = ["image/png", "image/jpeg", "image/heic", "video/mp4", "video/mkv", "video/quicktime", "video/x-msvideo"];
     if ($_FILES["user-media"]["name"][0] === "") {
         header('HTTP/1.0 403 Forbidden');
         exit("Error: Invalid File Count\nA minimum of one file must be uploaded.");
@@ -32,7 +31,7 @@
         $exif = @exif_read_data($tmp_name); // suppress warning that cannot really be avoided (https://stackoverflow.com/a/55353637)
         $orientation = ($exif && !empty($exif['Orientation'])) ? $exif["Orientation"] : 1;
 
-        if (!in_array($MIME, $EXTS)) {
+        if (!in_array($MIME, SUPPORTED_MIMES)) {
             header('HTTP/1.0 403 Forbidden');
             exit("Error: Invalid File Type\nThe content MIME type \"$MIME\" is not allowed.");
         }

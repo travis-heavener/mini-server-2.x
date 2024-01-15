@@ -14,6 +14,12 @@ $(document).ready(async () => {
     const albums = await loadAlbums();
     if (albums.length)
         focusAlbum(albums[0]["album_name"]);
+
+    // bind menu picker events
+    $("#add-btn").click(function(e) {
+        if (e.target === this)
+            $(this.parentElement).toggleClass("selected");
+    });
 });
 
 const __TEXT_SCROLL_INTERVALS = [];
@@ -137,7 +143,7 @@ async function loadContent({albumName, page}) {
         $(elem).attr("alt", "Album content placeholder.");
 
         const wrapper = document.createElement("DIV");
-        $(wrapper).addClass("content-container");
+        $(wrapper).addClass("content-container noselect");
         $(wrapper).append(elem);
         
         $("#album-content").append(wrapper);
@@ -218,8 +224,8 @@ async function loadContent({albumName, page}) {
 
 function focusAlbum(albumName) {
     if (albumName === ALBUM_CONTENT.name && ALBUM_CONTENT.currentPage === 1) return; // prevent reloading all content if we are still on the same page of the same album
-    // remove all the content on the DOM already and load up the new album from page 1
-    $("#album-content").html("");
+    // remove all the content-container elements on the DOM already and load up the new album from page 1
+    $("#album-content > .content-container").remove();
 
     // highlight the album picker icon
     $(".album-icon.selected-album-icon").removeClass("selected-album-icon");

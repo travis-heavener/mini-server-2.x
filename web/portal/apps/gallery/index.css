@@ -160,6 +160,8 @@ body {
 #album-content {
     --size: 128px;
     --padding: 10px;
+
+    position: relative;
     
     display: flex;
     flex-wrap: wrap;
@@ -250,5 +252,114 @@ body {
 
         width: 100%;
         height: calc(100% - 1 * var(--picker-width));
+    }
+}
+
+/* add button and form functionality */
+
+#add-container {
+    --btn-size: calc(0.63 * var(--size));
+
+    position: fixed;
+    right: calc(0.15 * var(--size));
+    bottom: calc(0.15 * var(--size) + var(--footer-height));
+
+    z-index: 99999;
+}
+
+#add-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    position: relative;
+    width: var(--btn-size);
+    height: var(--btn-size);
+
+    background-color: #68ec9b;
+    border: calc(0.04 * var(--size)) solid #111;
+    border-radius: 50%;
+    box-shadow:  2px  2px 4.5px #1116 inset,
+                -2px -2px 4.5px #1116 inset;
+    outline: none;
+
+    cursor: pointer;
+    transition: 0.25s background-color;
+}
+
+#add-btn:hover {  background-color: #9bf5b9;  }
+#add-btn:active {  background-color: #19c953;  }
+
+#add-btn > img {
+    width: 65%;
+    height: auto;
+    aspect-ratio: 2; /* up-caret.png is 128x64 */
+    transform: rotate(180deg) translateY(-7%);
+    transition: 0.25s transform;
+
+    pointer-events: none;
+}
+
+#add-container.selected > #add-btn > img {
+    transform: rotate(0deg) translateY(-7%);
+}
+
+/* reveal content */
+#add-container.selected > div:not(#add-btn) {
+    display: block;
+    position: absolute;
+    top: var(--top-offset);
+    right: 0;
+    
+    animation: 0.3s addIconAppear ease-out 1;
+}
+
+#add-container:not(.selected) > div:not(#add-btn) {  display: none;  }
+
+#add-container > #add-album-icon {  --top-offset: calc(-2.5 * var(--text-unit));  }
+#add-container > #upload-icon {  --top-offset: calc(-4.875 * var(--text-unit));  }
+
+#add-container h1 {
+    padding: calc(0.15 * var(--text-unit)) calc(0.6 * var(--text-unit));
+    background-color: #f8f8f888;
+    border-radius: 6px;
+
+    color: #111;
+    font-family: "Poppins", sans-serif;
+    font-size: calc(1.1 * var(--text-unit));
+    font-weight: 600;
+    text-align: right;
+
+    display: -webkit-box;
+    line-clamp: 1;
+    -webkit-line-clamp: 1;
+    text-wrap: nowrap;
+
+    cursor: pointer;
+    transition: 0.25s transform, 0.25s background-color;
+}
+
+#add-container h1:hover {
+    background-color: #f8f8f8dd;
+    transform-origin: 100% 50%;
+    transform: scale(1.03);
+}
+
+@keyframes addIconAppear {
+    from {  transform: translateY(calc(-1 * var(--top-offset)));  }
+    to {  transform: translateY(0);  }
+}
+
+@media screen and (orientation: portrait) {
+    #add-container {
+        --btn-size: calc(0.75 * var(--size));
+        bottom: calc(0.15 * var(--size) + var(--footer-height) + var(--picker-width));
+    }
+
+    #add-container > #add-album-icon {  --top-offset: calc(-2.33 * var(--text-unit));  }
+    #add-container > #upload-icon {  --top-offset: calc(-4.67 * var(--text-unit));  }
+
+    #add-container h1 {
+        font-size: calc(1 * var(--text-unit));
     }
 }

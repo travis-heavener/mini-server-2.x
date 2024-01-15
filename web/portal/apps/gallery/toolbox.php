@@ -6,7 +6,17 @@
     define("IVLEN", openssl_cipher_iv_length(CIPHER));
     define("CHUNK_COUNT", 10000); // each chunk is 16 bytes, so memory usage is CHUNK_COUNT * 16 bytes
     define("BLOCK_SIZE", 16); // each chunk is 16 bytes, so memory usage is CHUNK_COUNT * 16 bytes
-    
+    define("SUPPORTED_MIMES", [
+        // source: https://mimetype.io/all-types
+        "image/png", // .png
+        "image/jpeg", // .jpe, .jpeg, .jpg, .pjpg, .jfif, .jfif-tbnl, .jif
+        "image/heic", // .heif, .heic
+        "video/mp4", // .mp4, .mp4v, .mpg4
+        "video/x-matroska", // .mkv
+        "video/quicktime", // .mov, .qt
+        "video/x-msvideo" // .avi
+    ]);
+
     // modified from SO, handy function for resizing images (reduces client memory footprint dramatically) (https://stackoverflow.com/a/45479025)
     function resize_image($data, $width, $height, $raw_width, $raw_height) {
         if (gettype($data) === "object" && get_class($data) == "GdImage")

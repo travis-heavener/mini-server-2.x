@@ -59,6 +59,10 @@ body {
 .album-icon:hover {  background-color: #f8f8f866;  }
 .album-icon:active {  background-color: #f8f8f833;  }
 
+.album-icon.selected-album-icon {
+    background-color: #f8f8f866;
+}
+
 .album-icon:hover > h1,
 .album-icon:active > h1 {
     overflow-x: visible;

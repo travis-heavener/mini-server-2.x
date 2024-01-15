@@ -12,7 +12,7 @@ $(document).ready(async () => {
 
     // load initial content
     const albums = await loadAlbums();
-    loadContent({"albumName": albums[0]["album_name"], "page": 1});
+    focusAlbum(albums[0]["album_name"]);
 });
 
 const __TEXT_SCROLL_INTERVALS = [];
@@ -221,6 +221,10 @@ function focusAlbum(albumName) {
     // remove all the content on the DOM already and load up the new album from page 1
     $("#album-content").html("");
 
+    // highlight the album picker icon
+    $(".album-icon.selected-album-icon").removeClass("selected-album-icon");
+    $(`.album-icon[data-album-name="${albumName}"]`).addClass("selected-album-icon");
+
     // load the new content
     loadContent({"albumName": albumName, "page": 1});
 }
@@ -246,7 +250,7 @@ async function loadAlbums() {
                             previewImg = `<img src="${url}" class='album-icon-img' alt='Album icon image.'>`;
 
                         $("#album-picker").append(`
-                            <div class='album-icon noselect' onclick='focusAlbum("${albumName}")'>
+                            <div class='album-icon noselect' data-album-name="${albumName}" onclick="focusAlbum($(this).attr('data-album-name'))">
                                 ${previewImg}
                                 <h1>${albumName}</h1>
                             </div>

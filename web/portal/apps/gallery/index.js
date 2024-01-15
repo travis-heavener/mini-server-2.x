@@ -12,7 +12,8 @@ $(document).ready(async () => {
 
     // load initial content
     const albums = await loadAlbums();
-    focusAlbum(albums[0]["album_name"]);
+    if (albums.length)
+        focusAlbum(albums[0]["album_name"]);
 });
 
 const __TEXT_SCROLL_INTERVALS = [];
@@ -142,9 +143,9 @@ async function loadContent({albumName, page}) {
         $("#album-content").append(wrapper);
 
         // queue ajax call (rather than awaiting, this allows all image placeholders AND thus content to load at once instead of one-by-one)
-        resolveSrcToBlob(ids[i])
+        resolveSrcToBlob(ids[i], preloadInfo[i].mime.startsWith("image"))
             .then(({url, headers}) => {
-                const mime = headers.mime;
+                const mime = preloadInfo[i].mime;
 
                 if (mime.startsWith("image")) {
                     // we have an image, so just replace this one
@@ -159,6 +160,7 @@ async function loadContent({albumName, page}) {
                     // play on hover
                     $(elem).on("mouseenter", function() {
                         this.muted = true;
+                        this.loop = true;
                         this.play();
                         $(this).on("mouseleave", function() {
                             this.pause();
@@ -189,8 +191,6 @@ async function loadContent({albumName, page}) {
     ALBUM_CONTENT.currentPage = page;
     ALBUM_CONTENT.name = albumName;
 
-    // ajax call, get images (limit=ALBUM_CONTENT["amtPerPage"], start on page no. 'page')
-    // SELECT `id`, `name`, `mime`, `vector` FROM `$table` WHERE `album_name`=? ORDER BY `created` DESC LIMIT $pageCount OFFSET $currentPageNo*$pageCount;
     // allow the results per page to be toggled via dropdown (ie 25,50,75,100) alongside page pickers
     // default 50, but when changing results per page revert to page 1
     // when uploading files, reload the content on that page of the album, NOT the actual page
@@ -233,7 +233,7 @@ async function loadAlbums() {
     // dynamically load in thumbnails for each album picker icon
     return new Promise((resolve, reject) => {
         $.ajax({
-            "url": "resolveAlbums.php",
+            "url": "preloadAlbums.php",
             "method": "GET",
             "success": async (res) => {
                 // add each resulting object's metadata to the DOM
@@ -266,7 +266,7 @@ async function loadAlbums() {
     });
 }
 
-function resolveSrcToBlob(id) {
+function resolveSrcToBlob(id, isThumb=true) {
     // queue ajax call
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -274,7 +274,7 @@ function resolveSrcToBlob(id) {
             "method": "GET",
             "headers": {
                 "MS2_id": id,
-                "MS2_isThumb": true
+                "MS2_isThumb": isThumb
             },
             "xhrFields": {
                 responseType: "blob" // I've been needing this for literal HOURS
@@ -292,7 +292,7 @@ function resolveSrcToBlob(id) {
                 };
                 
                 // generate url from blob
-                const url = URL.createObjectURL(res);
+                url = !headers.isDefaultIcon ? URL.createObjectURL(res) : null;
 
                 resolve({"url": url, "headers": headers});
             },
@@ -357,7 +357,7 @@ function uploadFile() {
             $(dummyVideo).on("loadedmetadata", function() {
                 dimensions[i] = [this.videoWidth, this.videoHeight];
                 URL.revokeObjectURL(url);
-                console.log(i, this.videoWidth, this.videoHeight);
+                // console.log(i, this.videoWidth, this.videoHeight);
 
                 checkCompletion();
             });
@@ -368,7 +368,7 @@ function uploadFile() {
             $(dummyImage).on("load", function() {
                 dimensions[i] = [this.width, this.height];
                 URL.revokeObjectURL(url);
-                console.log(i, this.width, this.height);
+                // console.log(i, this.width, this.height);
 
                 checkCompletion();
             });

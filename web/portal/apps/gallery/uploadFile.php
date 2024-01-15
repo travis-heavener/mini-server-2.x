@@ -23,12 +23,13 @@
 
     for ($i = 0; $i < count($_FILES["user-media"]["name"]); $i++) {
         $name = $_FILES["user-media"]["name"][$i];
-        $content = file_get_contents($_FILES["user-media"]["tmp_name"][$i]);
-        $MIME = mime_content_type($_FILES["user-media"]["tmp_name"][$i]);
+        $tmp_name = $_FILES["user-media"]["tmp_name"][$i];
+        $content = file_get_contents($tmp_name);
+        $MIME = mime_content_type($tmp_name);
         $ext = pathinfo($_FILES["user-media"]["name"][$i], PATHINFO_EXTENSION);
 
         // get EXIF rotation, if present
-        $exif = @exif_read_data($_FILES["user-media"]["tmp_name"][$i]); // suppress warning that cannot really be avoided (https://stackoverflow.com/a/55353637)
+        $exif = @exif_read_data($tmp_name); // suppress warning that cannot really be avoided (https://stackoverflow.com/a/55353637)
         $orientation = ($exif && !empty($exif['Orientation'])) ? $exif["Orientation"] : 1;
 
         if (!in_array($MIME, $EXTS)) {
@@ -36,7 +37,7 @@
             exit("Error: Invalid File Type\nThe content MIME type \"$MIME\" is not allowed.");
         }
 
-        array_push($files_data, [ "name" => $name, "content" => $content, "MIME" => $MIME, "created" => $timestamps[$i], "orientation" => $orientation ]);
+        array_push($files_data, [ "name" => $name, "content" => $content, "MIME" => $MIME, "created" => $timestamps[$i], "orientation" => $orientation, "tmp_name" => $tmp_name ]);
     }
 
     // 4. verify auth
@@ -82,6 +83,10 @@
             $compressed = $file["content"];
             $compressed_thumb = rotate_imagejpeg_str($file["content"], $file["orientation"]);
             $compressed_thumb = resize_image($compressed_thumb, THUMB_SIZE, THUMB_SIZE, $width, $height);
+        } else if(str_starts_with($file["MIME"], "video")) {
+            // if we have a video, create a thumbnail
+            $compressed = $file["content"];
+            $compressed_thumb = resize_video($file["tmp_name"], THUMB_SIZE, THUMB_SIZE);
         } else {
             $compressed = $file["content"];
             $compressed_thumb = false;
@@ -109,12 +114,15 @@
 
         $image_path = gen_media_path($envs["GALLERY_PATH"], $user_id, $id);
         $thumb_path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $id);
-        if (file_exists($image_path)) {
+        if (file_exists($image_path) || (file_exists($thumb_path) && $compressed_thumb !== false)) {
+            // remove from database
+            $statement = $mysqli->prepare("DELETE FROM `$table` WHERE `id`=?");
+            $statement->bind_param("i", $id);
+            $statement->execute();
+            $statement->close();
+            $mysqli->close();
             header('HTTP/1.0 403 Forbidden');
-            exit("Error: File Already Exists\nAn uploaded file already exists at this path: " . dechex($user_data["id"]) . "_" . dechex($id) . ".bin");
-        } else if (file_exists($thumb_path) && $compressed_thumb !== false) {
-            header('HTTP/1.0 403 Forbidden');
-            exit("Error: File Already Exists\nAn uploaded file already exists at this path: " . dechex($user_data["id"]) . "_" . dechex($id) . "T.bin");
+            exit("Error: File Already Exists\nThe generated name for file is already taken: \"" . $file["name"] . "\"<br>Contact a system administrator.");
         }
 
         // 10. encrypt via openssl_encrypt and put image & thumbnail in file system

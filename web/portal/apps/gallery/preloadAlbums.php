@@ -18,10 +18,10 @@
             $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
             $MIME = $row["mime"];
 
-            // get this image as the album cover since it's an image
-            if (!str_starts_with($MIME, "image")) {
+            // if the file doesn't exist, grab the next item
+            if (!file_exists($path)) {
                 // get the next image if the newest album entry is not an image (ie. video)
-                $statement = $mysqli->prepare("SELECT * FROM `gal__1` WHERE `mime` LIKE 'image%' AND `album_name`=? ORDER BY `uploaded` DESC LIMIT 1;");
+                $statement = $mysqli->prepare("SELECT * FROM `gal__1` WHERE `album_name`=? ORDER BY `uploaded` DESC, `id` DESC LIMIT 1;");
                 $statement->bind_param("s", $rows[$i]["album_name"]);
                 $statement->execute();
                 $temp_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -35,7 +35,7 @@
                         continue;
                     }
                 }
-            } else if (str_starts_with($MIME, "image") && file_exists($path)) {
+            } else {
                 continue; // we have a hit, so keep everything as-is
             }
 

@@ -12,12 +12,7 @@
     // 2. extract headers (best way to do this with custom headers I guess)
     $headers = getallheaders();
     $id = $headers["MS2_id"];
-    $is_thumb = $headers["MS2_isThumb"];
-    
-    if (!$is_thumb) {
-        $img_width = $headers["MS2_imgWidth"];
-        $img_height = $headers["MS2_imgHeight"];
-    }
+    $is_thumb = $headers["MS2_isThumb"] === "true";
 
     // 3. load up mysqli
     $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
@@ -70,26 +65,31 @@
         echo "";
     } else {
         // decrypt the file w/ toolbox helper function (really proud I wrote that)
-        $raw = content_decrypt(($is_thumb && str_starts_with($MIME, "image")) ? $thumb_path : $content_path, $key);
+        $raw = content_decrypt($is_thumb ? $thumb_path : $content_path, $key);
 
         // handle different source types for image/video
         if (str_starts_with($MIME, "image")) {
-            // declare hint for AJAX as to incoming BLOB content-type
-            header("Content-type: $MIME");
-
             if ($is_thumb) {
                 // grab thumbnail
                 // serve as binary BLOB instead of base64
+                header('Content-type: image/jpeg');
                 echo $raw;
             } else {
                 // resize each image (also strips metadata, IMPORTANT!!!!)
                 // serve as binary BLOB instead of base64
+                header("Content-type: $MIME");
                 echo resize_image($raw, $img_width, $img_height, $row["width"], $row["height"], $row["orientation"]+1);
             }
         } else {
             // declare content-type as a video so the raw binary gets converted properly into a BLOB by the XHR in AJAX
             // 9:45 PM, 1/14/2024, I FINALLY got this to work (been probably 8 days now)
-            header('Content-type: video/mp4');
+            if ($is_thumb) {
+                // grab thumbnail as BLOB
+                header('Content-type: image/jpeg');
+            } else {
+                // serve as binary BLOB video instead of base64
+                header('Content-type: video/mp4');
+            }
             echo $raw;
         }
     }

@@ -46,6 +46,37 @@
         return $contents;
     }
 
+    // thanks https://www.php.net/manual/en/function.tmpfile.php#120062
+    // I want to sleep.
+    // - Travis Heavener @ 1:10 AM, 1/15/2024
+    function temporaryFile($name, $content) {
+        $file = DIRECTORY_SEPARATOR .
+                trim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) .
+                DIRECTORY_SEPARATOR .
+                ltrim($name, DIRECTORY_SEPARATOR);
+
+        file_put_contents($file, $content);
+
+        register_shutdown_function(function() use($file) {
+            unlink($file);
+        });
+
+        return $file;
+    }
+
+    function resize_video($path, $width, $height) {
+        // create a temp file
+        $tmp_path = pathinfo($path)["filename"] . ".jpg";
+
+        // crop the video down
+        exec("ffmpeg -ss 00:00:01.00 -i \"$path\" -vf crop='min(in_w,in_h)':'min(in_w,in_h)' -vf scale=$width:$height -vframes 1 \"$tmp_path\"");
+
+        // return the content from the file
+        $contents = file_get_contents($tmp_path);
+        unlink($tmp_path);
+        return $contents;
+    }
+
     function rotate_imagejpeg_str($content, $orientation, $quality=85) {
         $rotated = imagecreatefromstring($content);
 

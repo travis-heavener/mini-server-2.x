@@ -130,6 +130,7 @@ body {
         height: var(--picker-width);
 
         overflow-y: hidden;
+        overflow-x: auto;
     }
 
     .album-icon {

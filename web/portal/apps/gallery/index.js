@@ -201,7 +201,10 @@ async function loadContent({albumName, page}) {
             .then(({url, headers}) => {
                 const mime = preloadInfo[i].mime;
 
-                if (mime.startsWith("image")) {
+                if (url === null) {
+                    // load default icon
+                    elem.src = "/assets/app-icons/gallery.png";
+                } else if (mime.startsWith("image")) {
                     // we have an image, so just replace this one
                     elem.src = url;
                     if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");

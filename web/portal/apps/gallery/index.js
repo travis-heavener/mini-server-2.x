@@ -22,13 +22,14 @@ $(document).ready(async () => {
     });
 
     // make file upload areas drag and droppable
-    $("input[type=file]").on("dragenter dragover", e => e.preventDefault());
-    $("input[type=file]").on("drop", function(e) {
+    $("input[type=file], #form-file-drop").on("dragenter dragover", e => e.preventDefault());
+    $("input[type=file], #form-file-drop").on("drop", function(e) {
         e.preventDefault();
 
         // append existing files
+        const form = $(this).is("form") ? this : $(this).find("input")[0];
         const transfer = new DataTransfer();
-        for (let file of this.files)
+        for (let file of form.files)
             transfer.items.add(file);
 
         // take file and append to files list
@@ -36,7 +37,36 @@ $(document).ready(async () => {
             transfer.items.add(file);
 
         // reset the files list
-        this.files = transfer.files;
+        form.files = transfer.files;
+
+        // update display
+        const display = (form.files ? form.files.length : 0) + " files selected.";
+        $(form.parentElement).find("h2").html(display);
+
+        // check for form submit disable
+        $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);
+    });
+
+    $("#form-file-drop").click(function(e) {
+        $(this).find("input")[0].click();
+    });
+
+    $("input[type=file]").on("change", function(e) {
+        e.preventDefault();
+
+        // update display
+        const display = (this.files ? this.files.length : 0) + " files selected.";
+        $(this.parentElement).find("h2").html(display);
+
+        // check for form submit disable
+        $("#upload-form-content").find("input[type=submit]").attr("disabled", (this.files ? this.files.length : 0) === 0);
+    });
+
+    $("#upload-form-content, #form-button-row > button").click(function(e) {
+        if (e.target === this) {
+            $("#upload-form-content").css("display", "none");
+            e.preventDefault(); // prevent resubmitting form
+        }
     });
 });
 
@@ -240,8 +270,8 @@ async function loadContent({albumName, page}) {
     // top toolbar stays on top
 }
 
-function focusAlbum(albumName) {
-    if (albumName === ALBUM_CONTENT.name && ALBUM_CONTENT.currentPage === 1) return; // prevent reloading all content if we are still on the same page of the same album
+function focusAlbum(albumName, forceLoad=false) {
+    if (albumName === ALBUM_CONTENT.name && ALBUM_CONTENT.currentPage === 1 && !forceLoad) return; // prevent reloading all content if we are still on the same page of the same album
     // remove all the content-container elements on the DOM already and load up the new album from page 1
     $("#album-content > .content-container").remove();
 
@@ -387,6 +417,14 @@ async function showForm(formType) {
     } else if (formType === "upload") {
         // show the new album writer
         $("#upload-form-content").css("display", "flex");
+
+        // update display
+        const form = $("#upload-form-content").find("form")[0];
+        const display = (form.files ? form.files.length : 0) + " files selected.";
+        $(form.parentElement).find("h2").html(display);
+
+        // check for form submit disable
+        $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);
     }
 }
 
@@ -415,15 +453,19 @@ function uploadFile() {
             "data": data,
             "contentType": false,
             "processData": false,
-            "success": function(res) { // success, show editor
-                console.log("success", res);
+            "success": function(res) { // success, prompt user with success message
+                promptUser("Form Submission", "Files uploaded successfully.", false);
+                $("#upload-form-content").css("display", "none");
+
+                // focus the first page of the album
+                focusAlbum(ALBUM_CONTENT.name, true);
             },
-            "error": function(e) { // error, remove from url and reload
-                console.log("failure", e);
+            "error": function(e) { // error, alert user
                 const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
                 const title = msg.split("\n")[0];
                 const body = msg.split("\n")[1];
                 promptUser(title, body, false);
+                $("#upload-form-content").css("display", "none");
             }
         });
     };

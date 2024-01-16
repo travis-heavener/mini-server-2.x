@@ -380,6 +380,7 @@ body {
     background-color: #1117;
 
     z-index: 99999999; /* display over add-container*/
+    cursor: pointer;
 }
 
 #upload-form {
@@ -396,12 +397,117 @@ body {
     border: 4px solid #111;
     border-radius: 24px;
     background-color: #f8f8f8;
+
+    cursor: default;
 }
 
 #upload-form > h1 {
     color: #111;
-    font-size: calc(2.5 * var(--text-unit));
+    font-size: calc(2.75 * var(--text-unit));
     font-family: "Poppins", sans-serif;
     font-weight: 700;
     text-decoration: underline;
+}
+
+#upload-form > #form-file-drop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 75%;
+    height: 60%;
+
+    border: 3px dashed #6495ed;
+    border-radius: 16px;
+
+    background-image: url("/assets/app-icons/gallery.png");
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: max(15%, calc(3 * var(--text-unit)));
+
+    cursor: pointer;
+    transition: 0.25s background-color, 0.25s filter;
+}
+
+#upload-form > #form-file-drop:hover {
+    background-color: #6495ed44;
+    filter: brightness(90%);
+}
+
+#form-file-drop > input {
+    display: none;
+}
+
+#form-file-drop > h2 {
+    margin-top: 20%;
+
+    color: #111;
+    font-size: calc(1.25 * var(--text-unit));
+    font-family: "Ubuntu", sans-serif;
+    font-weight: 600;
+}
+
+#form-button-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: calc(0.75 * var(--text-unit));
+}
+
+#upload-form input[type=submit],
+#upload-form button {
+    padding: 0.375em 0.55em;
+
+    background-color: #eee;
+    border: 2px solid #111;
+    border-radius: 10px;
+    box-shadow: 2px 2px 3px #111;
+    outline: none;
+
+    font-size: calc(1.25 * var(--text-unit));
+    font-family: "Ubuntu", sans-serif;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.25s box-shadow, 0.25s filter, 0.25s transform, 0.1s color, 0.1s background-color;
+}
+
+#upload-form input[type=submit] {
+    background-color: #6495ed;
+    color: #f8f8f8;
+}
+
+#upload-form input[type=submit]:disabled {
+    background-color: #ccc;
+    box-shadow: none;
+    color: #111;
+}
+
+#upload-form input[type=submit]:hover:not(:disabled),
+#upload-form button:hover {
+    filter: brightness(115%);
+}
+
+#upload-form input[type=submit]:active:not(:disabled),
+#upload-form button:active {
+    filter: brightness(95%);
+    box-shadow: none;
+    transform: translate(2px, 2px);
+}
+
+@media screen and (orientation: portrait) {
+    #upload-form > h1 {
+        font-size: calc(2.125 * var(--text-unit));
+    }
+
+    #form-file-drop > h2 {
+        margin-top: 40%;
+        font-size: var(--text-unit);
+    }
+
+    #upload-form input[type=submit],
+    #upload-form button {
+        font-size: var(--text-unit);
+    }
 }

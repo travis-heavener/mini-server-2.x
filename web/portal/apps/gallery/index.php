@@ -43,8 +43,14 @@
         <div id="upload-form-content">
             <form id="upload-form" action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
                 <h1>Upload Files</h1>
-                <input type="file" name="user-media[]" multiple accept="<?php include("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
-                <input type="submit" value="Submit">
+                <div id="form-file-drop">
+                    <h2>0 files selected.</h2>
+                    <input type="file" name="user-media[]" multiple accept="<?php include("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
+                </div>
+                <div id="form-button-row">
+                    <input type="submit" value="Submit">
+                    <button>Cancel</button>
+                </div>
             </form>
         </div>
 

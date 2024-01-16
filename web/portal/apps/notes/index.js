@@ -70,8 +70,14 @@ function redirectToNote(noteId) {
 }
 
 function redirectToMenu() {
+    const params = window.location.search;
+
+    // initally remove params
     window.history.replaceState({}, document.title, window.location.href.replace(window.location.search, ""));
     window.location.reload(true);
+    
+    // if we havent't reloaded (ie. user cancel), replace the params
+    window.history.replaceState({}, document.title, window.location.href + params);
 }
 
 let __hasNoteChanged = false;

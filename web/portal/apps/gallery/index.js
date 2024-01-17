@@ -315,7 +315,7 @@ async function loadContent({albumName, page}) {
                             
                             if ($(elem).is("video")) {
                                 previewContainer = `
-                                    <video class="noselect" src="${largeSrc}" data-content-id="${ids[i]}" data-fname="${headers.name}">
+                                    <video class="noselect" controls src="${largeSrc}" data-content-id="${ids[i]}" data-fname="${headers.name}">
                                 `;
                             } else {
                                 previewContainer = `
@@ -387,6 +387,7 @@ async function loadContent({albumName, page}) {
     // when uploading files, reload the content on that page of the album, NOT the actual page
 
     // when adding an album, don't do anything on the backend until we upload files
+    // allow small pngs to be saved as pngs instead of jpegs
 
     // on top, allow a select button for multi select or allow shift clicking
     // have a delete icon as well, confirm when pressed to delete any things selected (gray out when nothing is selected)

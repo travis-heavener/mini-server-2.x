@@ -333,6 +333,10 @@ body {
                 -2px -2px 16px #1118;
 }
 
+.large-content-container > video {
+    cursor: pointer;
+}
+
 @media screen and (orientation: landscape) {
     .large-content-container > img,
     .large-content-container > video {

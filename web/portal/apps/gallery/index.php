@@ -26,6 +26,9 @@
         <div id="main-content">
             <div id="album-picker"></div>
             <div id="album-content">
+                <div id="content-manager">
+                    <div id="selection-checkbox" title="Select content" data-select-content="false" onclick="toggleSelectMode.bind(this)()"></div>
+                </div>
                 <div id="add-container" class="noselect">
                     <div id="add-album-icon" onclick="showForm('new-album')">
                         <h1>New Album</h1>

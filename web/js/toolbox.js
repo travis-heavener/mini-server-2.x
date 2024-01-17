@@ -114,3 +114,18 @@ const textPrompt = (title, text, minLength=0, maxLength=null) => {
 };
 
 /*************** END USER PROMPTS ***************/
+/*************** START MISC ***************/
+
+// wrote this myself, I should really be more active on StackOverflow since this is really helpful :)
+function formatByteSize(bytes=0) {
+    let raw = parseInt(bytes);
+    const suffixes = ["B", "KiB", "MiB", "GiB", "TiB"];
+
+    let i = 0;
+    while (raw >= 2 ** (10 * (i+1)) && i < suffixes.length)
+        i++;
+
+    return (raw / (2 ** (10*i))).toFixed(1) + " " + suffixes[i];
+}
+
+/*************** END MISC ***************/

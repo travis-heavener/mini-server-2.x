@@ -60,6 +60,12 @@
     header("MS2_height: " . $row["height"]);
     header("MS2_orientation: " . $row["orientation"]+1);
 
+    if (file_exists($is_thumb ? $thumb_path : $content_path))
+        header("MS2_filesize: " . filesize($is_thumb ? $thumb_path : $content_path));
+    else
+        header("MS2_filesize: null");
+    header("MS2_DUMMY: " . $is_thumb ? $thumb_path : $content_path);
+
     if (!file_exists($content_path) || (!str_starts_with($MIME, "image") && !str_starts_with($MIME, "video"))) {
         header("MS2_isDefaultIcon: true");
         echo "";
@@ -78,7 +84,8 @@
                 // resize each image (also strips metadata, IMPORTANT!!!!)
                 // serve as binary BLOB instead of base64
                 header("Content-type: $MIME");
-                echo resize_image($raw, $img_width, $img_height, $row["width"], $row["height"], $row["orientation"]+1);
+                // echo resize_image($raw, $row["width"], $row["height"], $row["width"], $row["height"], $row["orientation"]+1);
+                echo $raw;
             }
         } else {
             // declare content-type as a video so the raw binary gets converted properly into a BLOB by the XHR in AJAX

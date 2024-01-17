@@ -161,6 +161,7 @@ body {
 #album-content {
     --size: 128px;
     --padding: 10px;
+    --content-manager-height: calc(2.5 * var(--text-unit));
 
     position: relative;
     
@@ -193,6 +194,9 @@ body {
     min-width: var(--size);
     height: var(--size);
     min-height: var(--size);
+
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .content-container > img,
@@ -202,8 +206,6 @@ body {
 
     object-fit: cover;
     object-position: center;
-    
-    border-radius: 4px;
 
     cursor: pointer;
     transition: 0.25s filter;
@@ -247,6 +249,12 @@ body {
     max-height: 28%;
 }
 
+.content-container.content-selected {
+    /* add outline around selected elements */
+    border: calc(0.33 * var(--padding)) solid #f8f833;
+    box-shadow: 0 0 var(--padding) #f8f81188;
+}
+
 @media screen and (orientation: portrait) {
     #album-content {
         --size: 80px;
@@ -254,6 +262,136 @@ body {
         width: 100%;
         height: calc(100% - 1 * var(--picker-width));
     }
+}
+
+/* large content container view */
+
+.large-content-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    background-color: #1119;
+
+    z-index: 9999999999;
+    cursor: pointer;
+}
+
+.large-content-container > * {
+    cursor: default;
+}
+
+.large-content-container > h1 {
+    position: absolute;
+    padding-top: calc(0.5 * var(--text-unit));
+    top: 0;
+
+    font-size: calc(1.6 * var(--text-unit));
+    font-weight: 700;
+}
+
+.large-content-container > h2 {
+    position: absolute;
+    padding-bottom: calc(0.5 * var(--text-unit));
+    top: calc(2.9 * var(--text-unit));
+
+    font-size: calc(1 * var(--text-unit));
+    font-weight: 500;
+}
+
+.large-content-container > h1,
+.large-content-container > h2 {
+    padding-left: calc(0.75 * var(--text-unit));
+    padding-right: calc(0.75 * var(--text-unit));
+
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    overflow: hidden;
+
+    left: 0;
+    right: 0;
+
+    background-color: #111c;
+    
+    color: #f8f8f8;
+    font-family: "Poppins", sans-serif;
+    text-align: center;
+    text-wrap: nowrap;
+}
+
+.large-content-container > img,
+.large-content-container > video {
+    object-fit: contain;
+    box-shadow:  2px  2px 16px #1118,
+                -2px -2px 16px #1118;
+}
+
+@media screen and (orientation: landscape) {
+    .large-content-container > img,
+    .large-content-container > video {
+        max-width: 70%;
+        max-height: 70%;
+    }
+}
+
+@media screen and (orientation: portrait) {
+    .large-content-container > img,
+    .large-content-container > video {
+        max-width: 90%;
+        max-height: 70%;
+    }
+}
+
+/* content manager */
+
+#content-manager {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    padding: 0 calc(0.25 * var(--content-manager-height));
+
+    margin-top: calc(-1 * var(--padding));
+    margin-bottom: var(--padding);
+    width: 100%;
+    height: var(--content-manager-height);
+
+    background-color: #f8f8f8;
+    border: 3px solid #111;
+    border-top: none;
+    border-bottom-left-radius:  8px;
+    border-bottom-right-radius: 8px;
+    box-shadow:  1px -1px 8px #1117 inset,
+                -1px -1px 8px #1117 inset;
+}
+
+#content-manager > #selection-checkbox {
+    height: 55%;
+    aspect-ratio: 1;
+
+    background-color: #eee;
+    border: 2px solid #111;
+    border-radius: 6px;
+    outline: none;
+    
+    /* remove border (thanks https://stackoverflow.com/a/42832468) */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    cursor: pointer;
+}
+
+#selection-checkbox[data-select-content="true"] {
+    background-color: #6495ed !important;
 }
 
 /* add button and form functionality */

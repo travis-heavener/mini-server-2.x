@@ -449,6 +449,8 @@ body {
 
 /* reveal content */
 #add-container.selected > div:not(#add-btn) {
+    --icon-height: calc(2 * var(--text-unit));
+
     display: block;
     position: absolute;
     top: var(--top-offset);
@@ -459,13 +461,17 @@ body {
 
 #add-container:not(.selected) > div:not(#add-btn) {  display: none;  }
 
-#add-container > #add-album-icon {  --top-offset: calc(-2.5 * var(--text-unit));  }
-#add-container > #upload-icon {  --top-offset: calc(-4.875 * var(--text-unit));  }
+#add-container > div:not(#add-btn):nth-child(1) {  --top-offset: calc(-2.50 * var(--text-unit));  }
+#add-container > div:not(#add-btn):nth-child(2) {  --top-offset: calc(-2.75 * var(--text-unit) - 1 * var(--icon-height));  }
+#add-container > div:not(#add-btn):nth-child(3) {  --top-offset: calc(-3.00 * var(--text-unit) - 2 * var(--icon-height));  }
+#add-container > div:not(#add-btn):nth-child(4) {  --top-offset: calc(-3.25 * var(--text-unit) - 3 * var(--icon-height));  }
 
 #add-container h1 {
     padding: calc(0.15 * var(--text-unit)) calc(0.6 * var(--text-unit));
     background-color: #f8f8f888;
     border-radius: 6px;
+
+    height: var(--icon-height);
 
     color: #111;
     font-family: "Poppins", sans-serif;

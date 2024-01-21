@@ -30,11 +30,21 @@
                     <div id="selection-checkbox" title="Select content" data-select-content="false" onclick="toggleSelectMode.bind(this)()"></div>
                 </div>
                 <div id="add-container" class="noselect">
+                    <div id="delete-album-icon" onclick="deleteAlbum()">
+                        <h1>Delete Album</h1>
+                        <!-- add icon to the right of each caption (make it less verbose) -->
+                    </div>
+                    <div id="rename-album-icon" onclick="renameAlbum()">
+                        <h1>Rename Album</h1>
+                        <!-- add icon to the right of each caption (make it less verbose) -->
+                    </div>
                     <div id="add-album-icon" onclick="showForm('new-album')">
                         <h1>New Album</h1>
+                        <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>
                     <div id="upload-icon" onclick="showForm('upload')">
                         <h1>Upload</h1>
+                        <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>
                     <div id="add-btn">
                         <img src="/assets/apps/gallery/up-caret.png">

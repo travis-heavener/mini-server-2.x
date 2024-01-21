@@ -87,7 +87,7 @@ const textPrompt = (title, text, minLength=0, maxLength=null) => {
                 >
                 <div class="button-row">
                     <input type="submit" value="Done">
-                    <button class="cancel-btn">Cancel</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
                 </div>
             </form>
         </div>

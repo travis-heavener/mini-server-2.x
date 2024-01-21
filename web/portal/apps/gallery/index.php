@@ -27,15 +27,11 @@
             <div id="album-picker"></div>
             <div id="album-content">
                 <div id="content-manager">
-                    <div id="selection-checkbox" title="Select content" data-select-content="false" onclick="toggleSelectMode.bind(this)()"></div>
+                    <div id="selection-checkbox" title="Toggle content selection." data-select-content="false" onclick="toggleSelectMode.bind(this)()"></div>
                 </div>
                 <div id="add-container" class="noselect">
-                    <div id="delete-album-icon" onclick="deleteAlbum()">
-                        <h1>Delete Album</h1>
-                        <!-- add icon to the right of each caption (make it less verbose) -->
-                    </div>
-                    <div id="rename-album-icon" onclick="renameAlbum()">
-                        <h1>Rename Album</h1>
+                    <div id="edit-album-icon" onclick="editAlbum()">
+                        <h1>Edit Album</h1>
                         <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>
                     <div id="add-album-icon" onclick="showForm('new-album')">

@@ -251,8 +251,12 @@ body {
 
 .content-container.content-selected {
     /* add outline around selected elements */
-    border: calc(0.33 * var(--padding)) solid #f8f833;
-    box-shadow: 0 0 var(--padding) #f8f81188;
+    border: calc(0.45 * var(--padding)) solid #4400e9;
+    box-shadow: 0 0 var(--padding) #f8f8f888;
+}
+
+.content-container.content-selected > * {
+    filter: brightness(75%) !important;
 }
 
 @media screen and (orientation: portrait) {
@@ -378,12 +382,15 @@ body {
 }
 
 #content-manager > #selection-checkbox {
-    height: 55%;
+    height: 65%;
     aspect-ratio: 1;
 
     background-color: #eee;
-    border: 2px solid #111;
-    border-radius: 6px;
+    background-image: url("/assets/apps/gallery/selection-toggle.png");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+
+    border-radius: 9px;
     outline: none;
     
     /* remove border (thanks https://stackoverflow.com/a/42832468) */
@@ -395,7 +402,7 @@ body {
 }
 
 #selection-checkbox[data-select-content="true"] {
-    background-color: #6495ed !important;
+    border: 2px solid #4400e9;
 }
 
 /* add button and form functionality */

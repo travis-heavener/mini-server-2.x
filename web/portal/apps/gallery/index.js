@@ -21,8 +21,9 @@ $(document).ready(async () => {
 
     // bind menu picker events
     $("#add-btn").click(function(e) {
-        if (e.target === this)
+        if (e.target === this) {
             $(this.parentElement).toggleClass("selected");
+        }
     });
 
     // make file upload areas drag and droppable
@@ -66,10 +67,11 @@ $(document).ready(async () => {
         $("#upload-form-content").find("input[type=submit]").attr("disabled", (this.files ? this.files.length : 0) === 0);
     });
 
+    // prevent "cancel" button from submitting UPLOAD form
     $("#upload-form-content, #form-button-row > button").click(function(e) {
         if (e.target === this) {
-            $("#upload-form-content").css("display", "none");
             e.preventDefault(); // prevent resubmitting form
+            $("#upload-form-content").css("display", "none");
         }
     });
 });
@@ -82,6 +84,9 @@ function toggleSelectMode(overrideTo=null) {
     if (overrideTo === null) {
         isSelecting = $(this).attr("data-select-content") === "false";
         $(this).attr("data-select-content", isSelecting);
+        
+        // notify user
+        passivePrompt("Click to select: o" + (isSelecting ? "n" : "ff"));
     } else {
         // allow this function to be overridden
         isSelecting = overrideTo;
@@ -218,6 +223,7 @@ async function loadContent({albumName, page}) {
         $(elem).addClass("default-icon");
         $(elem).attr("src", "/assets/app-icons/gallery.png");
         $(elem).attr("alt", "Album content placeholder.");
+        $(elem).attr("draggable", "false");
 
         const wrapper = document.createElement("DIV");
         wrapper.id = id.replace("album-content", "content-container");
@@ -230,46 +236,35 @@ async function loadContent({albumName, page}) {
         resolveSrcToBlob(ids[i], preloadInfo[i].mime.startsWith("image"))
             .then(({url, headers}) => {
                 const mime = preloadInfo[i].mime;
-                let hasUpdated = false;
 
                 if (url === null) {
-                    // load default icon
-                    elem.src = "/assets/app-icons/gallery.png";
+                    elem.src = "/assets/app-icons/gallery.png"; // load default icon
                 } else if (mime.startsWith("image")) {
                     // we have an image, so just replace this one
-                    hasUpdated = true;
                     elem.src = url;
                     if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
                     $(elem).attr("alt", "Album image.");
                 } else if (mime.startsWith("video")) {
                     // we have a video, so replace this image with a video
-                    hasUpdated = true;
                     elem.outerHTML = `<video id="${id}" src="${url}" alt="Album video.">`;
                     elem = $("#" + id); // update reference after changing outerHTML
 
                     // play on hover
                     $(elem).on("mouseenter", function() {
-                        this.muted = true;
-                        this.loop = true;
-                        this.play();
+                        this.muted = true, this.loop = true, this.play();
                         $(this).on("mouseleave", function() {
-                            this.pause();
-                            this.currentTime = 0;
+                            this.pause(), this.currentTime = 0;
                         });
                     });
 
                     // append an additional play icon overlay
-                    $(wrapper).append(`
-                        <div class="play-overlay">
-                            <img src="/assets/apps/gallery/play-icon.png">
-                        </div>
-                    `);
+                    $(wrapper).append(`<div class="play-overlay"><img draggable="false" src="/assets/apps/gallery/play-icon.png"></div>`);
                 } else {
-                    console.warn("Unexpected MIME type: " + mime);
+                    return console.warn("Unexpected MIME type: " + mime);
                 }
 
                 // if the source or element has changed, add click events
-                if (hasUpdated) {
+                if (url !== null) {
                     // initially set custom attributes
                     $(wrapper).attr("data-is-selected", false);
 
@@ -290,81 +285,7 @@ async function loadContent({albumName, page}) {
                             }
                         } else { // allow each wrapper container to focus in large view
                             // resolve raw content source if image, if video use the source (video thumbnails are only for album icons)
-                            let largeSrc = $(elem).is("video") ? url : null;
-                            let filesize = headers.filesize;
-                            
-                            if (largeSrc === null) {
-                                // load large src
-                                const largeRes = await resolveSrcToBlob(ids[i], false);
-                                if (largeRes.url === null || largeRes.headers.isDefaultIcon) {
-                                    // an error occured grabbing the image, so prevent loading
-                                    handleError({"responseText": "Error: Content Resolve Issue\nThe requested content could not be fetched from the server. Try reloading the page."});
-                                    return;
-                                }
-
-                                // base case, update src info
-                                largeSrc = largeRes.url;
-                                filesize = largeRes.headers.filesize;
-                            }
-
-                            // format metadata
-                            filesize = formatByteSize(filesize);
-
-                            // append large view
-                            let previewContainer;
-                            
-                            if ($(elem).is("video")) {
-                                previewContainer = `
-                                    <video class="noselect" controls src="${largeSrc}" data-content-id="${ids[i]}" data-fname="${headers.name}">
-                                `;
-                            } else {
-                                previewContainer = `
-                                    <img class="noselect" src="${largeSrc}" data-content-id="${ids[i]}" data-fname="${headers.name}">
-                                `;
-                            }
-
-                            $("body").append(`
-                                <div class="large-content-container">
-                                    <h1>${headers.name}</h1>
-                                    <h2>Encrypted size: ${filesize}</h2>
-                                    ${previewContainer}
-                                </div>
-                            `);
-
-                            let textScrollInterval = null;
-
-                            $(".large-content-container").click(function(e) {
-                                if (e.target === this) {
-                                    $(this).remove();
-                                    if (textScrollInterval !== null)
-                                        clearInterval(textScrollInterval);
-                                }
-                            });
-
-                            // bind text scroll event to file name
-                            const h1 = $(".large-content-container > h1")[0];
-                            const DELAY = 1.5e3;
-                            const INITIAL_DELAY = 1e3;
-                            const OFFSET_INC = 1;
-                            const RATE = 50; // in ms, interval callback rate
-                            
-                            setTimeout(() => {
-                                // store interval
-                                let offset = 0;
-                                let lastStopped = 0;
-                                textScrollInterval = setInterval(() => {
-                                    if (Date.now() - lastStopped < DELAY) return;
-
-                                    h1.scrollTo({left: offset, top: 0, behavior: "smooth"});
-                                    offset += OFFSET_INC;
-
-                                    if (offset >= h1.scrollWidth - h1.clientWidth) {
-                                        offset = 0;
-                                        lastStopped = Date.now();
-                                        setTimeout(() => h1.scrollTo(0, 0), 0.67 * DELAY);
-                                    }
-                                }, RATE);
-                            }, INITIAL_DELAY);
+                            showLargeContent(ids[i], elem, headers);
                         }
                     });
                 }
@@ -393,11 +314,91 @@ async function loadContent({albumName, page}) {
     // have a delete icon as well, confirm when pressed to delete any things selected (gray out when nothing is selected)
 }
 
+// show a larger, full-size preview of a picture/video
+async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
+    let largeSrc = $(thumbnailElem).is("video") ? url : null;
+    let filesize = thumbnailHeaders.filesize;
+    
+    if (largeSrc === null) { // load large src
+        const largeRes = await resolveSrcToBlob(contentID, false);
+        if (largeRes.url === null || largeRes.headers.isDefaultIcon) {
+            // an error occured grabbing the image, so prevent loading
+            handleError({"responseText": "Error: Content Resolve Issue\nThe requested \
+                        content could not be fetched from the server. Try reloading \
+                        the page."});
+            return;
+        }
+
+        // base case, update src info
+        largeSrc = largeRes.url;
+        filesize = largeRes.headers.filesize;
+    }
+
+    // append large view
+    let preview = `<img class="noselect" draggable="false" src="${largeSrc}" data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}">`;
+    
+    if ($(thumbnailElem).is("video"))
+        preview = `<video class="noselect" controls src="${largeSrc}" data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}">`;
+
+    $("body").append(`
+        <div class="large-content-container">
+            <h1>${thumbnailHeaders.name}</h1>
+            <h2>Encrypted size: ${formatByteSize(filesize)}</h2>
+            ${preview}
+        </div>
+    `);
+
+    // bind events
+    let textScrollInterval = null;
+    
+    const closeView = () => {
+        $(".large-content-container").remove();
+        $(window).off("keydown.closeLargeContent");
+        if (textScrollInterval !== null)
+            clearInterval(textScrollInterval);
+    };
+    
+    $(".large-content-container").click(function(e) {
+        if (e.target === this)
+            closeView();
+    });
+
+    $(window).on("keydown.closeLargeContent", (e) => {
+        if (e.originalEvent.code === "Escape")
+            closeView();
+    });
+
+    // bind text scroll event to file name
+    const h1 = $(".large-content-container > h1")[0];
+    const DELAY = 1.5e3;
+    const INITIAL_DELAY = 1e3;
+    const OFFSET_INC = 1;
+    const RATE = 50; // in ms, interval callback rate
+    
+    setTimeout(() => {
+        // store interval
+        let offset = 0;
+        let lastStopped = 0;
+        textScrollInterval = setInterval(() => {
+            if (Date.now() - lastStopped < DELAY) return;
+
+            h1.scrollTo({left: offset, top: 0, behavior: "smooth"});
+            offset += OFFSET_INC;
+
+            if (offset >= h1.scrollWidth - h1.clientWidth) {
+                offset = 0;
+                lastStopped = Date.now();
+                setTimeout(() => h1.scrollTo(0, 0), 0.67 * DELAY);
+            }
+        }, RATE);
+    }, INITIAL_DELAY);
+}
+
 function focusAlbum(albumName, forceLoad=false) {
     if (albumName === CONTENT.album.name && CONTENT.album.currentPage === 1 && !forceLoad) return; // prevent reloading all content if we are still on the same page of the same album
 
     // reset content manager
-    toggleSelectMode(false); // uncheck the selection mode
+    toggleSelectMode.bind($("#selection-checkbox")[0])(false); // uncheck the selection mode
     
     // remove all the content-container elements on the DOM already and load up the new album from page 1
     $("#album-content > .content-container").remove();
@@ -423,12 +424,12 @@ async function loadAlbums() {
                 for (let entry of body) {
                     // parse each item
                     const albumName = entry["album_name"];
-                    let previewImg = "<img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' alt='Album icon image.'>";
+                    let previewImg = "<img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' draggable='false' alt='Album icon image.'>";
 
                     if (entry.id !== null) {
                         const {url, headers} = await resolveSrcToBlob(entry.id);
                         if (!headers.isDefaultIcon)
-                            previewImg = `<img src="${url}" class='album-icon-img' alt='Album icon image.'>`;
+                            previewImg = `<img src="${url}" class='album-icon-img' draggable='false' alt='Album icon image.'>`;
 
                         $("#album-picker").append(`
                             <div class='album-icon noselect' data-album-name="${albumName}" onclick="focusAlbum($(this).attr('data-album-name'))">
@@ -484,7 +485,7 @@ function resolveSrcToBlob(id, isThumb=true) {
 }
 
 function handleError(e) {
-    console.warn("Failure", e);
+    // console.warn("Failure", e);
     const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
     const title = msg.split("\n")[0];
     const body = msg.split("\n")[1];
@@ -508,7 +509,7 @@ async function showForm(formType) {
         let albumName;
         try {
             // get new album name
-            albumName = await textPrompt("New Album", "Enter an album name between 3 and 32 characters.", 3, 32);
+            albumName = await textPrompt("New Album", "Enter a name between 3 and 32 characters.", 3, 32);
 
             // verify the name isn't in use
             const isInUse = await $.ajax({
@@ -535,7 +536,7 @@ async function showForm(formType) {
         // create a new album-icon and bind the edit function to it
         $("#album-picker").prepend(`
             <div class="album-icon noselect" data-album-name="${albumName}" onclick="focusAlbum($(this).attr('data-album-name'))">
-                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' alt='Album icon image.'>
+                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' draggable='false' alt='Album icon image.'>
                 <h1>${albumName}</h1>
             </div>
         `);
@@ -606,7 +607,6 @@ function uploadFile() {
             $(dummyVideo).on("loadedmetadata", function() {
                 dimensions[i] = [this.videoWidth, this.videoHeight];
                 URL.revokeObjectURL(url);
-                // console.log(i, this.videoWidth, this.videoHeight);
 
                 checkCompletion();
             });
@@ -617,7 +617,6 @@ function uploadFile() {
             $(dummyImage).on("load", function() {
                 dimensions[i] = [this.width, this.height];
                 URL.revokeObjectURL(url);
-                // console.log(i, this.width, this.height);
 
                 checkCompletion();
             });

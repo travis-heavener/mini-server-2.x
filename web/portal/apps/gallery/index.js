@@ -52,9 +52,7 @@ $(document).ready(async () => {
         $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);
     });
 
-    $("#form-file-drop").click(function(e) {
-        $(this).find("input")[0].click();
-    });
+    $("#form-file-drop").click(function(e) {  $(this).find("input")[0].click();  });
 
     $("input[type=file]").on("change", function(e) {
         e.preventDefault();
@@ -105,118 +103,7 @@ function toggleSelectMode(overrideTo=null) {
     });
 }
 
-// asks to confirm deletion of all things selected
-async function deleteSelection() {
-    // get selected elements
-    const contentIds = [...$("[data-is-selected=true] > img, [data-is-selected=true] > video")].map(elem => parseInt($(elem).attr("data-content-id")));
-    
-    // prevent call since nothing is selected
-    if (!contentIds.length)
-        return $("#delete-icon").attr("data-disabled", "true");
-
-    // confirm delete
-    const willDelete = await confirmPrompt(
-        "Confirm Delete",
-        `Are you sure you want to delete ${contentIds.length} file${contentIds.length > 1 ? "s" : ""}?`,
-        "Yes", "Cancel"
-    );
-
-    if (!willDelete)
-        return promptUser("Delete Cancelled", "Files not deleted from server.", false);
-
-    // ajax call to delete
-    $.ajax({
-        "url": "deleteContent.php",
-        "method": "POST",
-        "data": {
-            "album-name": CONTENT.album.name,
-            "content-ids": JSON.stringify(contentIds)
-        },
-        "success": res => focusAlbum(CONTENT.album.name, true),
-        "error": e => handleError(e)
-    });
-}
-
-const __TEXT_SCROLL_INTERVALS = [];
-function bindTextScroll() {
-    // recheck text scrolling
-    const isLandscape = screen.orientation.type.startsWith("landscape");
-
-    // remove all existing mouseenter events
-    $(".album-icon").each(function() {
-        $(this).off("mouseenter");
-    });
-
-    // remove all intervals for text scrolling
-    __TEXT_SCROLL_INTERVALS.forEach(interval => clearInterval(interval));
-
-    // bind text scroll to all album-icon h1
-    const DELAY = 1.5e3;
-    const INITIAL_DELAY = 1e3;
-    const OFFSET_INC = 1;
-    const RATE = 50; // in ms, interval callback rate
-
-    if (isLandscape) {
-        // bind for landscape devices
-        $(".album-icon").on("mouseenter", function(e) {
-            const h1 = $(this).find("h1")[0];
-            if (h1.scrollWidth === h1.clientWidth) return; // only scroll elements that overflow
-
-            // wait initial time
-            let interval = null;
-
-            let timeout = setTimeout(() => {
-                let offset = 0;
-                let lastStopped = 0;
-                interval = setInterval(() => {
-                    if (Date.now() - lastStopped < DELAY) return;
-
-                    h1.scrollTo({left: offset, top: 0, behavior: "smooth"});
-                    offset += OFFSET_INC;
-
-                    if (offset >= h1.scrollWidth - h1.clientWidth) {
-                        offset = 0;
-                        lastStopped = Date.now();
-                        setTimeout(() => h1.scrollTo(0, 0), 0.67 * DELAY);
-                    }
-                }, RATE);
-            }, INITIAL_DELAY);
-
-            $(this).on("mouseleave", function(e) {
-                clearTimeout(timeout);
-                interval !== null && clearInterval(interval);
-                h1.scrollTo(0, 0);
-            });
-        });
-    } else {
-        // bind for portrait devices
-        $(".album-icon").each(function() {
-            const h1 = $(this).find("h1")[0];
-
-            setTimeout(() => {
-                // double check the orientation hasn't changed
-                if (screen.orientation.type.startsWith("landscape")) return;
-
-                // store interval
-                let offset = 0;
-                let lastStopped = 0;
-                const interval = setInterval(() => {
-                    if (Date.now() - lastStopped < DELAY) return;
-
-                    h1.scrollTo({left: 0, top: offset, behavior: "smooth"});
-                    offset += OFFSET_INC;
-
-                    if (offset >= h1.scrollHeight - h1.clientHeight) {
-                        offset = 0;
-                        lastStopped = Date.now();
-                        setTimeout(() => h1.scrollTo(0, 0), 0.67 * DELAY);
-                    }
-                }, RATE);
-                __TEXT_SCROLL_INTERVALS.push(interval);
-            }, INITIAL_DELAY);
-        });
-    }
-}
+/********************* content displaying & such *********************/
 
 async function loadContent({albumName, page}) {
     // determine how many rows we can fit
@@ -431,6 +318,8 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
     }, INITIAL_DELAY);
 }
 
+/********************* album focusing & such *********************/
+
 function focusAlbum(albumName, forceLoad=false) {
     if (albumName === CONTENT.album.name && CONTENT.album.currentPage === 1 && !forceLoad) return; // prevent reloading all content if we are still on the same page of the same album
 
@@ -521,21 +410,6 @@ function resolveSrcToBlob(id, isThumb=true) {
     });
 }
 
-function handleError(e) {
-    // console.warn("Failure", e);
-    const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
-    const title = msg.split("\n")[0];
-    const body = msg.split("\n")[1];
-    
-    if (title === "silent_error") {
-        return;
-    } else if (title === "auth_error") {
-        window.location.reload(true);
-    } else {
-        promptUser(title, body, false);
-    }
-};
-
 /********************* content upload stuff *********************/
 
 async function showForm(formType) {
@@ -591,6 +465,9 @@ async function showForm(formType) {
 
         // check for form submit disable
         $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);
+    } else if (formType === "edit-album") {
+        // allow users to edit an album (ie. rename, delete)
+        throw new Error("todo, starting here.");
     }
 }
 
@@ -662,4 +539,134 @@ function uploadFile() {
     }
     
     return false;
+}
+
+// asks to confirm deletion of all things selected
+async function deleteSelection() {
+    // get selected elements
+    const contentIds = [...$("[data-is-selected=true] > img, [data-is-selected=true] > video")].map(elem => parseInt($(elem).attr("data-content-id")));
+    
+    // prevent call since nothing is selected
+    if (!contentIds.length)
+        return $("#delete-icon").attr("data-disabled", "true");
+
+    // confirm delete
+    const willDelete = await confirmPrompt(
+        "Confirm Delete",
+        `Are you sure you want to delete ${contentIds.length} file${contentIds.length > 1 ? "s" : ""}?`,
+        "Yes", "Cancel"
+    );
+
+    if (!willDelete)
+        return promptUser("Delete Cancelled", "Files not deleted from server.", false);
+
+    // ajax call to delete
+    $.ajax({
+        "url": "deleteContent.php",
+        "method": "POST",
+        "data": {
+            "album-name": CONTENT.album.name,
+            "content-ids": JSON.stringify(contentIds)
+        },
+        "success": res => focusAlbum(CONTENT.album.name, true),
+        "error": e => handleError(e)
+    });
+}
+
+/********************* misc *********************/
+
+const __TEXT_SCROLL_INTERVALS = [];
+function bindTextScroll() {
+    // recheck text scrolling
+    const isLandscape = screen.orientation.type.startsWith("landscape");
+
+    // remove all existing mouseenter events
+    $(".album-icon").each(function() {
+        $(this).off("mouseenter");
+    });
+
+    // remove all intervals for text scrolling
+    __TEXT_SCROLL_INTERVALS.forEach(interval => clearInterval(interval));
+
+    // bind text scroll to all album-icon h1
+    const DELAY = 1.5e3;
+    const INITIAL_DELAY = 1e3;
+    const OFFSET_INC = 1;
+    const RATE = 50; // in ms, interval callback rate
+
+    if (isLandscape) {
+        // bind for landscape devices
+        $(".album-icon").on("mouseenter", function(e) {
+            const h1 = $(this).find("h1")[0];
+            if (h1.scrollWidth === h1.clientWidth) return; // only scroll elements that overflow
+
+            // wait initial time
+            let interval = null;
+
+            let timeout = setTimeout(() => {
+                let offset = 0;
+                let lastStopped = 0;
+                interval = setInterval(() => {
+                    if (Date.now() - lastStopped < DELAY) return;
+
+                    h1.scrollTo({left: offset, top: 0, behavior: "smooth"});
+                    offset += OFFSET_INC;
+
+                    if (offset >= h1.scrollWidth - h1.clientWidth) {
+                        offset = 0;
+                        lastStopped = Date.now();
+                        setTimeout(() => h1.scrollTo(0, 0), 0.67 * DELAY);
+                    }
+                }, RATE);
+            }, INITIAL_DELAY);
+
+            $(this).on("mouseleave", function(e) {
+                clearTimeout(timeout);
+                interval !== null && clearInterval(interval);
+                h1.scrollTo(0, 0);
+            });
+        });
+    } else {
+        // bind for portrait devices
+        $(".album-icon").each(function() {
+            const h1 = $(this).find("h1")[0];
+
+            setTimeout(() => {
+                // double check the orientation hasn't changed
+                if (screen.orientation.type.startsWith("landscape")) return;
+
+                // store interval
+                let offset = 0;
+                let lastStopped = 0;
+                const interval = setInterval(() => {
+                    if (Date.now() - lastStopped < DELAY) return;
+
+                    h1.scrollTo({left: 0, top: offset, behavior: "smooth"});
+                    offset += OFFSET_INC;
+
+                    if (offset >= h1.scrollHeight - h1.clientHeight) {
+                        offset = 0;
+                        lastStopped = Date.now();
+                        setTimeout(() => h1.scrollTo(0, 0), 0.67 * DELAY);
+                    }
+                }, RATE);
+                __TEXT_SCROLL_INTERVALS.push(interval);
+            }, INITIAL_DELAY);
+        });
+    }
+}
+
+function handleError(e) {
+    // console.warn("Failure", e);
+    const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+    const title = msg.split("\n")[0];
+    const body = msg.split("\n")[1];
+    
+    if (title === "silent_error") {
+        return;
+    } else if (title === "auth_error") {
+        window.location.reload(true);
+    } else {
+        promptUser(title, body, false);
+    }
 }

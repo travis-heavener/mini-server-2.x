@@ -31,7 +31,7 @@
                     <div id="delete-icon" title="Delete selection." onclick="deleteSelection()" data-disabled="true"></div>
                 </div>
                 <div id="add-container" class="noselect">
-                    <div id="edit-album-icon" onclick="editAlbum()">
+                    <div id="edit-album-icon" onclick="showForm('edit-album')">
                         <h1>Edit Album</h1>
                         <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>
@@ -62,6 +62,15 @@
                     <button>Cancel</button>
                 </div>
             </form>
+        </div>
+
+        <div id="edit-form-content">
+            <!--
+                NOTES TO SELF:
+                I made renameAlbum.php but have not tested it, 95% confident it works.
+                Also I need to add something to display the edit/remove album content (in this div)
+                as well as in index.js:470.
+            -->
         </div>
 
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>

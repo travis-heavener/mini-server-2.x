@@ -31,13 +31,15 @@ function hideUserPrompt() {
     });
 }
 
-const passivePrompt = (text) => {
+const passivePrompt = (text, deleteExisting=false) => {
+    if (deleteExisting) $(".passive-prompt").remove();
+
     const div = document.createElement("DIV");
     $(div).addClass("passive-prompt");
     $(div).append("<p>" + text + "</p>");
     $("body").append(div);
 
-    setTimeout(() => div.parentElement.removeChild(div), 4e3 + 1); // wait the 4 second duration plus buffer
+    setTimeout(() => $(div).remove(div), 4e3 + 1); // wait the 4 second duration plus buffer
 };
 
 const confirmPrompt = (title, text, confirmText="Yes", rejectText="No") => {

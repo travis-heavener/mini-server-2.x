@@ -86,7 +86,7 @@ function toggleSelectMode(overrideTo=null) {
         $(this).attr("data-select-content", isSelecting);
         
         // notify user
-        passivePrompt("Click to select: o" + (isSelecting ? "n" : "ff"));
+        passivePrompt("Click to select: o" + (isSelecting ? "n" : "ff"), true);
     } else {
         // allow this function to be overridden
         isSelecting = overrideTo;
@@ -95,12 +95,45 @@ function toggleSelectMode(overrideTo=null) {
 
     // clear current selection
     CONTENT.isSelecting = isSelecting;
+    if (!isSelecting) $("#delete-icon").attr("data-disabled", "true"); // disable delete if not selecting
     CONTENT.selection = [];
 
     // unselect each selected content container
     $(".content-container.content-selected").each(function() {
         $(this).removeClass("content-selected");
         $(this).attr("data-is-selected", false);
+    });
+}
+
+// asks to confirm deletion of all things selected
+async function deleteSelection() {
+    // get selected elements
+    const contentIds = [...$("[data-is-selected=true] > img, [data-is-selected=true] > video")].map(elem => parseInt($(elem).attr("data-content-id")));
+    
+    // prevent call since nothing is selected
+    if (!contentIds.length)
+        return $("#delete-icon").attr("data-disabled", "true");
+
+    // confirm delete
+    const willDelete = await confirmPrompt(
+        "Confirm Delete",
+        `Are you sure you want to delete ${contentIds.length} file${contentIds.length > 1 ? "s" : ""}?`,
+        "Yes", "Cancel"
+    );
+
+    if (!willDelete)
+        return promptUser("Delete Cancelled", "Files not deleted from server.", false);
+
+    // ajax call to delete
+    $.ajax({
+        "url": "deleteContent.php",
+        "method": "POST",
+        "data": {
+            "album-name": CONTENT.album.name,
+            "content-ids": JSON.stringify(contentIds)
+        },
+        "success": res => focusAlbum(CONTENT.album.name, true),
+        "error": e => handleError(e)
     });
 }
 
@@ -277,11 +310,15 @@ async function loadContent({albumName, page}) {
                             // update the element
                             if (isSelected) {
                                 CONTENT.selection.push(this.id);
+                                $("#delete-icon").attr("data-disabled", "false"); // enable the delete icon
                                 $(this).addClass("content-selected");
                             } else {
                                 $(this).removeClass("content-selected");
                                 const index = CONTENT.selection.indexOf(this.id);
                                 CONTENT.selection.splice(index, 1);
+                                
+                                if (!CONTENT.selection.length)
+                                    $("#delete-icon").attr("data-disabled", "true"); // disable the delete icon
                             }
                         } else { // allow each wrapper container to focus in large view
                             // resolve raw content source if image, if video use the source (video thumbnails are only for album icons)

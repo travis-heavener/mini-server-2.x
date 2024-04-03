@@ -3,16 +3,16 @@
     <head>
         
         <?php
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
-            include($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
+            include_once($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
+            include_once($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
+            include_once($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
             
             $user_data = check_auth(); // actually call to check the auth
             verify_perms($user_data); // verify the user has access to this page
             echo format_title("Gallery"); // add document title
             
             // check that the user has their own gallery table, create if not
-            include("createUserTable.php");
+            include_once("createUserTable.php");
             $user_data["gal_table"] = check_user_table($user_data["id"]);
         ?>
 
@@ -21,7 +21,7 @@
     </head>
     <body>
 
-        <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php") ?>
+        <?php include_once($_SERVER['DOCUMENT_ROOT'] . "/php/createHeader.php") ?>
 
         <div id="main-content">
             <div id="album-picker"></div>
@@ -55,7 +55,7 @@
                 <h1>Upload Files</h1>
                 <div id="form-file-drop">
                     <h2>0 files selected.</h2>
-                    <input type="file" name="user-media[]" multiple accept="<?php include("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
+                    <input type="file" name="user-media[]" multiple accept="<?php include_once("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
                 </div>
                 <div id="form-button-row">
                     <input type="submit" value="Submit">

@@ -1,5 +1,6 @@
 <?php
     // check for the availability of an album name
+    include_once("./toolbox.php");
     
     // 1. check for POST
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -25,7 +26,7 @@
     $album_name = $_POST["albumName"];
 
     // 5. get from database
-    $table = $table = "gal__" . dechex($user_data["id"]);
+    $table = $table = TABLE_STEM . dechex($user_data["id"]);
     $statement = $mysqli->prepare("SELECT COUNT(*) FROM `$table` WHERE `album_name`=?;");
     $statement->bind_param("s", $album_name);
     $statement->execute();

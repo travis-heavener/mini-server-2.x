@@ -1,6 +1,6 @@
 <?php
     // upload a file to the system
-    include("./toolbox.php");
+    include_once("./toolbox.php");
 
     // 1. check for POST
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -65,7 +65,7 @@
         exit("Error: Invalid Cipher\nThe provided cipher was not recognized by the server.");
     }
 
-    $table = "gal__" . dechex($user_data["id"]);
+    $table = TABLE_STEM . dechex($user_data["id"]);
     for ($i = 0; $i < count($files_data); $i++) {
         $file = $files_data[$i];
         $width = $dimensions[$i][0];

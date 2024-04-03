@@ -1,11 +1,11 @@
 <?php
     // create album icons for gallery
-    include("./toolbox.php");
+    include_once("./toolbox.php");
     
     function get_user_albums($user_id, $key, $mysqli, $envs) {
-        $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
+        $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
         $statement = $mysqli->prepare(
-            "SELECT `id`, `album_name`, `mime` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `gal__1` GROUP BY `album_name`) ORDER BY `uploaded` DESC;
+            "SELECT `id`, `album_name`, `mime` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `$table` GROUP BY `album_name`) ORDER BY `uploaded` DESC;
         ");
         $statement->execute();
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);

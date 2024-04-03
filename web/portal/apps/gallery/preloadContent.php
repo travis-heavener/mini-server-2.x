@@ -1,5 +1,6 @@
 <?php
     // load content from database on command
+    include_once("./toolbox.php");
 
     // 1. check for GET
     if ($_SERVER["REQUEST_METHOD"] !== "GET") {
@@ -30,7 +31,7 @@
     $user_id = $user_data["id"];
     
     // 5. get data from db
-    $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
+    $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
     $statement = $mysqli->prepare("SELECT `id`, `name`, `mime` FROM `$table` WHERE `album_name`=? ORDER BY `uploaded` DESC, `id` DESC LIMIT ? OFFSET ?");
     $statement->bind_param("sii", $album_name, $max_amt, $offset);
     $statement->execute();

@@ -1,6 +1,6 @@
 <?php
     // retrieve the content src for an individual item from the server
-    include("./toolbox.php");
+    include_once("./toolbox.php");
     include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
 
     // 1. check for GET
@@ -30,7 +30,7 @@
     $user_id = $user_data["id"];
     
     // 5. get data from db
-    $table = "gal__" . dechex($user_id); // we already know the id must be valid since it comes directly from the database
+    $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
     $statement = $mysqli->prepare("SELECT `name`, `mime`, `width`, `height`, `orientation` FROM `$table` WHERE `id`=? LIMIT 1;");
     $statement->bind_param("i", $id);
     $statement->execute();

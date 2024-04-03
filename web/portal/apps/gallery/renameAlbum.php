@@ -1,6 +1,6 @@
 <?php
     // upload a file to the system
-    include("./toolbox.php");
+    include_once("./toolbox.php");
 
     // 1. check for POST
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -34,10 +34,10 @@
         exit("Error: auth_error\nnull.");
     }
 
-    $table = "gal__" . dechex($user_data["id"]);
+    $table = TABLE_STEM . dechex($user_data["id"]);
 
     // 5. rename content in the database
-    $statement = $mysqli->prepare("UPDATE `gal__1` SET `album_name`=? WHERE `album_name`=?;");
+    $statement = $mysqli->prepare("UPDATE `$table` SET `album_name`=? WHERE `album_name`=?;");
     $statement->bind_param("ss", $new_name, $album_name);
     $statement->execute();
     $statement->close();

@@ -4,12 +4,14 @@
     // someone were to try and pull from another user's table, decryption would fail
 
     /*
-        table naming scheme: gal__<id>
+        table naming scheme: gallery__<id>
             where `id` is the hex representation of the user_id
         
         file naming scheme: <user_id>_<item_id>
             where `user_id` is the hex representation of the user_id and `item_id` is the hex representation of the item_id
     */
+
+    include_once("./toolbox.php");
 
     function check_user_table($user_id) {
         // verify the $user_id is legal
@@ -24,7 +26,7 @@
         }
 
         // generate table name
-        $name = "gal__" . dechex($user_id);
+        $name = TABLE_STEM . dechex($user_id);
 
         // mysqli connect
         $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");

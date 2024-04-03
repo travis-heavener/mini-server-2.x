@@ -16,6 +16,7 @@
         "video/quicktime", // .mov, .qt
         "video/x-msvideo" // .avi
     ]);
+    define("TABLE_STEM", "gallery__"); // stem for all table names in database
 
     // modified from SO, handy function for resizing images (reduces client memory footprint dramatically) (https://stackoverflow.com/a/45479025)
     function resize_image($data, $width, $height, $raw_width, $raw_height) {
@@ -169,7 +170,7 @@
             $output = "";
             $iv = fread($in_handle, IVLEN); // get IV
 
-            $data;
+            $data = null;
             while (!feof($in_handle)) {
                 // encrypt and output
                 $data = fread($in_handle, BLOCK_SIZE * CHUNK_COUNT);

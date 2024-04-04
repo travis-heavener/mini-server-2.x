@@ -5,6 +5,15 @@ body {
     overflow-y: auto;
 }
 
+/* override default styling for header & footer colors */
+#header-content {
+    background-color: #111e !important;
+}
+
+#footer-content {
+    background-color: #999d !important;
+}
+
 #main-content {
     --picker-width: calc(17 * var(--text-unit));
     
@@ -32,7 +41,7 @@ body {
 
     padding: var(--text-unit);
     
-    background-color: #111e;
+    background-color: #1a1a1aee;
 
     overflow-x: hidden;
     overflow-y: auto;
@@ -175,7 +184,7 @@ body {
     padding: var(--padding);
 
     height: 100%;
-    background-color: #6668;
+    background-color: #666b;
     overflow-x: hidden;
     overflow-y: auto;
 
@@ -446,7 +455,7 @@ body {
     width: var(--btn-size);
     height: var(--btn-size);
 
-    background-color: #68ec9b;
+    background-color: #d7d7f4;
     border: calc(0.04 * var(--size)) solid #111;
     border-radius: 50%;
     box-shadow:  2px  2px 4.5px #1116 inset,
@@ -457,8 +466,8 @@ body {
     transition: 0.25s background-color;
 }
 
-#add-btn:hover {  background-color: #9bf5b9;  }
-#add-btn:active {  background-color: #19c953;  }
+#add-btn:hover {  background-color: #aac3f5;  }
+#add-btn:active {  background-color: #46acf0;  }
 
 #add-btn > img {
     width: 65%;

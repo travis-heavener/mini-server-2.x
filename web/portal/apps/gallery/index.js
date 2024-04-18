@@ -426,9 +426,7 @@ async function showForm(formType) {
             const isInUse = await $.ajax({
                 "url": "checkNameUsage.php",
                 "method": "POST",
-                "data": JSON.stringify({
-                    "albumName": albumName
-                })
+                "data": { "albumName": albumName }
             });
 
             // also check that the album isn't in the dom

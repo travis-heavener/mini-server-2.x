@@ -32,11 +32,11 @@
     $statement = $mysqli->prepare("SELECT COUNT(*) FROM `$table` WHERE `album_name`=?;");
     $statement->bind_param("s", $album_name);
     $statement->execute();
-    $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+    $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC)[0];
     $statement->close();
     $mysqli->close();
 
     // 6. return
     header("Content-type: text/plain");
-    echo count($rows) > 0 ? "true" : "false";
+    echo $rows["COUNT(*)"] > 0 ? "true" : "false";
 ?>

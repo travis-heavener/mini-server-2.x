@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // retrieve the content src for an individual item from the server
     include_once("./toolbox.php");
     include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
@@ -15,7 +17,7 @@
     $is_thumb = $headers["MS2_isThumb"] === "true";
 
     // 3. load up mysqli
-    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $envs = loadEnvs();
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
 
     // 4. verify auth

@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // load content from database on command
     include_once("./toolbox.php");
 
@@ -15,7 +17,7 @@
     $offset = $headers["MS2_offset"];
 
     // 3. load up mysqli
-    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $envs = loadEnvs();
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
 
     // 4. verify auth

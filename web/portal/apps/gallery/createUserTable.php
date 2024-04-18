@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // check that the user has their own table and if they don't, create one
     // the user's secret key is still assigned to all their images so even if
     // someone were to try and pull from another user's table, decryption would fail
@@ -29,7 +31,7 @@
         $name = TABLE_STEM . dechex($user_id);
 
         // mysqli connect
-        $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+        $envs = loadEnvs();
         $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
         
         $statement = $mysqli->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME=?;");

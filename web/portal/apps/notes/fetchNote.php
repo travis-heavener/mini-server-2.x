@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     function base64url_decode($string) {
         return base64_decode(str_replace(['-','_'], ['+','/'], $string));
     }
@@ -19,7 +21,7 @@
     $user_id = $body_dec->id;
     
     // load up mysqli
-    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $envs = loadEnvs();
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
     
     $statement = $mysqli->prepare("SELECT `id`, `name`, `last_edit`, `created` FROM `notes` WHERE `user_id`=? AND `id`=?");

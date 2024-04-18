@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // upload a file to the system
     include_once("./toolbox.php");
 
@@ -53,7 +55,7 @@
 
     // NOW we can store the image/video
     // 5. load mysqli
-    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $envs = loadEnvs();
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
 
     // 6. grab user's secret

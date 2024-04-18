@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     function base64url_encode($data) {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
@@ -15,7 +17,7 @@
     $pass = $post_data->pass;
 
     // load envs
-    $envs = parse_ini_file(dirname($_SERVER["DOCUMENT_ROOT"]) . "/config/.env");
+    $envs = loadEnvs();
 
     // check that the user exists
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);

@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // verify post request
     if ($_SERVER["REQUEST_METHOD"] !== "DELETE") {
         header('HTTP/1.0 403 Forbidden');
@@ -20,7 +22,7 @@
     }
 
     // we know the auth token is still valid, so check that the note belongs to the user
-    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $envs = loadEnvs();
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
     
     $statement = $mysqli->prepare("DELETE FROM `notes` WHERE `user_id`=? AND `id`=?");

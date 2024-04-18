@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // verify post request
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         echo "Invalid request method: expected POST, got " . $_SERVER["REQUEST_METHOD"] . ".";
@@ -22,7 +24,7 @@
     $user_data = check_auth();
 
     // load envs
-    $envs = parse_ini_file(dirname($_SERVER["DOCUMENT_ROOT"]) . "/config/.env");
+    $envs = loadEnvs();
     
     // connect to database
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);

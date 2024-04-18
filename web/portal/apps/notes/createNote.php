@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // verify post request
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         header('HTTP/1.0 403 Forbidden');
@@ -16,7 +18,7 @@
     }
 
     // load up mysqli
-    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $envs = loadEnvs();
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
 
     // we know the user is valid, so create the note

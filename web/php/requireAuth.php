@@ -1,5 +1,7 @@
 <?php
 
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
     // PERMISSIONS STUFF
 
     /*
@@ -82,7 +84,7 @@
         }
         
         // load envs
-        $envs = ($_envs === null) ? parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env") : $_envs;
+        $envs = ($_envs === null) ? loadEnvs() : $_envs;
 
         // check that the signature matches
         $check_sig = hash_hmac("sha256", "$headers.$body", $envs["AUTH_SECRET"]);

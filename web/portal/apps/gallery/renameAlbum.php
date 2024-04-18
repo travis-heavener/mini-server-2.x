@@ -1,4 +1,6 @@
 <?php
+    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+    
     // upload a file to the system
     include_once("./toolbox.php");
 
@@ -25,7 +27,7 @@
     $user_id = $user_data["id"];
 
     // 4. load mysqli
-    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+    $envs = loadEnvs();
     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
     
     if (!preg_match("/^\d+$/", $user_data["id"])) {

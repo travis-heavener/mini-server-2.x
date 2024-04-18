@@ -34,8 +34,10 @@
             </div>
             <div id="notes-menu">
                 <?php
+                    include_once($_SERVER['DOCUMENT_ROOT'] . "/php/toolbox.php");
+
                     // load in all the user's notes
-                    $envs = parse_ini_file(dirname($_SERVER['DOCUMENT_ROOT']) . "/config/.env");
+                    $envs = loadEnvs();
                     $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
                     
                     $statement = $mysqli->prepare("SELECT `id`, `name`, `last_edit` FROM `notes` WHERE `user_id`=? ORDER BY `last_edit` DESC");

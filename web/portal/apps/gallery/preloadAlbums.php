@@ -7,7 +7,7 @@
     function get_user_albums($user_id, $key, $mysqli, $envs) {
         $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
         $statement = $mysqli->prepare(
-            "SELECT `id`, `album_name`, `mime` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `$table` GROUP BY `album_name`) ORDER BY `uploaded` DESC;
+            "SELECT `id`, `album_name` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `$table` GROUP BY `album_name`) ORDER BY `uploaded` DESC;
         ");
         $statement->execute();
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -18,7 +18,6 @@
             // get the file path
             $row = $rows[$i];
             $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
-            $MIME = $row["mime"];
 
             // if the file doesn't exist, grab the next item
             if (!file_exists($path)) {

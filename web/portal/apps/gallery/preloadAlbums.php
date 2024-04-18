@@ -23,7 +23,8 @@
             // if the file doesn't exist, grab the next item
             if (!file_exists($path)) {
                 // get the next image if the newest album entry is not an image (ie. video)
-                $statement = $mysqli->prepare("SELECT * FROM `gal__1` WHERE `album_name`=? ORDER BY `uploaded` DESC, `id` DESC LIMIT 1;");
+                $table = TABLE_STEM . dechex($user_id);
+                $statement = $mysqli->prepare("SELECT * FROM $table WHERE `album_name`=? ORDER BY `uploaded` DESC, `id` DESC LIMIT 1;");
                 $statement->bind_param("s", $rows[$i]["album_name"]);
                 $statement->execute();
                 $temp_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);

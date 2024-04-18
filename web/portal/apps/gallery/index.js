@@ -240,7 +240,7 @@ async function loadContent({albumName, page}) {
 
 // show a larger, full-size preview of a picture/video
 async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
-    let largeSrc = $(thumbnailElem).is("video") ? url : null;
+    let largeSrc = $(thumbnailElem).is("video") ? $(thumbnailElem)[0].src : null;
     let filesize = thumbnailHeaders.filesize;
     
     if (largeSrc === null) { // load large src

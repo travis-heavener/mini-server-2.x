@@ -13,7 +13,7 @@
 
     // 2. extract headers (best way to do this with custom headers I guess)
     $headers = getallheaders();
-    $id = $headers["MS2_id"];
+    $id = (int)$headers["MS2_id"];
     $is_thumb = $headers["MS2_isThumb"] === "true";
 
     // 3. load up mysqli

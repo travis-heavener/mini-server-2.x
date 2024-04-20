@@ -262,10 +262,11 @@ body {
     /* add outline around selected elements */
     border: calc(0.45 * var(--padding)) solid #4400e9;
     box-shadow: 0 0 var(--padding) #f8f8f888;
+    background-color: #4400e9;
 }
 
 .content-container.content-selected > * {
-    filter: brightness(75%) !important;
+    filter: opacity(67%) !important;
 }
 
 @media screen and (orientation: portrait) {
@@ -342,6 +343,7 @@ body {
 .large-content-container > img,
 .large-content-container > video {
     object-fit: contain;
+    background-color: #f3f3f3;
     box-shadow:  2px  2px 16px #1118,
                 -2px -2px 16px #1118;
 }
@@ -373,13 +375,15 @@ body {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-
     column-gap: calc(0.25 * var(--content-manager-height));
 
-    padding: 0 calc(0.25 * var(--content-manager-height));
-
+    position: sticky;
+    top: calc(-1 * var(--padding));
+    z-index: 99999;
+    
     margin-top: calc(-1 * var(--padding));
     margin-bottom: var(--padding);
+    padding: 0 calc(0.25 * var(--content-manager-height));
     width: 100%;
     height: var(--content-manager-height);
 
@@ -470,17 +474,15 @@ body {
 #add-btn:active {  background-color: #46acf0;  }
 
 #add-btn > img {
-    width: 65%;
+    width: 43%;
     height: auto;
-    aspect-ratio: 2; /* up-caret.png is 128x64 */
-    transform: rotate(180deg) translateY(-7%);
+    transform: rotate(180deg);
     transition: 0.25s transform;
-
     pointer-events: none;
 }
 
 #add-container.selected > #add-btn > img {
-    transform: rotate(0deg) translateY(-7%);
+    transform: rotate(0deg);
 }
 
 /* reveal content */
@@ -630,6 +632,7 @@ body {
     font-size: calc(1.25 * var(--text-unit));
     font-family: "Ubuntu", sans-serif;
     font-weight: 600;
+    text-align: center;
 }
 
 #form-button-row {

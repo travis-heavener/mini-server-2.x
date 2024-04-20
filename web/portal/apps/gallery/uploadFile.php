@@ -74,13 +74,13 @@
         $height = $dimensions[$i][1];
         
         // compress file format, if necessary
-        if ($file["MIME"] === "image/png" || $file["MIME"] === "image/jpeg") {
+        if ($file["MIME"] === "image/jpeg") {
             // compress images to JPEG
             $compressed = rotate_imagejpeg_str($file["content"], $file["orientation"]);
             $compressed_thumb = rotate_imagejpeg_str($file["content"], $file["orientation"]);
             $compressed_thumb = resize_image($compressed_thumb, THUMB_SIZE, THUMB_SIZE, $width, $height);
-            $file["MIME"] = "image/jpeg";
         } else if (str_starts_with($file["MIME"], "image")) {
+            // don't compress raw, just thumbnail
             $compressed = $file["content"];
             $compressed_thumb = rotate_imagejpeg_str($file["content"], $file["orientation"]);
             $compressed_thumb = resize_image($compressed_thumb, THUMB_SIZE, THUMB_SIZE, $width, $height);

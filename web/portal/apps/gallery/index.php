@@ -44,7 +44,7 @@
                         <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>
                     <div id="add-btn">
-                        <img src="/assets/apps/gallery/up-caret.png">
+                        <img src="/assets/apps/gallery/plus-icon.png">
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
             <form id="upload-form" action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
                 <h1>Upload Files</h1>
                 <div id="form-file-drop">
-                    <h2>0 files selected.</h2>
+                    <h2><span>0</span> files selected.<br>(Limit 100)</h2>
                     <input type="file" name="user-media[]" multiple accept="<?php include_once("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
                 </div>
                 <div id="form-button-row">

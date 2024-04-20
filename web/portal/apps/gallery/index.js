@@ -45,8 +45,8 @@ $(document).ready(async () => {
         form.files = transfer.files;
 
         // update display
-        const display = (form.files ? form.files.length : 0) + " files selected.";
-        $(form.parentElement).find("h2").html(display);
+        const display = (form.files ? form.files.length : 0);
+        $(form.parentElement).find("h2 > span").html(display);
 
         // check for form submit disable
         $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);
@@ -58,8 +58,8 @@ $(document).ready(async () => {
         e.preventDefault();
 
         // update display
-        const display = (this.files ? this.files.length : 0) + " files selected.";
-        $(this.parentElement).find("h2").html(display);
+        const display = (this.files ? this.files.length : -10);
+        $(this.parentElement).find("h2 > span").html(display);
 
         // check for form submit disable
         $("#upload-form-content").find("input[type=submit]").attr("disabled", (this.files ? this.files.length : 0) === 0);
@@ -458,8 +458,8 @@ async function showForm(formType) {
 
         // update display
         const form = $("#upload-form-content").find("form")[0];
-        const display = (form.files ? form.files.length : 0) + " files selected.";
-        $(form.parentElement).find("h2").html(display);
+        const display = (form.files ? form.files.length : 0);
+        $(form.parentElement).find("h2 > span").html(display);
 
         // check for form submit disable
         $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);

@@ -53,6 +53,7 @@
                     `orientation` BIT(3) NOT NULL ,
                     `uploaded` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
                     `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+                    `deletion_date` timestamp NULL DEFAULT NULL
                     PRIMARY KEY (`id`)
                 ) ENGINE = InnoDB;
             ");

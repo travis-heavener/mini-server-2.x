@@ -16,7 +16,9 @@
 
     // 3. verify auth
     include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
-    $user_data = check_auth(true);
+    $envs = loadEnvs();
+    $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
+    $user_data = check_auth(true, $envs, $mysqli);
 
     if (gettype($user_data) !== "array") {
         // tell the page to reload for anything that isn't proper user_data being returned (ie. invalid auth)
@@ -25,18 +27,14 @@
     }
 
     $user_id = $user_data["id"];
-
-    // 4. load mysqli
-    $envs = loadEnvs();
-    $mysqli = new mysqli($envs["HOST"], $envs["USER"], $envs["PASS"], $envs["DBID"]);
     
-    if (!preg_match("/^\d+$/", $user_data["id"])) {
-        // disallow any user ids that aren't numbers
+    // 4. prevent using the recycle bin name as an album name
+    if ($new_name == RECYCLE_BIN_NAME) {
         header('HTTP/1.0 403 Forbidden');
-        exit("Error: auth_error\nnull.");
+        exit("Error: Invalid Name\nThe specified album name is not allowed.");
     }
 
-    $table = TABLE_STEM . dechex($user_data["id"]);
+    $table = TABLE_STEM . dechex($user_id);
 
     // 5. rename content in the database
     $statement = $mysqli->prepare("UPDATE `$table` SET `album_name`=? WHERE `album_name`=?;");

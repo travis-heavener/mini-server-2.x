@@ -27,6 +27,12 @@
     // 4. get album name
     $album_name = $_POST["albumName"];
 
+    // prevent using the recycle bin name as an album name
+    if ($album_name == RECYCLE_BIN_NAME) {
+        header('HTTP/1.0 403 Forbidden');
+        exit("Error: Invalid Name\nThe specified album name is not allowed.");
+    }
+
     // 5. get from database
     $table = $table = TABLE_STEM . dechex($user_data["id"]);
     $statement = $mysqli->prepare("SELECT COUNT(*) FROM `$table` WHERE `album_name`=?;");

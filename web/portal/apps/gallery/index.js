@@ -226,16 +226,6 @@ async function loadContent({albumName, page}) {
     // update the page we are on
     CONTENT.album.currentPage = page;
     CONTENT.album.name = albumName;
-
-    // allow the results per page to be toggled via dropdown (ie 25,50,75,100) alongside page pickers
-    // default 50, but when changing results per page revert to page 1
-    // when uploading files, reload the content on that page of the album, NOT the actual page
-
-    // when adding an album, don't do anything on the backend until we upload files
-    // allow small pngs to be saved as pngs instead of jpegs
-
-    // on top, allow a select button for multi select or allow shift clicking
-    // have a delete icon as well, confirm when pressed to delete any things selected (gray out when nothing is selected)
 }
 
 // show a larger, full-size preview of a picture/video
@@ -541,19 +531,18 @@ function uploadFile() {
 
 // asks to confirm deletion of all things selected
 async function deleteSelection() {
-    // get selected elements
-    const contentIds = [...$("[data-is-selected=true] > img, [data-is-selected=true] > video")].map(elem => parseInt($(elem).attr("data-content-id")));
-    
+    // get selected elements by their content ids
+    const contentIds = [
+        ...$("[data-is-selected=true] > img, [data-is-selected=true] > video")
+    ].map(elem => parseInt($(elem).attr("data-content-id")));
+
     // prevent call since nothing is selected
-    if (!contentIds.length)
-        return $("#delete-icon").attr("data-disabled", "true");
+    if (!contentIds.length) return $("#delete-icon").attr("data-disabled", "true");
 
     // confirm delete
-    const willDelete = await confirmPrompt(
-        "Confirm Delete",
+    const willDelete = await confirmPrompt("Confirm Delete",
         `Are you sure you want to delete ${contentIds.length} file${contentIds.length > 1 ? "s" : ""}?`,
-        "Yes", "Cancel"
-    );
+        "Yes", "Cancel");
 
     if (!willDelete)
         return promptUser("Delete Cancelled", "Files not deleted from server.", false);
@@ -566,7 +555,7 @@ async function deleteSelection() {
             "album-name": CONTENT.album.name,
             "content-ids": JSON.stringify(contentIds)
         },
-        "success": res => focusAlbum(CONTENT.album.name, true),
+        "success": () => window.location.reload(),
         "error": e => handleError(e)
     });
 }

@@ -17,6 +17,7 @@
         "video/x-msvideo" // .avi
     ]);
     define("TABLE_STEM", "gallery__"); // stem for all table names in database
+    define("RECYCLE_BIN_NAME", "Recycle Bin"); // name for recycled content destination
 
     // modified from SO, handy function for resizing images (reduces client memory footprint dramatically) (https://stackoverflow.com/a/45479025)
     function resize_image($data, $width, $height, $raw_width, $raw_height) {
@@ -80,7 +81,7 @@
         $tmp_path = pathinfo($path)["filename"] . ".jpg";
 
         // crop the video down
-        exec("ffmpeg -ss 00:00:01.00 -i \"$path\" -vf crop='min(in_w,in_h)':'min(in_w,in_h)' -vf scale=$width:$height -vframes 1 \"$tmp_path\"");
+        exec("ffmpeg -ss 00:00:00.00 -i \"$path\" -vf crop='min(in_w,in_h)':'min(in_w,in_h)' -vf scale=$width:$height -vframes 1 \"$tmp_path\"");
 
         // return the content from the file
         $contents = file_get_contents($tmp_path);

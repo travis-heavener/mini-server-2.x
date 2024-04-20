@@ -142,6 +142,16 @@
 
         if ($_mysqli === null)
             $mysqli->close();
+        
+        // disallow any user ids that aren't numbers
+        if (!preg_match("/^\d+$/", $id)) {
+            header('HTTP/1.0 403 Forbidden');
+            $mysqli->close();
+            if ($force_return)
+                return;
+            else
+                exit("Error: auth_error\nnull.");
+        }
 
         // store user data in disclosed variables
         $user_data = $rows[0];

@@ -564,10 +564,28 @@ function uploadFile() {
     const fileInput = $(form).find("input[type='file']")[0];
     let data = new FormData(form);
 
+    const fail = (title, text) => {
+        fileInput.value = null;// clear files
+        $(form.parentElement).find("h2 > span").html(0); // update display
+        promptUser(title, text);
+    };
+
     // prevent uploading to no album
-    if (CONTENT.album.name === "" || CONTENT.album.name === "Recycle Bin") {
-        promptUser("Invalid Album", "Cannot upload to album or Recycle Bin. Either create a new album.");
-        return;
+    if (CONTENT.album.name === "" || CONTENT.album.name === "Recycle Bin")
+        return fail("Invalid Album", "Cannot upload to album or Recycle Bin. Either create a new album.");
+    
+    // prevent uploading too many files
+    if (fileInput.files.length > 100)
+        return fail("Too Many Files", "Cannot upload more than 100 files at a time.");
+
+    // prevent exceeding max post file size
+    const maxBytes = 500_000_000; // 500MB
+    let totalBytes = 0;
+    for (let file of fileInput.files) {
+        totalBytes += file.size;
+        console.log(totalBytes);
+        if (totalBytes > maxBytes)
+            return fail("Max Size Exceeded", "Cannot upload more than 500MB at a time.");
     }
 
     // add album name

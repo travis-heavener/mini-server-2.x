@@ -74,7 +74,18 @@
         exit("Error: Invalid Cipher\nThe provided cipher was not recognized by the server.");
     }
 
+    // get initial entry id
+    $dbname = $envs["DBID"];
     $table = TABLE_STEM . dechex($user_data["id"]);
+    $statement = $mysqli->prepare(
+        "SELECT `AUTO_INCREMENT` FROM  INFORMATION_SCHEMA.TABLES " .
+        "WHERE TABLE_SCHEMA='$dbname' AND TABLE_NAME='$table';
+    ");
+    $statement->execute();
+    $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+    $id = $rows[0]["AUTO_INCREMENT"] - 1; // remove 1 bc this is the next id
+    $statement->close();
+
     for ($i = 0; $i < count($files_data); $i++) {
         $file = $files_data[$i];
         $width = $dimensions[$i][0];
@@ -113,12 +124,8 @@
         $statement->execute();
         $statement->close();
 
-        // 9. get id
-        $statement = $mysqli->prepare("SELECT LAST_INSERT_ID();");
-        $statement->execute();
-        $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
-        $id = $rows[0]["LAST_INSERT_ID()"];
-        $statement->close();
+        // 9. increment id
+        $id++;
 
         $image_path = gen_media_path($envs["GALLERY_PATH"], $user_id, $id);
         $thumb_path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $id);

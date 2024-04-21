@@ -2,10 +2,10 @@
     // helper functions for content scaling & such
 
     define("THUMB_SIZE", 128); // size of image thumbnails, in px
-    define("CIPHER", "aes-256-ctr");
+    define("CIPHER", "aes-128-ctr");
     define("IVLEN", openssl_cipher_iv_length(CIPHER));
-    define("CHUNK_COUNT", 10000); // each chunk is 16 bytes, so memory usage is CHUNK_COUNT * 16 bytes
-    define("BLOCK_SIZE", 16); // each chunk is 16 bytes, so memory usage is CHUNK_COUNT * 16 bytes
+    define("CHUNK_COUNT", 5000); // each chunk is N bytes, so memory usage is CHUNK_COUNT * N bytes
+    define("BLOCK_SIZE", 10240);
     define("SUPPORTED_MIMES", [
         // source: https://mimetype.io/all-types
         "image/png", // .png

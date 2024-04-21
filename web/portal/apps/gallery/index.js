@@ -16,14 +16,11 @@ $(document).ready(async () => {
 
     // load initial content
     const albums = await loadAlbums();
-    if (albums.length)
-        focusAlbum(albums[0]["album_name"]);
+    if (albums.length) focusAlbum(albums[0]["album_name"]);
 
     // bind menu picker events
     $("#add-btn").click(function(e) {
-        if (e.target === this) {
-            $(this.parentElement).toggleClass("selected");
-        }
+        if (e.target === this) $(this.parentElement).toggleClass("selected");
     });
 
     // make file upload areas drag and droppable
@@ -72,6 +69,22 @@ $(document).ready(async () => {
         if (e.target === this) {
             e.preventDefault(); // prevent resubmitting form
             $("#upload-form-content").css("display", "none");
+        }
+    });
+
+    // bind select mode to shift key
+    $(window).on("keydown", e => {
+        if ((e.shiftKey || e.ctrlKey) && !CONTENT.isSelecting) {
+            e.preventDefault();
+            toggleSelectMode.bind($("#selection-checkbox")[0])(true);
+        }
+    });
+    
+    $(window).on("keyup", e => {
+        // shift is 16, ctrl is 17
+        if ((e.keyCode === 16 || e.keyCode === 17) && !CONTENT.selection.length) {
+            e.preventDefault();
+            toggleSelectMode.bind($("#selection-checkbox")[0])(false);
         }
     });
 });
@@ -124,7 +137,8 @@ async function loadContent({albumName, page}) {
             "method": "GET",
             "headers": {
                 "MS2_offset": pageOffset, "MS2_maxAmt": amtPerPage, "MS2_albumName": albumName
-            }
+            },
+            "cache": false
         });
     } catch (err) {
         return handleError(err);
@@ -156,7 +170,7 @@ async function loadContent({albumName, page}) {
         // queue ajax call (rather than awaiting, this allows all image placeholders AND thus content to load at once instead of one-by-one)
         resolveSrcToBlob(ids[i], preloadInfo[i].mime.startsWith("image"))
             .then(({url, headers}) => buildContentElem(url, headers, preloadInfo[i].mime, elem))
-            // .catch(handleError);
+            .catch(handleError);
     }
 
     // update the page we are on
@@ -339,7 +353,12 @@ function focusAlbum(albumName, forceLoad=false) {
     toggleSelectMode.bind($("#selection-checkbox")[0])(false); // uncheck the selection mode
     
     // remove all the content-container elements on the DOM already and load up the new album from page 1
-    $("#album-content > .content-container").remove();
+    $("#album-content > .content-container").each(function() {
+        // revoke BLOB url & remove
+        let url = $(this).find("#album-content-" + this.id.split("-")[2])[0].src;
+        URL.revokeObjectURL(url);
+        $(this).remove();
+    });
 
     // highlight the album picker icon
     $(".album-icon.selected-album-icon").removeClass("selected-album-icon");
@@ -365,7 +384,7 @@ async function loadAlbums() {
                     let previewImg = "<img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' draggable='false' alt='Album icon image.'>";
 
                     if (entry.id !== null) {
-                        const {url, headers} = await resolveSrcToBlob(entry.id);
+                        const {url, headers} = await resolveSrcToBlob(entry.id, true);
                         if (!headers.isDefaultIcon)
                             previewImg = `<img src="${url}" class='album-icon-img' draggable='false' alt='Album icon image.'>`;
 
@@ -381,7 +400,8 @@ async function loadAlbums() {
                 // return the raw JSON response
                 resolve(body);
             },
-            "error": err => handleError(err)
+            "error": err => handleError(err),
+            "cache": false
         });
     });
 }
@@ -417,7 +437,8 @@ function resolveSrcToBlob(id, isThumb=true) {
 
                 resolve({"url": url, "headers": headers});
             },
-            "error": err => handleError(err)
+            "error": err => handleError(err),
+            "cache": false
         });
     });
 }
@@ -485,8 +506,13 @@ function showUploadMenu() {
 // shown when a user selects "edit album" in the menu
 async function showEditMenu() {
     // allow users to edit an album (ie. rename, delete)
-    const choice = await triplePrompt("Edit Album", "Select an option:", "Rename", "Delete", "Cancel");
     const albumName = CONTENT.album.name;
+    let choice;
+    try {
+        choice = await triplePrompt("Edit Album", "Select an option:", "Rename", "Delete", "Cancel");
+    } catch (e) {
+        return; // ignore silent errors
+    }
 
     switch (choice) {
         case 1: {

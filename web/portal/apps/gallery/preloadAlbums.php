@@ -12,6 +12,7 @@
         );
         $statement->execute();
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+        // print_r($rows);
         $statement->close();
 
         // add album previews
@@ -21,7 +22,7 @@
             $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
 
             // if the file doesn't exist, grab the next item
-            if (!file_exists($path)) {
+            if (!file_exists($path) && false) {
                 // get the next image if the newest album entry is not an image (ie. video)
                 $table = TABLE_STEM . dechex($user_id);
                 $statement = $mysqli->prepare("SELECT * FROM $table WHERE `album_name`=? ORDER BY `uploaded` DESC, `id` DESC LIMIT 1;");
@@ -31,7 +32,6 @@
                 $statement->close();
                 
                 if (count($temp_rows) > 0) {
-                    $path = $envs["GALLERY_PATH"] . dechex($user_id) . "_" . dechex($temp_rows[0]["id"]) . ".bin";
                     $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
                     if (file_exists($path)) {
                         $rows[$i] = $temp_rows[0];

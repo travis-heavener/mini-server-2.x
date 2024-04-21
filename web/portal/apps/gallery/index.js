@@ -49,7 +49,8 @@ $(document).ready(async () => {
         $(form.parentElement).find("h2 > span").html(display);
 
         // check for form submit disable
-        $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);
+        $("#upload-form-content").find("input[type=submit]")
+            .attr("disabled", (form.files ? form.files.length : 0) === 0);
     });
 
     $("#form-file-drop").click(function(e) {  $(this).find("input")[0].click();  });
@@ -62,7 +63,8 @@ $(document).ready(async () => {
         $(this.parentElement).find("h2 > span").html(display);
 
         // check for form submit disable
-        $("#upload-form-content").find("input[type=submit]").attr("disabled", (this.files ? this.files.length : 0) === 0);
+        $("#upload-form-content").find("input[type=submit]")
+            .attr("disabled", (this.files ? this.files.length : 0) === 0);
     });
 
     // prevent "cancel" button from submitting UPLOAD form
@@ -117,22 +119,17 @@ async function loadContent({albumName, page}) {
             "url": "preloadContent.php",
             "method": "GET",
             "headers": {
-                "MS2_offset": pageOffset,
-                "MS2_maxAmt": amtPerPage,
-                "MS2_albumName": albumName
+                "MS2_offset": pageOffset, "MS2_maxAmt": amtPerPage, "MS2_albumName": albumName
             }
         });
     } catch (err) {
-        handleError(err);
-        return;
+        return handleError(err);
     }
 
     // parse the response
     preloadInfo = JSON.parse(preloadInfo);
 
-    const ids = [];
-    for (let info of preloadInfo)
-        ids.push(info.id);
+    const ids = Object.values(preloadInfo).map(info => info.id);
 
     // display placeholder info & queue an ajax call for each
     for (let i = 0; i < ids.length; i++) {
@@ -154,78 +151,83 @@ async function loadContent({albumName, page}) {
 
         // queue ajax call (rather than awaiting, this allows all image placeholders AND thus content to load at once instead of one-by-one)
         resolveSrcToBlob(ids[i], preloadInfo[i].mime.startsWith("image"))
-            .then(({url, headers}) => {
-                const mime = preloadInfo[i].mime;
-
-                if (url === null) {
-                    elem.src = "/assets/app-icons/gallery.png"; // load default icon
-                } else if (mime.startsWith("image")) {
-                    // we have an image, so just replace this one
-                    elem.src = url;
-                    if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
-                    $(elem).attr("alt", "Album image.");
-                } else if (mime.startsWith("video")) {
-                    // we have a video, so replace this image with a video
-                    elem.outerHTML = `<video id="${id}" src="${url}" alt="Album video.">`;
-                    elem = $("#" + id); // update reference after changing outerHTML
-
-                    // play on hover
-                    $(elem).on("mouseenter", function() {
-                        this.muted = true, this.loop = true, this.play();
-                        $(this).on("mouseleave", function() {
-                            this.pause(), this.currentTime = 0;
-                        });
-                    });
-
-                    // append an additional play icon overlay
-                    $(wrapper).append(`<div class="play-overlay"><img draggable="false" src="/assets/apps/gallery/play-icon.png"></div>`);
-                } else {
-                    return console.warn("Unexpected MIME type: " + mime);
-                }
-
-                // if the source or element has changed, add click events
-                if (url !== null) {
-                    // initially set custom attributes
-                    $(wrapper).attr("data-is-selected", false);
-
-                    // bind click events to the wrapper
-                    $(wrapper).click(async function() {
-                        if (CONTENT.isSelecting) { // allow wrapper container to be selected/unselected when clicked
-                            const isSelected = $(this).attr("data-is-selected") === "false";
-                            $(this).attr("data-is-selected", isSelected);
-
-                            // update the element
-                            if (isSelected) {
-                                CONTENT.selection.push(this.id);
-                                $("#delete-icon").attr("data-disabled", "false"); // enable the delete icon
-                                $(this).addClass("content-selected");
-                            } else {
-                                $(this).removeClass("content-selected");
-                                const index = CONTENT.selection.indexOf(this.id);
-                                CONTENT.selection.splice(index, 1);
-                                
-                                if (!CONTENT.selection.length)
-                                    $("#delete-icon").attr("data-disabled", "true"); // disable the delete icon
-                            }
-                        } else { // allow each wrapper container to focus in large view
-                            // resolve raw content source if image, if video use the source (video thumbnails are only for album icons)
-                            showLargeContent(ids[i], elem, headers);
-                        }
-                    });
-                }
-
-                // append extra metadata
-                $(elem).attr("data-content-id", ids[i]);
-                $(elem).attr("data-fname", headers.name);
-            })
-            .catch((err) => {
-                handleError(err);
-            });
+            .then(({url, headers}) => buildContentElem(url, headers, preloadInfo[i].mime, elem))
+            // .catch(handleError);
     }
 
     // update the page we are on
     CONTENT.album.currentPage = page;
     CONTENT.album.name = albumName;
+}
+
+// separated from above method, creates element to hold BLOB data
+function buildContentElem(url, headers, mime, elem) {
+    const wrapper = elem.parentElement;
+    const id = parseInt(headers.id);
+
+    if (url === null) {
+        elem.src = "/assets/app-icons/gallery.png"; // load default icon
+    } else if (mime.startsWith("image")) { // we have image, so just replace this one
+        elem.src = url;
+        if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
+        $(elem).attr("alt", "Album image.");
+    } else if (mime.startsWith("video")) { // we have video, replace this image w/ a video
+        elem.outerHTML = `<video id="${elem.id}" src="${url}" alt="Album video.">`;
+        elem = $("#" + elem.id); // update reference to elem
+
+        // play on hover
+        $(elem).on("mouseenter", function() {
+            this.muted = this.loop = true;
+            this.play();
+            $(this).on("mouseleave", function() {
+                this.pause();
+                this.currentTime = 0;
+            });
+        });
+
+        // append an additional play icon overlay
+        $(wrapper).append(`<div class="play-overlay">
+            <img draggable="false" src="/assets/apps/gallery/play-icon.png">
+        </div>`);
+    } else {
+        return console.warn("Unexpected MIME type: " + mime);
+    }
+
+    // if the source or element has changed, add click events
+    if (url !== null) {
+        // initially set custom attributes
+        $(wrapper).attr("data-is-selected", false);
+
+        // bind click events to the wrapper
+        $(wrapper).click(async function() {
+            if (CONTENT.isSelecting) { // allow wrapper container to be selected/unselected when clicked
+                const isSelected = $(this).attr("data-is-selected") === "false";
+                $(this).attr("data-is-selected", isSelected);
+
+                // update the element
+                if (isSelected) {
+                    CONTENT.selection.push(this.id);
+                    $("#delete-icon").attr("data-disabled", "false"); // enable the delete icon
+                    $(this).addClass("content-selected");
+                } else {
+                    $(this).removeClass("content-selected");
+                    const index = CONTENT.selection.indexOf(this.id);
+                    CONTENT.selection.splice(index, 1);
+                    
+                    if (!CONTENT.selection.length)
+                        $("#delete-icon").attr("data-disabled", "true"); // disable the delete icon
+                }
+            } else { // allow each wrapper container to focus in large view
+                // resolve raw content source if image,
+                // if video use raw source (video thumbnails only for album icons)
+                showLargeContent(id, elem, headers);
+            }
+        });
+    }
+
+    // append extra metadata
+    $(elem).attr("data-content-id", id);
+    $(elem).attr("data-fname", headers.name);
 }
 
 // show a larger, full-size preview of a picture/video
@@ -434,8 +436,10 @@ async function showForm(formType) {
 
         // create a new album-icon and bind the edit function to it
         $("#album-picker").prepend(`
-            <div class="album-icon noselect" data-album-name="${albumName}" onclick="focusAlbum($(this).attr('data-album-name'))">
-                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon' draggable='false' alt='Album icon image.'>
+            <div class="album-icon noselect" data-album-name="${albumName}"
+                onclick="focusAlbum($(this).attr('data-album-name'))">
+                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon'
+                    draggable='false' alt='Album icon image.'>
                 <h1>${albumName}</h1>
             </div>
         `);
@@ -452,7 +456,8 @@ async function showForm(formType) {
         $(form.parentElement).find("h2 > span").html(display);
 
         // check for form submit disable
-        $("#upload-form-content").find("input[type=submit]").attr("disabled", (form.files ? form.files.length : 0) === 0);
+        $("#upload-form-content").find("input[type=submit]")
+            .attr("disabled", (form.files ? form.files.length : 0) === 0);
     } else if (formType === "edit-album") {
         // allow users to edit an album (ie. rename, delete)
         throw new Error("todo, starting here.");
@@ -485,7 +490,7 @@ function uploadFile() {
             "contentType": false,
             "processData": false,
             "success": function(res) { // success, prompt user with success message
-                promptUser("Form Submission", "Files uploaded successfully.", false);
+                promptUser("Success", "Files uploaded successfully.", false);
                 $("#upload-form-content").css("display", "none");
 
                 // focus the first page of the album
@@ -509,7 +514,6 @@ function uploadFile() {
             $(dummyVideo).on("loadedmetadata", function() {
                 dimensions[i] = [this.videoWidth, this.videoHeight];
                 URL.revokeObjectURL(url);
-
                 checkCompletion();
             });
             dummyVideo.src = url;
@@ -519,7 +523,6 @@ function uploadFile() {
             $(dummyImage).on("load", function() {
                 dimensions[i] = [this.width, this.height];
                 URL.revokeObjectURL(url);
-
                 checkCompletion();
             });
             dummyImage.src = url;
@@ -644,7 +647,6 @@ function bindTextScroll() {
 }
 
 function handleError(e) {
-    // console.warn("Failure", e);
     const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
     const title = msg.split("\n")[0];
     const body = msg.split("\n")[1];

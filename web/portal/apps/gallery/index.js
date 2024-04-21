@@ -583,7 +583,6 @@ function uploadFile() {
     let totalBytes = 0;
     for (let file of fileInput.files) {
         totalBytes += file.size;
-        console.log(totalBytes);
         if (totalBytes > maxBytes)
             return fail("Max Size Exceeded", "Cannot upload more than 500MB at a time.");
     }

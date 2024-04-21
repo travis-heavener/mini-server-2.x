@@ -93,8 +93,13 @@ function toggleSelectMode(overrideTo=null) {
     }
 
     // clear current selection
-    if (!CONTENT.isSelecting) $("#delete-icon").attr("data-disabled", "true"); // disable delete if not selecting
-    if (!CONTENT.isSelecting) $("#restore-icon").attr("data-disabled", "true"); // disable restore if not selecting
+    // disable icons if not selecting
+    if (!CONTENT.isSelecting) {
+        $("#delete-icon").attr("data-disabled", "true");
+        $("#restore-icon").attr("data-disabled", "true");
+        $("#download-icon").attr("data-disabled", "true");
+    }
+
     CONTENT.selection = [];
 
     // unselect each selected content container
@@ -207,6 +212,7 @@ function buildContentElem(url, headers, mime, elem) {
                 if (isSelected) {
                     CONTENT.selection.push(this.id);
                     // enable icons
+                    $("#download-icon").attr("data-disabled", "false");
                     $("#delete-icon").attr("data-disabled", "false");
                     if (CONTENT.album.name === "Recycle Bin")
                         $("#restore-icon").attr("data-disabled", "false");
@@ -218,8 +224,9 @@ function buildContentElem(url, headers, mime, elem) {
                     
                     // disable icons if selection is empty
                     if (!CONTENT.selection.length) {
-                        $("#delete-icon").attr("data-disabled", "true");
+                        $("#download-icon").attr("data-disabled", "true");
                         $("#restore-icon").attr("data-disabled", "true");
+                        $("#delete-icon").attr("data-disabled", "true");
                     }
                 }
             } else { // allow each wrapper container to focus in large view
@@ -233,16 +240,21 @@ function buildContentElem(url, headers, mime, elem) {
     // append extra metadata
     $(elem).attr("data-content-id", id);
     $(elem).attr("data-fname", headers.name);
+    $(elem).attr("data-mime", headers.mime);
 }
 
 // show a larger, full-size preview of a picture/video
 async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
-    let largeSrc = $(thumbnailElem).is("video") ? $(thumbnailElem)[0].src : null;
+    const isVideo = $(thumbnailElem).is("video");
+    let largeSrc = isVideo ? $(thumbnailElem)[0].src : null;
     let filesize = thumbnailHeaders.filesize;
     
     if (largeSrc === null) { // load large src
         const largeRes = await resolveSrcToBlob(contentID, false);
         if (largeRes.url === null || largeRes.headers.isDefaultIcon) {
+            // free BLOB url
+            if (largeRes.url !== null) URL.revokeObjectURL(largeRes.url);
+
             // an error occured grabbing the image, so prevent loading
             handleError({"responseText": "Error: Content Resolve Issue\nThe requested \
                         content could not be fetched from the server. Try reloading \
@@ -256,10 +268,13 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
     }
 
     // append large view
-    let preview = `<img class="noselect" draggable="false" src="${largeSrc}" data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}">`;
+    let preview = `<img class="noselect" draggable="false" src="${largeSrc}"
+                        data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}"
+                        data-mime="${thumbnailHeaders.mime}">`;
     
-    if ($(thumbnailElem).is("video"))
-        preview = `<video class="noselect" controls src="${largeSrc}" data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}">`;
+    if (isVideo)
+        preview = `<video class="noselect" controls src="${largeSrc}" data-content-id="${contentID}"
+                          data-fname="${thumbnailHeaders.name}" data-mime="${thumbnailHeaders.mime}">`;
 
     $("body").append(`
         <div class="large-content-container">
@@ -273,6 +288,8 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
     let textScrollInterval = null;
     
     const closeView = () => {
+        // free BLOB if not a video
+        if (!isVideo) URL.revokeObjectURL(largeSrc);
         $(".large-content-container").remove();
         $(window).off("keydown.closeLargeContent");
         if (textScrollInterval !== null)
@@ -280,13 +297,11 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
     };
     
     $(".large-content-container").click(function(e) {
-        if (e.target === this)
-            closeView();
+        if (e.target === this) closeView();
     });
 
     $(window).on("keydown.closeLargeContent", (e) => {
-        if (e.originalEvent.code === "Escape")
-            closeView();
+        if (e.originalEvent.code === "Escape") closeView();
     });
 
     // bind text scroll event to file name
@@ -595,6 +610,39 @@ async function restoreSelection() {
         "success": () => window.location.reload(),
         "error": e => handleError(e)
     });
+}
+
+// download all selected content one-at-a-time
+async function downloadSelection() {
+    // iterate over all selected content, download its source
+    for (const elemId of CONTENT.selection) {
+        // grab the BLOB url
+        const elem = $("#" + elemId);
+        const isImg = elem.find("video").length === 0; // can't use IMG, videos have IMG play icon
+        let blob, MIME, name;
+
+        // resolve SRC if image, otherwise grab video SRC
+        if (isImg) {
+            const imgId = $("#" + elemId + ">img").attr("data-content-id");
+            await resolveSrcToBlob(parseInt(imgId), false)
+                .then(res => {
+                    blob = res.url;
+                    MIME = res.headers.mime;
+                    name = res.headers.name;
+                })
+                .catch(err => handleError(err));
+        } else { // grab video SRC
+            blob = elem.find("video")[0].src;
+            MIME = elem.find("video").attr("data-mime");
+            name = elem.find("video").attr("data-fname");
+        }
+
+        // download BLOB url
+        saveAs(blob, name, {type: MIME});
+
+        // free IMG blob URLs since they're only temp generated
+        if (isImg) URL.revokeObjectURL(blob);
+    }
 }
 
 /********************* misc *********************/

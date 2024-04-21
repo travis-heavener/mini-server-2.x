@@ -424,18 +424,26 @@ body {
     border: 2px solid #4400e9;
 }
 
+#content-manager > #download-icon {
+    background-image: url("/assets/apps/gallery/download-icon.png");
+}
+
 #content-manager > #restore-icon {
     background-image: url("/assets/apps/gallery/restore-icon.png");
-    cursor: pointer;
-    transition: 0.2s filter;
 }
 
 #content-manager > #delete-icon {
     background-image: url("/assets/trash.png");
+}
+
+#content-manager > #download-icon,
+#content-manager > #restore-icon,
+#content-manager > #delete-icon {
     cursor: pointer;
     transition: 0.2s filter;
 }
 
+#content-manager > #download-icon[data-disabled=true],
 #content-manager > #restore-icon[data-disabled=true],
 #content-manager > #delete-icon[data-disabled=true] {
     display: none;

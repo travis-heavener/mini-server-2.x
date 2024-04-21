@@ -18,6 +18,8 @@
     ]);
     define("TABLE_STEM", "gallery__"); // stem for all table names in database
     define("RECYCLE_BIN_NAME", "Recycle Bin"); // name for recycled content destination
+    define("MAX_NAME_LEN", 32); // max and min length of album names
+    define("MIN_NAME_LEN", 3); // max and min length of album names
 
     // modified from SO, handy function for resizing images (reduces client memory footprint dramatically) (https://stackoverflow.com/a/45479025)
     function resize_image($data, $width, $height, $raw_width, $raw_height) {

@@ -4,15 +4,16 @@
     // upload a file to the system
     include_once("./toolbox.php");
 
-    // 1. check for POST
-    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    // 1. check for DELETE
+    if ($_SERVER["REQUEST_METHOD"] !== "DELETE") {
         header('HTTP/1.0 403 Forbidden');
-        exit("Error: Invalid request method\nExpected POST, got " . $_SERVER["REQUEST_METHOD"] . ".");
+        exit("Error: Invalid request method\nExpected DELETE, got " . $_SERVER["REQUEST_METHOD"] . ".");
     }
 
     // 2. extract body
-    $album_name = $_POST["album-name"];
-    $ids = json_decode($_POST["content-ids"]);
+    $data = json_decode(file_get_contents("php://input"), true);
+    $album_name = $data["album-name"];
+    $ids = $data["content-ids"];
 
     // 3. verify auth & load mysqli
     include($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");

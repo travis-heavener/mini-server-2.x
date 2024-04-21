@@ -213,6 +213,13 @@ body {
     width: 100%;
 }
 
+/* formatting for triple-option prompt */
+.user-prompt .prompt-triple { width: 33%; }
+.user-prompt .prompt-triple:nth-of-type(2) {
+    background-color: #9c360d;
+    box-shadow: 0.125em 0.125em 0em #5f1208;
+}
+
 @keyframes promptAppear {
     from {
         opacity: 0;

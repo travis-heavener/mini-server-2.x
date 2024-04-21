@@ -64,7 +64,7 @@ const confirmPrompt = (title, text, confirmText="Yes", rejectText="No") => {
         $(wrapper).click(function(e) {
             const attr = $(e.target).attr("data-resolve-to");
             if (typeof(attr) === "undefined" || attr === false) return;
-
+            
             wrapper.parentElement.removeChild(wrapper);
             resolve(attr === "true");
         });
@@ -111,6 +111,36 @@ const textPrompt = (title, text, minLength=0, maxLength=null) => {
             $(wrapper).remove();
             resolve(text.trim());
             return false;
+        });
+    });
+};
+
+const triplePrompt = (title, text, textA="Option A", textB="Option B", textC="Option C") => {
+    // create modal
+    const wrapper = document.createElement("div");
+    $(wrapper).addClass("user-prompt");
+    $(wrapper).attr("data-resolve-to", false);
+
+    $(wrapper).append(`
+        <div>
+            <h1>${title}</h1>
+            <p>${text}</p>
+            <div class="button-row">
+                <button class="prompt-triple" data-resolve-to="1">${textA}</button>
+                <button class="prompt-triple" data-resolve-to="2">${textB}</button>
+                <button class="prompt-triple" data-resolve-to="3">${textC}</button>
+            </div>
+        </div>
+    `);
+    $("body").append(wrapper);
+
+    return new Promise((resolve) => {
+        $(wrapper).click(function(e) {
+            const attr = $(e.target).attr("data-resolve-to");
+            if (typeof(attr) === "undefined" || attr === false) return;
+
+            wrapper.parentElement.removeChild(wrapper);
+            resolve(parseInt(attr));
         });
     });
 };

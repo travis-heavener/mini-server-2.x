@@ -15,6 +15,13 @@
     $dimensions = json_decode($_POST["dimensions"]);
     $timestamps = json_decode($_POST["timestamps"]);
 
+    // verify album name is proper length
+    if ($album_name == RECYCLE_BIN_NAME
+        || strlen($album_name) < MIN_NAME_LEN || strlen($album_name) > MAX_NAME_LEN) {
+        header('HTTP/1.0 403 Forbidden');
+        exit("Error: Invalid Name\nThe specified album name is not allowed.");
+    }
+    
     // 3. verify file type is accepted
     $files_data = [];
     if ($_FILES["user-media"]["name"][0] === "") {

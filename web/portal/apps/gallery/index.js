@@ -424,66 +424,112 @@ function resolveSrcToBlob(id, isThumb=true) {
 
 /********************* content upload stuff *********************/
 
-async function showForm(formType) {
-    if (formType === "new-album") {
-        // hide content upload form
-        $("#upload-form-content").css("display", "none");
+// shown when a user selects "new album" in the menu
+async function showNewAlbumMenu() {
+    // hide content upload form
+    $("#upload-form-content").css("display", "none");
 
-        let albumName;
-        try {
-            // get new album name
-            albumName = await textPrompt("New Album", "Enter a name between 3 and 32 characters.", 3, 32);
+    let albumName;
+    try {
+        // get new album name
+        albumName = await textPrompt("New Album", "Enter a name between 3 and 32 characters.", 3, 32);
 
-            // verify the name isn't in use
-            const isInUse = await $.ajax({
-                "url": "checkNameUsage.php",
-                "method": "POST",
-                "data": { "albumName": albumName }
-            });
+        // verify the name isn't in use
+        const isInUse = await $.ajax({
+            "url": "checkNameUsage.php",
+            "method": "POST",
+            "data": { "albumName": albumName }
+        });
 
-            // also check that the album isn't in the dom
-            const doElemsExist = [...$("div[data-album-name=\"" + albumName + "\"]")].length > 0;
+        // also check that the album isn't in the dom
+        const doElemsExist = [...$("div[data-album-name=\"" + albumName + "\"]")].length > 0;
 
-            if (isInUse === "true" || doElemsExist) {
-                handleError({"responseText": `Error: Album Name Taken\nThe requested album name \"${albumName}\" is already in use.`});
-                return;
-            }
-        } catch (e) {
-            handleError(e);
+        if (isInUse === "true" || doElemsExist) {
+            handleError({"responseText": `Error: Album Name Taken\nThe requested album name \"${albumName}\" is already in use.`});
             return;
         }
+    } catch (e) {
+        return handleError(e);
+    }
 
 
-        // create a new album-icon and bind the edit function to it
-        $("#album-picker").prepend(`
-            <div class="album-icon noselect" data-album-name="${albumName}"
-                onclick="focusAlbum($(this).attr('data-album-name'))">
-                <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon'
-                    draggable='false' alt='Album icon image.'>
-                <h1>${albumName}</h1>
-            </div>
-        `);
+    // create a new album-icon and bind the edit function to it
+    $("#album-picker").prepend(`
+        <div class="album-icon noselect" data-album-name="${albumName}"
+            onclick="focusAlbum($(this).attr('data-album-name'))">
+            <img src='/assets/app-icons/gallery.png' class='album-icon-img default-icon'
+                draggable='false' alt='Album icon image.'>
+            <h1>${albumName}</h1>
+        </div>
+    `);
 
-        // focus that album
-        focusAlbum(albumName);
-    } else if (formType === "upload") {
-        // show the new album writer
-        $("#upload-form-content").css("display", "flex");
+    // focus that album
+    focusAlbum(albumName);
+}
 
-        // update display
-        const form = $("#upload-form-content").find("form")[0];
-        const display = (form.files ? form.files.length : 0);
-        $(form.parentElement).find("h2 > span").html(display);
+// shown when a user selects "upload" in the menu
+function showUploadMenu() {
+    // show the new album writer
+    $("#upload-form-content").css("display", "flex");
 
-        // check for form submit disable
-        $("#upload-form-content").find("input[type=submit]")
-            .attr("disabled", (form.files ? form.files.length : 0) === 0);
-    } else if (formType === "edit-album") {
-        // allow users to edit an album (ie. rename, delete)
-        throw new Error("todo, starting here.");
+    // update display
+    const form = $("#upload-form-content").find("form")[0];
+    const display = (form.files ? form.files.length : 0);
+    $(form.parentElement).find("h2 > span").html(display);
+
+    // check for form submit disable
+    $("#upload-form-content").find("input[type=submit]")
+        .attr("disabled", (form.files ? form.files.length : 0) === 0);
+}
+
+// shown when a user selects "edit album" in the menu
+async function showEditMenu() {
+    // allow users to edit an album (ie. rename, delete)
+    const choice = await triplePrompt("Edit Album", "Select an option:", "Rename", "Delete", "Cancel");
+    const albumName = CONTENT.album.name;
+
+    switch (choice) {
+        case 1: {
+            // show rename prompt
+            const newName = await textPrompt("Rename Album", "Enter a name between 3 and 32 characters.", 3, 32);
+
+            $.ajax({
+                "url": "renameAlbum.php",
+                "method": "POST",
+                "data": { "album-name": albumName, "new-name": newName },
+                "success": () => {
+                    CONTENT.album.name = newName;
+                    $(`#album-picker > div[data-album-name="${albumName}"] > h1`).html(newName);
+                },
+                "error": e => handleError(e)
+            });
+            break;
+        }
+        case 2: {
+            // show delete prompt
+            const willDelete = await confirmPrompt(
+                "Delete Album?",
+                `Are you sure you want to delete "${albumName}" and move its contents to the Recycle Bin?`,
+                "Yes", "Cancel"
+            );
+
+            if (!willDelete)
+                return promptUser("Delete Cancelled", "Album not deleted.");
+
+            // base case, delete
+            $.ajax({
+                "url": "deleteAlbum.php",
+                "method": "DELETE",
+                "data": JSON.stringify({ "album-name": albumName }),
+                "success": () => window.location.reload(),
+                "error": e => handleError(e)
+            });
+            break;
+        }
     }
 }
 
+// function to upload all files in the file upload input elem
 function uploadFile() {
     const form = $("#upload-form")[0];
     const fileInput = $(form).find("input[type='file']")[0];
@@ -553,6 +599,8 @@ function uploadFile() {
     return false;
 }
 
+/********************* content manager button functions *********************/
+
 // asks to confirm deletion of all things selected
 async function deleteSelection() {
     // get selected elements by their content ids
@@ -574,11 +622,11 @@ async function deleteSelection() {
     // ajax call to delete
     $.ajax({
         "url": "deleteContent.php",
-        "method": "POST",
-        "data": {
+        "method": "DELETE",
+        "data": JSON.stringify({
             "album-name": CONTENT.album.name,
-            "content-ids": JSON.stringify(contentIds)
-        },
+            "content-ids": contentIds
+        }),
         "success": () => window.location.reload(),
         "error": e => handleError(e)
     });

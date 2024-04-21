@@ -39,15 +39,15 @@
                     <div id="delete-icon" title="Delete selection." onclick="deleteSelection()" data-disabled="true"></div>
                 </div>
                 <div id="add-container" class="noselect">
-                    <div id="edit-album-icon" onclick="showForm('edit-album')">
+                    <div id="edit-album-icon" onclick="showEditMenu()">
                         <h1>Edit Album</h1>
                         <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>
-                    <div id="add-album-icon" onclick="showForm('new-album')">
+                    <div id="add-album-icon" onclick="showNewAlbumMenu()">
                         <h1>New Album</h1>
                         <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>
-                    <div id="upload-icon" onclick="showForm('upload')">
+                    <div id="upload-icon" onclick="showUploadMenu()">
                         <h1>Upload</h1>
                         <!-- add icon to the right of each caption (make it less verbose) -->
                     </div>

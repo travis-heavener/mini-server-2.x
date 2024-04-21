@@ -71,13 +71,13 @@
 
     $remaining_ids = [];
     if (sizeof($rows) > 0)
-        foreach ($rows[0] as $key => $val)
-            array_push($remaining_ids, (string)$val);
+        foreach ($rows as $key => $val)
+            array_push($remaining_ids, $val["id"]);
     
     // 7. remove content from file system
     foreach ($ids as $id) {
         // only remove if the id doesn't exist
-        if (in_array($id, $remaining_ids))
+        if (in_array((int)$id, $remaining_ids))
             continue;
 
         $image_path = gen_media_path($envs["GALLERY_PATH"], $user_id, $id);

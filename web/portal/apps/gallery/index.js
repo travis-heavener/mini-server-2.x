@@ -474,6 +474,12 @@ function uploadFile() {
     const fileInput = $(form).find("input[type='file']")[0];
     let data = new FormData(form);
 
+    // prevent uploading to no album
+    if (CONTENT.album.name === "" || CONTENT.album.name === "Recycle Bin") {
+        promptUser("Invalid Album", "Cannot upload to album or Recycle Bin. Either create a new album.");
+        return;
+    }
+
     // add album name
     data.set("album-name", CONTENT.album.name);
 
@@ -487,6 +493,7 @@ function uploadFile() {
     const checkCompletion = () => {
         if (dimensions.includes(null)) return;
         data.set("dimensions", JSON.stringify(dimensions));
+        $("#upload-form-content").css("display", "none");
 
         $.ajax({
             "url": "uploadFile.php",
@@ -496,17 +503,11 @@ function uploadFile() {
             "processData": false,
             "success": function(res) { // success, prompt user with success message
                 promptUser("Success", "Files uploaded successfully.", false);
-                $("#upload-form-content").css("display", "none");
-
-                // focus the first page of the album
-                focusAlbum(CONTENT.album.name, true);
+                focusAlbum(CONTENT.album.name, true); // focus first page of album
             },
             "error": function(e) { // error, alert user
                 const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
-                const title = msg.split("\n")[0];
-                const body = msg.split("\n")[1];
-                promptUser(title, body, false);
-                $("#upload-form-content").css("display", "none");
+                promptUser(...msg.split("\n"), false); // show title and body
             }
         });
     };
@@ -563,6 +564,34 @@ async function deleteSelection() {
             "album-name": CONTENT.album.name,
             "content-ids": JSON.stringify(contentIds)
         },
+        "success": () => window.location.reload(),
+        "error": e => handleError(e)
+    });
+}
+
+// asks to restore selected content
+async function restoreSelection() {
+    // get selected elements by their content ids
+    const contentIds = [
+        ...$("[data-is-selected=true] > img, [data-is-selected=true] > video")
+    ].map(elem => parseInt($(elem).attr("data-content-id")));
+
+    // prevent call since nothing is selected
+    if (!contentIds.length) return $("#restore-icon").attr("data-disabled", "true");
+
+    // confirm delete
+    const willRestore = await confirmPrompt("Confirm Restore",
+        `Are you sure you want to restore ${contentIds.length} file${contentIds.length > 1 ? "s" : ""}?`,
+        "Yes", "Cancel");
+
+    if (!willRestore)
+        return promptUser("Restore Cancelled", "Files not restored from recycle bin.", false);
+
+    // ajax call to delete
+    $.ajax({
+        "url": "restoreContent.php",
+        "method": "POST",
+        "data": { "content-ids": JSON.stringify(contentIds) },
         "success": () => window.location.reload(),
         "error": e => handleError(e)
     });

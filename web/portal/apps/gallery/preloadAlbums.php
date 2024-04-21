@@ -52,7 +52,7 @@
         $recycled_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
         $statement->close();
 
-        if (sizeof($recycled_rows) > 0)
+        if (sizeof($recycled_rows) > 0 && !is_null($recycled_rows[0]["MAX(`id`)"]))
             array_push($rows, ["id"=>$recycled_rows[0]["MAX(`id`)"], "album_name"=>RECYCLE_BIN_NAME]);
 
         $mysqli->close();

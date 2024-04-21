@@ -29,9 +29,14 @@
     }
 
     $user_id = $user_data["id"];
-
-    // 4. generate mysqli data
     $table = TABLE_STEM . dechex($user_id);
+
+    // 4. verify not trying to delete Recycle Bin
+    if ($album_name === RECYCLE_BIN_NAME) {
+        header('HTTP/1.0 403 Forbidden');
+        $mysqli->close();
+        exit("Error: Delete Cancelled\nCannot delete \"Recycle Bin\" album.");
+    }
 
     // 5. delete album's non-recycled content and move to recycle bin
     $delete_ts = date("Y-m-d H:i:s", time() + (int)$envs["GALLERY_DELETE_DAYS"] * 86400);

@@ -539,6 +539,9 @@ async function showEditMenu() {
                 "Yes", "Cancel"
             );
 
+            if (CONTENT.album.name === "Recycle Bin")
+                return promptUser("Delete Cancelled", "Cannot delete \"Recycle Bin\" album.");
+
             if (!willDelete)
                 return promptUser("Delete Cancelled", "Album not deleted.");
 

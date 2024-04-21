@@ -80,22 +80,21 @@ $(document).ready(async () => {
 // NOTE: the element is bound to the function via `this` keyword (gotta love .bind())
 function toggleSelectMode(overrideTo=null) {
     // toggle the attribute
-    let isSelecting;
     if (overrideTo === null) {
-        isSelecting = $(this).attr("data-select-content") === "false";
-        $(this).attr("data-select-content", isSelecting);
+        CONTENT.isSelecting = $(this).attr("data-select-content") === "false";
+        $(this).attr("data-select-content", CONTENT.isSelecting);
         
         // notify user
-        passivePrompt("Click to select: o" + (isSelecting ? "n" : "ff"), true);
+        passivePrompt("Click to select: o" + (CONTENT.isSelecting ? "n" : "ff"), true);
     } else {
         // allow this function to be overridden
-        isSelecting = overrideTo;
+        CONTENT.isSelecting = overrideTo;
         $(this).attr("data-select-content", overrideTo);
     }
 
     // clear current selection
-    CONTENT.isSelecting = isSelecting;
-    if (!isSelecting) $("#delete-icon").attr("data-disabled", "true"); // disable delete if not selecting
+    if (!CONTENT.isSelecting) $("#delete-icon").attr("data-disabled", "true"); // disable delete if not selecting
+    if (!CONTENT.isSelecting) $("#restore-icon").attr("data-disabled", "true"); // disable restore if not selecting
     CONTENT.selection = [];
 
     // unselect each selected content container
@@ -207,15 +206,21 @@ function buildContentElem(url, headers, mime, elem) {
                 // update the element
                 if (isSelected) {
                     CONTENT.selection.push(this.id);
-                    $("#delete-icon").attr("data-disabled", "false"); // enable the delete icon
+                    // enable icons
+                    $("#delete-icon").attr("data-disabled", "false");
+                    if (CONTENT.album.name === "Recycle Bin")
+                        $("#restore-icon").attr("data-disabled", "false");
                     $(this).addClass("content-selected");
                 } else {
                     $(this).removeClass("content-selected");
                     const index = CONTENT.selection.indexOf(this.id);
                     CONTENT.selection.splice(index, 1);
                     
-                    if (!CONTENT.selection.length)
-                        $("#delete-icon").attr("data-disabled", "true"); // disable the delete icon
+                    // disable icons if selection is empty
+                    if (!CONTENT.selection.length) {
+                        $("#delete-icon").attr("data-disabled", "true");
+                        $("#restore-icon").attr("data-disabled", "true");
+                    }
                 }
             } else { // allow each wrapper container to focus in large view
                 // resolve raw content source if image,

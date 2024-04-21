@@ -28,6 +28,7 @@
             <div id="album-content">
                 <div id="content-manager">
                     <div id="selection-checkbox" title="Toggle content selection." data-select-content="false" onclick="toggleSelectMode.bind(this)()"></div>
+                    <div id="restore-icon" title="Restore selection." onclick="restoreSelection()" data-disabled="true"></div>
                     <div id="delete-icon" title="Delete selection." onclick="deleteSelection()" data-disabled="true"></div>
                 </div>
                 <div id="add-container" class="noselect">

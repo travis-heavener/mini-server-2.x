@@ -396,8 +396,7 @@ body {
                 -1px -1px 8px #1117 inset;
 }
 
-#content-manager > #selection-checkbox,
-#content-manager > #delete-icon {
+#content-manager > div {
     display: flex;
     height: 65%;
     aspect-ratio: 1;
@@ -425,18 +424,25 @@ body {
     border: 2px solid #4400e9;
 }
 
+#content-manager > #restore-icon {
+    background-image: url("/assets/apps/gallery/restore-icon.png");
+    cursor: pointer;
+    transition: 0.2s filter;
+}
+
 #content-manager > #delete-icon {
     background-image: url("/assets/trash.png");
     cursor: pointer;
     transition: 0.2s filter;
 }
 
+#content-manager > #restore-icon[data-disabled=true],
 #content-manager > #delete-icon[data-disabled=true] {
     display: none;
 }
 
-#content-manager > #delete-icon[data-disabled=false]:hover {  filter: brightness(110%);  }
-#content-manager > #delete-icon[data-disabled=false]:active {  filter: brightness(95%);  }
+#content-manager > div[data-disabled=false]:hover {  filter: brightness(110%);  }
+#content-manager > div[data-disabled=false]:active {  filter: brightness(95%);  }
 
 /* add button and form functionality */
 

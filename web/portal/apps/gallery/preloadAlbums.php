@@ -5,10 +5,10 @@
     include_once("./toolbox.php");
     
     function get_user_albums($user_id, $key, $mysqli, $envs) {
+        // grab all unique albums, most recently updated first
         $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
         $statement = $mysqli->prepare(
-            "SELECT `id`, `album_name` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `$table` " .
-            "WHERE `deletion_date` IS NULL GROUP BY `album_name`) ORDER BY `created` DESC;"
+            "SELECT DISTINCT `album_name` FROM `$table` WHERE `deletion_date` IS NULL ORDER BY `uploaded` DESC;"
         );
         $statement->execute();
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -16,43 +16,30 @@
 
         // add album previews
         for ($i = 0; $i < count($rows); $i++) {
+            // grab the most recent thumbnail from this album
+            $statement = $mysqli->prepare(
+                "SELECT * FROM `$table` WHERE `deletion_date` IS NULL AND `album_name`=? ORDER BY `created` DESC LIMIT 1;"
+            );
+            $statement->bind_param("s", $rows[$i]["album_name"]);
+            $statement->execute();
+            $temp_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+            $statement->close();
+
             // get the file path
-            $row = $rows[$i];
-            $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
+            $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $temp_rows[0]["id"]);
 
-            // if the file doesn't exist, grab the next item
-            if (!file_exists($path)) {
-                // get the next image if the newest album entry is not an image (ie. video)
-                $table = TABLE_STEM . dechex($user_id);
-                $statement = $mysqli->prepare("SELECT * FROM $table WHERE `album_name`=? ORDER BY `created` DESC, `id` DESC LIMIT 1;");
-                $statement->bind_param("s", $rows[$i]["album_name"]);
-                $statement->execute();
-                $temp_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
-                $statement->close();
-                
-                if (count($temp_rows) > 0) {
-                    $path = gen_thumb_path($envs["GALLERY_PATH"], $user_id, $row["id"]);
-                    if (file_exists($path)) {
-                        $rows[$i] = $temp_rows[0];
-                        continue;
-                    }
-                }
-            } else {
-                continue; // we have a hit, so keep everything as-is
-            }
-
-            // base case, placeholder image is inserted
-            $rows[$i]["id"] = null;
+            // if thumbnail doesn't exist, placeholder image is inserted
+            $rows[$i]["id"] = !file_exists($path) ? null : $temp_rows[0]["id"];
         }
 
         // check for recycled content
-        $statement = $mysqli->prepare("SELECT MAX(`id`) FROM `$table` WHERE `deletion_date` IS NOT NULL;");
+        $statement = $mysqli->prepare("SELECT `id`, MAX(`deletion_date`) FROM `$table` WHERE `deletion_date` IS NOT NULL;");
         $statement->execute();
         $recycled_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
         $statement->close();
 
-        if (sizeof($recycled_rows) > 0 && !is_null($recycled_rows[0]["MAX(`id`)"]))
-            array_push($rows, ["id"=>$recycled_rows[0]["MAX(`id`)"], "album_name"=>RECYCLE_BIN_NAME]);
+        if (sizeof($recycled_rows) > 0 && !is_null($recycled_rows[0]["id"]))
+            array_push($rows, ["id"=>$recycled_rows[0]["id"], "album_name"=>RECYCLE_BIN_NAME]);
 
         $mysqli->close();
         return json_encode($rows);

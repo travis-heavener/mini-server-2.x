@@ -395,7 +395,8 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
 /********************* album focusing & such *********************/
 
 function focusAlbum(albumName, forceLoad=false) {
-    if (albumName === CONTENT.album.name && CONTENT.album.currentPage === 1 && !forceLoad) return; // prevent reloading all content if we are still on the same page of the same album
+    // prevent reloading all content if we are still on the same page of the same album
+    if (albumName === CONTENT.album.name && CONTENT.album.currentPage === 1 && !forceLoad) return;
 
     // reset content manager
     toggleSelectMode.bind($("#selection-checkbox")[0])(false); // uncheck the selection mode
@@ -534,6 +535,12 @@ async function showNewAlbumMenu() {
 
     // focus that album
     focusAlbum(albumName);
+
+    // force update the albumName and metadata
+    // (since album is empty, doesn't update after receiving empty preload data)
+    CONTENT.album.name = albumName;
+    CONTENT.album.currentPage = 1;
+    CONTENT.album.numPages = null;
 }
 
 // shown when a user selects "upload" in the menu

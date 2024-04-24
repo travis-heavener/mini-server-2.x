@@ -1,11 +1,14 @@
 const CONTENT = {
     "album": {
         "name": "",
-        "currentPage": 1
+        "currentPage": 1,
+        "numPages": null // if not null, we've found the max per album
     },
     "selection": [], // array of selected elements' ids
     "isSelecting": false
-}
+};
+
+const __PAGE_MAX_CONTENT = 25;
 
 $(document).ready(async () => {
     // initial binding of text scroll
@@ -87,6 +90,13 @@ $(document).ready(async () => {
             toggleSelectMode.bind($("#selection-checkbox")[0])(false);
         }
     });
+
+    // bind page number form submit
+    $("#page-number-form").on("submit", function(e) {
+        e.preventDefault();
+        jumpToPage( parseInt(this.children[0].value) );
+        return false;
+    });
 });
 
 // toggle touches/clicks between selecting content and opening content
@@ -124,10 +134,14 @@ function toggleSelectMode(overrideTo=null) {
 
 /********************* content displaying & such *********************/
 
-async function loadContent({albumName, page}) {
+async function loadContent({albumName, page}, willClearBody=false) {
+    // verify the page number is not the max for the album
+    if (CONTENT.album.name === albumName &&
+        (CONTENT.album.numPages !== null && page > CONTENT.album.numPages))
+        return;
+
     // determine how many rows we can fit
-    const amtPerPage = 50;
-    const pageOffset = (page-1) * amtPerPage;
+    const pageOffset = (page-1) * __PAGE_MAX_CONTENT;
 
     // get initial information about all incoming data
     let preloadInfo;
@@ -136,7 +150,7 @@ async function loadContent({albumName, page}) {
             "url": "preloadContent.php",
             "method": "GET",
             "headers": {
-                "MS2_offset": pageOffset, "MS2_maxAmt": amtPerPage, "MS2_albumName": albumName
+                "MS2_offset": pageOffset, "MS2_maxAmt": __PAGE_MAX_CONTENT, "MS2_albumName": albumName
             },
             "cache": false
         });
@@ -147,9 +161,28 @@ async function loadContent({albumName, page}) {
     // parse the response
     preloadInfo = JSON.parse(preloadInfo);
 
-    const ids = Object.values(preloadInfo).map(info => info.id);
+    // if no content returned, don't update page
+    if (preloadInfo.length === 0) {
+        CONTENT.album.numPages = page-1;
+        return;
+    }
+
+    // there IS content, so wipe the body if necessary
+    if (willClearBody) {
+        // reset content manager
+        toggleSelectMode.bind($("#selection-checkbox")[0])(false); // uncheck the selection mode
+            
+        // wipe body content for loading
+        $("#album-content > .content-container").each(function() {
+            // revoke BLOB url & remove
+            let url = $(this).find("#album-content-" + this.id.split("-")[2])[0].src;
+            URL.revokeObjectURL(url);
+            $(this).remove();
+        });
+    }
 
     // display placeholder info & queue an ajax call for each
+    const ids = Object.values(preloadInfo).map(info => info.id);
     for (let i = 0; i < ids.length; i++) {
         // create img placeholder
         let elem = document.createElement("IMG"); // hey future self (idiot), don't make this a const (please), when replacing img w/ video this needs to be reassigned
@@ -173,9 +206,15 @@ async function loadContent({albumName, page}) {
             .catch(handleError);
     }
 
+    // if switching from different album, reset numPages
+    if (CONTENT.album.name !== albumName) CONTENT.album.numPages = null;
+
     // update the page we are on
     CONTENT.album.currentPage = page;
     CONTENT.album.name = albumName;
+
+    // update page display elem
+    $("#page-number-field")[0].value = page;
 }
 
 // separated from above method, creates element to hold BLOB data
@@ -255,6 +294,15 @@ function buildContentElem(url, headers, mime, elem) {
     $(elem).attr("data-content-id", id);
     $(elem).attr("data-fname", headers.name);
     $(elem).attr("data-mime", headers.mime);
+}
+
+// switch between pages
+function jumpToPage(page) {
+    // return if nothing has changed or invalid page num (non-integer or zero/negative)
+    if (page === CONTENT.album.currentPage || page < 1 || page != ~~page) return;
+
+    // passthru to load content & flag it to wipe the body
+    loadContent({ albumName: CONTENT.album.name, page: page }, true);
 }
 
 // show a larger, full-size preview of a picture/video
@@ -689,7 +737,7 @@ async function restoreSelection() {
     if (!contentIds.length) return $("#restore-icon").attr("data-disabled", "true");
 
     // confirm delete
-    const willRestore = await confirmPrompt("Confirm Restore",
+    const willRestore = await confirmPrompt("Restore Item?",
         `Are you sure you want to restore ${contentIds.length} file${contentIds.length > 1 ? "s" : ""}?`,
         "Yes", "Cancel");
 

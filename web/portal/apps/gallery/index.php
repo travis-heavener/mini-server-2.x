@@ -33,10 +33,22 @@
             <div id="album-picker"></div>
             <div id="album-content">
                 <div id="content-manager">
-                    <div id="selection-checkbox" title="Toggle content selection." data-select-content="false" onclick="toggleSelectMode.bind(this)()"></div>
-                    <div id="download-icon" title="Download selection." onclick="downloadSelection()" data-disabled="true"></div>
-                    <div id="restore-icon" title="Restore selection." onclick="restoreSelection()" data-disabled="true"></div>
-                    <div id="delete-icon" title="Delete selection." onclick="deleteSelection()" data-disabled="true"></div>
+                    <!-- left-side -->
+                    <div>
+                        <div id="selection-checkbox" title="Toggle content selection." data-select-content="false" onclick="toggleSelectMode.bind(this)()"></div>
+                        <div id="download-icon" title="Download selection." onclick="downloadSelection()" data-disabled="true"></div>
+                        <div id="restore-icon" title="Restore selection." onclick="restoreSelection()" data-disabled="true"></div>
+                        <div id="delete-icon" title="Delete selection." onclick="deleteSelection()" data-disabled="true"></div>
+                    </div>
+                    
+                        <!-- right-side -->
+                    <div>
+                        <div id="last-page-icon" title="View last page." onclick="jumpToPage(CONTENT.album.currentPage-1)"></div>
+                        <form id="page-number-form" action="#">
+                            <input id="page-number-field" class="input-num-no-arrow" type="number" min="1" title="Jump to page.">
+                        </form>
+                        <div id="next-page-icon" title="View next page." onclick="jumpToPage(CONTENT.album.currentPage+1)"></div>
+                    </div>
                 </div>
                 <div id="add-container" class="noselect">
                     <div id="edit-album-icon" onclick="showEditMenu()">

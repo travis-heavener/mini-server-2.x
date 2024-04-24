@@ -52,6 +52,14 @@ html {
               user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 }
 
+/* thanks https://www.w3schools.com/howto/howto_css_hide_arrow_number.asp */
+.input-num-no-arrow[type=number] {  -moz-appearance: textfield;  }
+.input-num-no-arrow::-webkit-outer-spin-button,
+.input-num-no-arrow::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 body {
     width: 100%;
     height: 100%;
@@ -218,6 +226,13 @@ body {
 .user-prompt .prompt-triple:nth-of-type(2) {
     background-color: #9c360d;
     box-shadow: 0.125em 0.125em 0em #5f1208;
+#content-manager #page-number-field[type=number] {  -moz-appearance: textfield;  }
+#content-manager #page-number-field::-webkit-outer-spin-button,
+#content-manager #page-number-field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 }
 
 @keyframes promptAppear {

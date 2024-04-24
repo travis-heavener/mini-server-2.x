@@ -373,9 +373,6 @@ body {
 #content-manager {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    column-gap: calc(0.25 * var(--content-manager-height));
 
     position: sticky;
     top: calc(-1 * var(--padding));
@@ -396,15 +393,31 @@ body {
                 -1px -1px 8px #1117 inset;
 }
 
+/* both halves */
 #content-manager > div {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: calc(0.25 * var(--content-manager-height));
+    
+    width: 50%;
+    height: 100%;
+}
+
+#content-manager > div:last-of-type {
+    justify-content: flex-end;
+}
+
+#content-manager > div > div {
     display: flex;
     height: 65%;
     aspect-ratio: 1;
-
+    
     background-color: #eee;
     background-size: 100% 100%;
     background-repeat: no-repeat;
-
+    
     border-radius: 9px;
     outline: none;
     
@@ -412,45 +425,54 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-
-    cursor: pointer;
-}
-
-#content-manager > #selection-checkbox {
-    background-image: url("/assets/apps/gallery/selection-toggle.png");
-}
-
-#selection-checkbox[data-select-content="true"] {
-    border: 2px solid #4400e9;
-}
-
-#content-manager > #download-icon {
-    background-image: url("/assets/apps/gallery/download-icon.png");
-}
-
-#content-manager > #restore-icon {
-    background-image: url("/assets/apps/gallery/restore-icon.png");
-}
-
-#content-manager > #delete-icon {
-    background-image: url("/assets/trash.png");
-}
-
-#content-manager > #download-icon,
-#content-manager > #restore-icon,
-#content-manager > #delete-icon {
+    
     cursor: pointer;
     transition: 0.2s filter;
 }
 
-#content-manager > #download-icon[data-disabled=true],
-#content-manager > #restore-icon[data-disabled=true],
-#content-manager > #delete-icon[data-disabled=true] {
+#content-manager > div > div:hover {  filter: brightness(103%);  }
+#content-manager > div > div:active {  filter: brightness(98%);  }
+
+#selection-checkbox {  background-image: url("/assets/apps/gallery/selection-toggle.png");  }
+#selection-checkbox[data-select-content="true"] {  border: 2px solid #4400e9;  }
+
+#content-manager #download-icon {  background-image: url("/assets/apps/gallery/download-icon.png");  }
+#content-manager #restore-icon {  background-image: url("/assets/apps/gallery/restore-icon.png");  }
+#content-manager #delete-icon {  background-image: url("/assets/trash.png");  }
+
+#download-icon, #restore-icon, #delete-icon {
+    cursor: pointer;
+    transition: 0.2s filter;
+}
+
+#download-icon[data-disabled=true],
+#restore-icon[data-disabled=true],
+#delete-icon[data-disabled=true] {
     display: none;
 }
 
-#content-manager > div[data-disabled=false]:hover {  filter: brightness(110%);  }
-#content-manager > div[data-disabled=false]:active {  filter: brightness(95%);  }
+#content-manager > div > div[data-disabled=false]:hover {  filter: brightness(110%);  }
+#content-manager > div > div[data-disabled=false]:active {  filter: brightness(95%);  }
+
+/* pagination formatting */
+#content-manager #last-page-icon,
+#content-manager #next-page-icon {
+    background-size: 80% 80%;
+    background-position: center;
+    background-image: url("/assets/back_arrow.png");
+}
+
+#content-manager #next-page-icon {  transform: rotate(180deg);  }
+
+#content-manager #page-number-field {
+    width: 3em;
+
+    color: #161616;
+    font-family: "Poppins", sans-serif;
+    font-size: calc(0.33 * var(--content-manager-height));
+    font-weight: 700;
+    text-align: center;
+}
 
 /* add button and form functionality */
 

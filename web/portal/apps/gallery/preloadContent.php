@@ -36,10 +36,10 @@
     $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
 
     if ($album_name == RECYCLE_BIN_NAME) {
-        $statement = $mysqli->prepare("SELECT `id`, `name`, `mime` FROM `$table` WHERE `deletion_date` IS NOT NULL ORDER BY `uploaded` DESC, `id` DESC LIMIT ? OFFSET ?");
+        $statement = $mysqli->prepare("SELECT `id`, `name`, `mime` FROM `$table` WHERE `deletion_date` IS NOT NULL ORDER BY `created` DESC, `id` DESC LIMIT ? OFFSET ?");
         $statement->bind_param("ii", $max_amt, $offset);
     } else {
-        $statement = $mysqli->prepare("SELECT `id`, `name`, `mime` FROM `$table` WHERE `album_name`=? AND `deletion_date` IS NULL ORDER BY `uploaded` DESC, `id` DESC LIMIT ? OFFSET ?");
+        $statement = $mysqli->prepare("SELECT `id`, `name`, `mime` FROM `$table` WHERE `album_name`=? AND `deletion_date` IS NULL ORDER BY `created` DESC, `id` DESC LIMIT ? OFFSET ?");
         $statement->bind_param("sii", $album_name, $max_amt, $offset);
     }
 

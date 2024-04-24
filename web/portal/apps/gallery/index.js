@@ -8,7 +8,10 @@ const CONTENT = {
     "isSelecting": false
 };
 
-const __PAGE_MAX_CONTENT = 25;
+const __PAGE_MAX_CONTENT = 50;
+
+// create FileQueue for entire document
+const FILE_QUEUE = new FileQueue();
 
 $(document).ready(async () => {
     // initial binding of text scroll
@@ -494,6 +497,46 @@ function resolveSrcToBlob(id, isThumb=true) {
 
 /********************* content upload stuff *********************/
 
+const getFileDimensions = async (file) => {
+    let waitTimeout = null;
+    let dims = {width: 0, height: 0};
+    const prom = new Promise((res, rej) => {
+        if (file.type.startsWith("video")) {
+            const dummyVideo = document.createElement("VIDEO");
+            const url = URL.createObjectURL(file);
+            $(dummyVideo).on("loadedmetadata", function() {
+                URL.revokeObjectURL(url);
+                res({width: this.videoWidth, height: this.videoHeight});
+            });
+            dummyVideo.src = url;
+        } else if (file.type.startsWith("image")) {
+            const dummyImage = document.createElement("IMG");
+            const url = URL.createObjectURL(file);
+            $(dummyImage).on("load", function() {
+                URL.revokeObjectURL(url);
+                res({width: this.width, height: this.height});
+            });
+            dummyImage.src = url;
+        } else { // base case
+            rej(`File Error\nFailed to extract dimensions from file: "${file.name}"`);
+        }
+
+        // wait 10 sec, if not resolved, throw exception
+        waitTimeout = setTimeout(() => {
+            rej(`File Error\nFailed to extract dimensions from file: "${file.name}" due to connection time out.`);
+        }, 15e3); // max of 15 sec to load asset
+    })
+    .then(_dims => dims = _dims)
+    .catch(e => handleError(e));
+
+    await prom;
+
+    // kill wait timeout
+    if (waitTimeout !== null) clearTimeout(waitTimeout);
+
+    return dims;
+};
+
 // shown when a user selects "new album" in the menu
 async function showNewAlbumMenu() {
     // hide content upload form
@@ -614,90 +657,33 @@ async function showEditMenu() {
 }
 
 // function to upload all files in the file upload input elem
-function uploadFile() {
+async function uploadFile() {
     const form = $("#upload-form")[0];
     const fileInput = $(form).find("input[type='file']")[0];
-    let data = new FormData(form);
-
-    const fail = (title, text) => {
-        fileInput.value = null;// clear files
-        $(form.parentElement).find("h2 > span").html(0); // update display
-        promptUser(title, text);
-    };
 
     // prevent uploading to no album
-    if (CONTENT.album.name === "" || CONTENT.album.name === "Recycle Bin")
-        return fail("Invalid Album", "Cannot upload to album or Recycle Bin. Either create a new album.");
+    if (CONTENT.album.name === "" || CONTENT.album.name === "Recycle Bin") {
+        fileInput.value = null; // clear files
+        $(form.parentElement).find("h2 > span").html(0); // update display
+        promptUser("Invalid Album", "Cannot upload to album or Recycle Bin. Either create a new album.");
+        return;
+    }
     
-    // prevent uploading too many files
-    if (fileInput.files.length > 100)
-        return fail("Too Many Files", "Cannot upload more than 100 files at a time.");
+    // hide form modal
+    promptUser("Upload Started", "The page will refresh after all items finish uploading.");
+    $("#upload-form-content").css("display", "none");
 
-    // prevent exceeding max post file size
-    const maxBytes = 500_000_000; // 500MB
-    let totalBytes = 0;
+    // for each file, create it's MetaFile and append to FileQueue to start uploading
     for (let file of fileInput.files) {
-        totalBytes += file.size;
-        if (totalBytes > maxBytes)
-            return fail("Max Size Exceeded", "Cannot upload more than 500MB at a time.");
+        // grab dimensions
+        const {width, height} = await getFileDimensions(file);
+        FILE_QUEUE.enqueue(new MetaFile(file, width, height, CONTENT.album.name));
     }
 
-    // add album name
-    data.set("album-name", CONTENT.album.name);
+    // start uploading after fetching dimensions
+    FILE_QUEUE.start();
 
-    // add file creation timestamps
-    const timestamps = [...fileInput.files].map(val => val.lastModified);
-    data.set("timestamps", JSON.stringify(timestamps));
-
-    // add the file width and heights
-    const dimensions = [...fileInput.files].map(() => null);
-
-    const checkCompletion = () => {
-        if (dimensions.includes(null)) return;
-        data.set("dimensions", JSON.stringify(dimensions));
-        $("#upload-form-content").css("display", "none");
-
-        $.ajax({
-            "url": "uploadFile.php",
-            "method": "POST",
-            "data": data,
-            "contentType": false,
-            "processData": false,
-            "success": function(res) { // success, prompt user with success message
-                promptUser("Success", "Files uploaded successfully.", false);
-                focusAlbum(CONTENT.album.name, true); // focus first page of album
-            },
-            "error": function(e) { // error, alert user
-                const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
-                promptUser(...msg.split("\n"), false); // show title and body
-            }
-        });
-    };
-
-    for (let i = 0; i < fileInput.files.length; i++) {
-        const file = fileInput.files[i];
-        if (file.type.startsWith("video")) {
-            const dummyVideo = document.createElement("VIDEO");
-            const url = URL.createObjectURL(file);
-            $(dummyVideo).on("loadedmetadata", function() {
-                dimensions[i] = [this.videoWidth, this.videoHeight];
-                URL.revokeObjectURL(url);
-                checkCompletion();
-            });
-            dummyVideo.src = url;
-        } else if (file.type.startsWith("image")) {
-            const dummyImage = document.createElement("IMG");
-            const url = URL.createObjectURL(file);
-            $(dummyImage).on("load", function() {
-                dimensions[i] = [this.width, this.height];
-                URL.revokeObjectURL(url);
-                checkCompletion();
-            });
-            dummyImage.src = url;
-        }
-    }
-    
-    return false;
+    return false; // prevent form firing
 }
 
 /********************* content manager button functions *********************/
@@ -878,7 +864,7 @@ function bindTextScroll() {
 }
 
 function handleError(e) {
-    const msg = e.responseText.substring(7); // remove 'Error: ' from beginning
+    let msg = (e.constructor === String) ? e : e.responseText.substring(7); // remove 'Error: ' from beginning
     const title = msg.split("\n")[0];
     const body = msg.split("\n")[1];
     

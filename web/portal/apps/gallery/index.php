@@ -74,7 +74,7 @@
             <form id="upload-form" action="javascript:uploadFile()" method="post" enctype="multipart/form-data">
                 <h1>Upload Files</h1>
                 <div id="form-file-drop">
-                    <h2><span>0</span> files selected.<br>(Limit 100)</h2>
+                    <h2><span>0</span> files selected.<br>(Max. 500 MB)</h2>
                     <input type="file" name="user-media[]" multiple accept="<?php include_once("toolbox.php"); echo join(",", SUPPORTED_MIMES); ?>">
                 </div>
                 <div id="form-button-row">
@@ -95,6 +95,7 @@
 
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>
 
+        <script src="file_queue.js" type="text/javascript"></script>
         <script src="index.js" type="text/javascript"></script>
 
     </body>

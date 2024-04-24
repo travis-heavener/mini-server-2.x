@@ -8,7 +8,7 @@
         $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
         $statement = $mysqli->prepare(
             "SELECT `id`, `album_name` FROM `$table` WHERE `id` IN (SELECT MAX(`id`) AS `id` FROM `$table` " .
-            "WHERE `deletion_date` IS NULL GROUP BY `album_name`) ORDER BY `uploaded` DESC;"
+            "WHERE `deletion_date` IS NULL GROUP BY `album_name`) ORDER BY `created` DESC;"
         );
         $statement->execute();
         $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -24,7 +24,7 @@
             if (!file_exists($path)) {
                 // get the next image if the newest album entry is not an image (ie. video)
                 $table = TABLE_STEM . dechex($user_id);
-                $statement = $mysqli->prepare("SELECT * FROM $table WHERE `album_name`=? ORDER BY `uploaded` DESC, `id` DESC LIMIT 1;");
+                $statement = $mysqli->prepare("SELECT * FROM $table WHERE `album_name`=? ORDER BY `created` DESC, `id` DESC LIMIT 1;");
                 $statement->bind_param("s", $rows[$i]["album_name"]);
                 $statement->execute();
                 $temp_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);

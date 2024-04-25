@@ -200,11 +200,11 @@ async function loadContent({albumName, page}, willClearBody=false) {
         wrapper.id = id.replace("album-content", "content-container");
         $(wrapper).addClass("content-container noselect");
         $(wrapper).append(elem);
-        
+
         $("#album-content").append(wrapper);
 
         // queue ajax call (rather than awaiting, this allows all image placeholders AND thus content to load at once instead of one-by-one)
-        resolveSrcToBlob(ids[i], preloadInfo[i].mime.startsWith("image"))
+        resolveSrcToBlob(ids[i], true)
             .then(({url, headers}) => buildContentElem(url, headers, preloadInfo[i].mime, elem))
             .catch(handleError);
     }
@@ -225,78 +225,66 @@ function buildContentElem(url, headers, mime, elem) {
     const wrapper = elem.parentElement;
     const id = parseInt(headers.id);
 
-    if (url === null) {
-        elem.src = "/assets/app-icons/gallery.png"; // load default icon
-    } else if (mime.startsWith("image")) { // we have image, so just replace this one
-        elem.src = url;
-        if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
-        $(elem).attr("alt", "Album image.");
-    } else if (mime.startsWith("video")) { // we have video, replace this image w/ a video
-        elem.outerHTML = `<video id="${elem.id}" src="${url}" alt="Album video.">`;
-        elem = $("#" + elem.id); // update reference to elem
-
-        // play on hover
-        $(elem).on("mouseenter", function() {
-            this.muted = this.loop = true;
-            this.play();
-            $(this).on("mouseleave", function() {
-                this.pause();
-                this.currentTime = 0;
-            });
-        });
-
-        // append an additional play icon overlay
-        $(wrapper).append(`<div class="play-overlay">
-            <img draggable="false" src="/assets/apps/gallery/play-icon.png">
-        </div>`);
-    } else {
-        return console.warn("Unexpected MIME type: " + mime);
-    }
-
-    // if the source or element has changed, add click events
-    if (url !== null) {
-        // initially set custom attributes
-        $(wrapper).attr("data-is-selected", false);
-
-        // bind click events to the wrapper
-        $(wrapper).click(async function() {
-            if (CONTENT.isSelecting) { // allow wrapper container to be selected/unselected when clicked
-                const isSelected = $(this).attr("data-is-selected") === "false";
-                $(this).attr("data-is-selected", isSelected);
-
-                // update the element
-                if (isSelected) {
-                    CONTENT.selection.push(this.id);
-                    // enable icons
-                    $("#download-icon").attr("data-disabled", "false");
-                    $("#delete-icon").attr("data-disabled", "false");
-                    if (CONTENT.album.name === "Recycle Bin")
-                        $("#restore-icon").attr("data-disabled", "false");
-                    $(this).addClass("content-selected");
-                } else {
-                    $(this).removeClass("content-selected");
-                    const index = CONTENT.selection.indexOf(this.id);
-                    CONTENT.selection.splice(index, 1);
-                    
-                    // disable icons if selection is empty
-                    if (!CONTENT.selection.length) {
-                        $("#download-icon").attr("data-disabled", "true");
-                        $("#restore-icon").attr("data-disabled", "true");
-                        $("#delete-icon").attr("data-disabled", "true");
-                    }
-                }
-            } else { // allow each wrapper container to focus in large view
-                // resolve raw content source if image,
-                // if video use raw source (video thumbnails only for album icons)
-                showLargeContent(id, elem, headers);
-            }
-        });
-    }
-
     // append extra metadata
     $(elem).attr("data-content-id", id);
     $(elem).attr("data-fname", headers.name);
     $(elem).attr("data-mime", headers.mime);
+
+    if (url === null) {
+        elem.src = "/assets/app-icons/gallery.png"; // load default icon
+        return;
+    }
+    
+    // base case, replace this image w/ thumbnail
+    elem.src = url;
+    if (!headers.isDefaultIcon) $(elem).removeClass("default-icon");
+    $(elem).attr("alt", "Album image.");
+
+    // if video, append play overlay
+    if (mime.startsWith("video")) {
+        $(wrapper).append(`<div class="play-overlay">
+            <img draggable="false" src="/assets/apps/gallery/play-icon.png">
+        </div>`);
+    }
+
+    // initially set custom attributes
+    $(wrapper).attr("data-is-selected", false);
+
+    // bind click events to the wrapper
+    $(wrapper).click(async function() {
+        if (CONTENT.isSelecting) { // allow wrapper container to be selected/unselected when clicked
+            const isSelected = $(this).attr("data-is-selected") === "false";
+            $(this).attr("data-is-selected", isSelected);
+
+            // update the element
+            if (isSelected) {
+                CONTENT.selection.push(this.id);
+                // enable icons
+                $("#download-icon").attr("data-disabled", "false");
+                $("#delete-icon").attr("data-disabled", "false");
+                if (CONTENT.album.name === "Recycle Bin")
+                    $("#restore-icon").attr("data-disabled", "false");
+                $(this).addClass("content-selected");
+                return;
+            }
+            
+            // not selected
+            $(this).removeClass("content-selected");
+            const index = CONTENT.selection.indexOf(this.id);
+            CONTENT.selection.splice(index, 1);
+            
+            // disable icons if selection is empty
+            if (!CONTENT.selection.length) {
+                $("#download-icon").attr("data-disabled", "true");
+                $("#restore-icon").attr("data-disabled", "true");
+                $("#delete-icon").attr("data-disabled", "true");
+            }
+            return;
+        }
+        
+        // base case, allow each wrapper container to focus in large view
+        showLargeContent(id, elem, headers);
+    });
 }
 
 // switch between pages
@@ -310,44 +298,43 @@ function jumpToPage(page) {
 
 // show a larger, full-size preview of a picture/video
 async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
-    const isVideo = $(thumbnailElem).is("video");
-    let largeSrc = isVideo ? $(thumbnailElem)[0].src : null;
-    let filesize = thumbnailHeaders.filesize;
+    const isVideo = $(thumbnailElem).attr("data-mime").startsWith("video");
     
-    if (largeSrc === null) { // load large src
-        const largeRes = await resolveSrcToBlob(contentID, false);
-        if (largeRes.url === null || largeRes.headers.isDefaultIcon) {
-            // free BLOB url
-            if (largeRes.url !== null) URL.revokeObjectURL(largeRes.url);
+    // load large src
+    const largeRes = await resolveSrcToBlob(contentID, false);
+    if (largeRes.url === null || largeRes.headers.isDefaultIcon) {
+        // free BLOB url
+        if (largeRes.url !== null) URL.revokeObjectURL(largeRes.url);
 
-            // an error occured grabbing the image, so prevent loading
-            handleError({"responseText": "Error: Content Resolve Issue\nThe requested \
-                        content could not be fetched from the server. Try reloading \
-                        the page."});
-            return;
-        }
-
-        // base case, update src info
-        largeSrc = largeRes.url;
-        filesize = largeRes.headers.filesize;
+        // an error occured grabbing the image, so prevent loading
+        handleError("Content Resolve Issue\nThe requested \
+                    content could not be fetched from the server. Try reloading \
+                    the page.");
+        return;
     }
 
-    // append large view
-    let preview = `<img class="noselect" draggable="false" src="${largeSrc}"
-                        data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}"
-                        data-mime="${thumbnailHeaders.mime}">`;
-    
-    if (isVideo)
-        preview = `<video class="noselect" controls src="${largeSrc}" data-content-id="${contentID}"
-                          data-fname="${thumbnailHeaders.name}" data-mime="${thumbnailHeaders.mime}">`;
+    // base case, update src info
+    const largeSrc = largeRes.url, {filesize} = largeRes.headers;
 
-    $("body").append(`
-        <div class="large-content-container">
+    // append large view
+    let preview;
+    
+    if (isVideo) {
+        preview = `<video class="noselect" controls src="${largeSrc}" data-content-id="${contentID}"
+                    data-fname="${thumbnailHeaders.name}" data-mime="${thumbnailHeaders.mime}">`;
+    } else {
+        preview = `<img class="noselect" draggable="false" src="${largeSrc}"
+                    data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}"
+                    data-mime="${thumbnailHeaders.mime}">`;
+    }
+
+    $("body").append(
+        `<div class="large-content-container">
             <h1>${thumbnailHeaders.name}</h1>
             <h2>Encrypted size: ${formatByteSize(filesize)}</h2>
             ${preview}
-        </div>
-    `);
+        </div>`
+    );
 
     // bind events
     let textScrollInterval = null;
@@ -357,29 +344,24 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
         if (!isVideo) URL.revokeObjectURL(largeSrc);
         $(".large-content-container").remove();
         $(window).off("keydown.closeLargeContent");
-        if (textScrollInterval !== null)
-            clearInterval(textScrollInterval);
+        if (textScrollInterval !== null) clearInterval(textScrollInterval);
     };
     
-    $(".large-content-container").click(function(e) {
-        if (e.target === this) closeView();
-    });
-
-    $(window).on("keydown.closeLargeContent", (e) => {
-        if (e.originalEvent.code === "Escape") closeView();
-    });
+    $(".large-content-container").click(
+        function(e) { if (e.target === this) closeView(); }
+    );
+    $(window).on("keydown.closeLargeContent",
+        (e) => { if (e.originalEvent.code === "Escape") closeView(); }
+    );
 
     // bind text scroll event to file name
     const h1 = $(".large-content-container > h1")[0];
-    const DELAY = 1.5e3;
-    const INITIAL_DELAY = 1e3;
-    const OFFSET_INC = 1;
+    const DELAY = 1.5e3, INITIAL_DELAY = 1e3, OFFSET_INC = 1;
     const RATE = 50; // in ms, interval callback rate
     
     setTimeout(() => {
         // store interval
-        let offset = 0;
-        let lastStopped = 0;
+        let offset = 0, lastStopped = 0;
         textScrollInterval = setInterval(() => {
             if (Date.now() - lastStopped < DELAY) return;
 
@@ -417,6 +399,7 @@ function focusAlbum(albumName, forceLoad=false) {
     $(`.album-icon[data-album-name="${albumName}"]`).addClass("selected-album-icon");
 
     // load the new content
+    CONTENT.album.numPages = null;
     loadContent({"albumName": albumName, "page": 1});
 }
 

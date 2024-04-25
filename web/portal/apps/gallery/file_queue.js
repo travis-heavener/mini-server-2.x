@@ -65,7 +65,7 @@ class FileQueue {
 
         // if empty, focus new album
         if (this.empty())
-            location.reload(false); // focus first page of album
+            focusAlbum(data.album, true); // focus first page of album
         
         return data;
     }
@@ -81,10 +81,23 @@ class FileQueue {
             return;
         }
 
+        // verify file isn't too large
+        const data = this.front();
+        const maxBytes = 500_000_000; // 500MB
+        if (data.size > maxBytes) {
+            // notify user of large file
+            promptUser("File Too Large", `File \"${data.name}\" exceeds 500 MB upload limit.`);
+
+            // pop, then keep going
+            this.#currentPromise = null;
+            this.dequeue();
+            this.#processNext();
+            return;
+        }
+
         // upload next file
         this.#currentPromise = new Promise((res, rej) => {
             // upload first item
-            const data = this.front();
             const payload = new FormData();
 
             // append form data

@@ -225,7 +225,7 @@ async function loadContent({albumName, page}, willClearBody=false) {
 function buildContentElem(url, headers, elem) {
     const wrapper = elem.parentElement;
     const id = parseInt(headers.id);
-    const {name, mime} = headers;
+    const {name, mime, deletionDate} = headers;
 
     // append extra metadata
     $(elem).attr("data-content-id", id);
@@ -285,7 +285,7 @@ function buildContentElem(url, headers, elem) {
         }
         
         // base case, allow each wrapper container to focus in large view
-        showLargeContent(id, name, mime);
+        showLargeContent(id, name, mime, deletionDate);
     });
 }
 
@@ -299,14 +299,14 @@ function jumpToPage(page) {
 }
 
 // show a larger, full-size preview of a picture/video
-async function showLargeContent(contentID, name, mime) {
+async function showLargeContent(contentID, name, mime, deletionDate) {
     // if empty, generate content placeholder data to keep track of BLOBs
     if (CONTENT.largeBlobs.length === 0) {
         CONTENT.largeBlobs = [...$(".content-container > img, .content-container > video")]
                             .map(elem => ({
                                 "id": parseInt($(elem).attr("data-content-id")),
                                 "url": null, "filesize": 0,
-                                "name": "", "mime": ""
+                                "name": "", "mime": "", "deletionDate": null
                             }));
     }
 
@@ -320,7 +320,7 @@ async function showLargeContent(contentID, name, mime) {
         if (CONTENT.largeBlobs[i].id === contentID) {
             blobArrayIndex = i;
             largeSrc = CONTENT.largeBlobs[i].url;
-            ({filesize, name, mime} = CONTENT.largeBlobs[i]); // parenthesis for destructuring
+            ({filesize, name, mime, deletionDate} = CONTENT.largeBlobs[i]); // parenthesis for destructuring
             break;
         }
     }
@@ -340,16 +340,23 @@ async function showLargeContent(contentID, name, mime) {
 
         // base case, was found
         largeSrc = largeRes.url;
-        ({filesize, name, mime} = largeRes.headers);
+        ({filesize, name, mime, deletionDate} = largeRes.headers);
         CONTENT.largeBlobs[blobArrayIndex].url = largeSrc;
-        CONTENT.largeBlobs[blobArrayIndex].filesize = filesize;
-        CONTENT.largeBlobs[blobArrayIndex].name = name;
-        CONTENT.largeBlobs[blobArrayIndex].mime = mime;
+        Object.assign(CONTENT.largeBlobs[blobArrayIndex], {filesize, name, mime, deletionDate});
     }
 
     // update text
     $("#large-content-container > h1").html(name);
-    $("#large-content-container > h2").html(`Encrypted size: ${formatByteSize(filesize)}`);
+
+    // if deletion date exists, format string
+    if (deletionDate !== null) {
+        const date = new Date(deletionDate);
+        const dateStr = date.toLocaleTimeString("en-US",
+            {month: "short", day: "numeric", hour: "numeric", minute: "numeric"});
+        $("#large-content-container > h2").html(`Deletes on: ${dateStr}`);
+    } else {
+        $("#large-content-container > h2").html(`Encrypted size: ${formatByteSize(filesize)}`);
+    }
 
     // append large content
     const isVideo = mime.startsWith("video");
@@ -368,7 +375,7 @@ async function showLargeContent(contentID, name, mime) {
     // bind events for text scroll
     let textScrollInterval = null;
     
-    const closeView = (clearBlobs=true) => {
+    const hideLargeContent = (clearBlobs=true) => {
         // hide content
         if (clearBlobs)
             $("#large-content-container").css("display", "");
@@ -385,10 +392,10 @@ async function showLargeContent(contentID, name, mime) {
 
     // rebind events
     $("#large-content-container").click(
-        function(e) { if (e.target === this) closeView(true); }
+        function(e) { if (e.target === this) hideLargeContent(true); }
     );
     $(window).on("keyup.closeLargeContent",
-        (e) => { if (e.key === "Escape") closeView(true); }
+        (e) => { if (e.key === "Escape") hideLargeContent(true); }
     );
 
     // bind text scroll event to file name
@@ -423,8 +430,8 @@ async function showLargeContent(contentID, name, mime) {
     const changeContent = (index) => { // reload large content
         if (index < 0 || index >= CONTENT.largeBlobs.length) return;
         let contentData = CONTENT.largeBlobs[index];
-        closeView(false); // close this view but don't free blobs yet
-        showLargeContent(contentData.id, contentData.name, contentData.mime);
+        hideLargeContent(false); // close this view but don't free blobs yet
+        showLargeContent(contentData.id, contentData.name, contentData.mime, contentData.deletionDate);
     };
 
     $(".large-content-arrow:first-of-type").one("click", () => changeContent(blobArrayIndex-1));
@@ -530,9 +537,10 @@ function resolveSrcToBlob(id, isThumb=true) {
                     "height":        parseInt(xhr.getResponseHeader("MS2_height")),
                     "orientation":   parseInt(xhr.getResponseHeader("MS2_orientation")),
                     "isDefaultIcon": !!(xhr.getResponseHeader("MS2_isDefaultIcon") || false),
-                    "filesize":      xhr.getResponseHeader("MS2_filesize")
+                    "filesize":      parseInt(xhr.getResponseHeader("MS2_filesize")),
+                    "deletionDate":  xhr.getResponseHeader("MS2_deletionDate") || null
                 };
-                
+
                 // generate url from blob
                 url = !headers.isDefaultIcon ? URL.createObjectURL(res) : null;
 

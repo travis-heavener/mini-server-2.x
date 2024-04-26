@@ -21,6 +21,12 @@
     define("MAX_NAME_LEN", 32); // max and min length of album names
     define("MIN_NAME_LEN", 3); // max and min length of album names
 
+    // shorthand to get deletion date timestamp from current time, UTC TIME!!!!!
+    function get_deletion_ts($num_days) {
+        date_default_timezone_set("America/New_York"); // ensure proper timezone is set
+        return date("Y-m-d H:i:s", strtotime($num_days . " days", time()));
+    }
+
     // modified from SO, handy function for resizing images (reduces client memory footprint dramatically) (https://stackoverflow.com/a/45479025)
     function resize_image($data, $width, $height, $raw_width, $raw_height) {
         if (gettype($data) === "object" && get_class($data) == "GdImage")

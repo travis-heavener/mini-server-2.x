@@ -57,7 +57,7 @@
     $statement->close();
     
     // mark new items for recycling
-    $delete_ts = date("Y-m-d H:i:s", time() + (int)$envs["GALLERY_DELETE_DAYS"] * 86400);
+    $delete_ts = get_deletion_ts($envs["GALLERY_DELETE_DAYS"]);
     $statement = $mysqli->prepare("UPDATE `$table` SET `deletion_date`=? WHERE `album_name`=? AND `id` IN ($idParams);");
     $statement->bind_param("ss", $delete_ts, $album_name);
     $statement->execute();

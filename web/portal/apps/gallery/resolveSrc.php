@@ -33,7 +33,7 @@
     
     // 5. get data from db
     $table = TABLE_STEM . dechex($user_id); // we already know the id must be valid since it comes directly from the database
-    $statement = $mysqli->prepare("SELECT `name`, `mime`, `width`, `height`, `orientation` FROM `$table` WHERE `id`=? LIMIT 1;");
+    $statement = $mysqli->prepare("SELECT `name`, `mime`, `width`, `height`, `orientation`, `deletion_date` FROM `$table` WHERE `id`=? LIMIT 1;");
     $statement->bind_param("i", $id);
     $statement->execute();
     $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -61,6 +61,7 @@
     header("MS2_width: " . $row["width"]);
     header("MS2_height: " . $row["height"]);
     header("MS2_orientation: " . $row["orientation"]+1);
+    header("MS2_deletionDate: " . $row["deletion_date"]);
 
     if (file_exists($is_thumb ? $thumb_path : $content_path))
         header("MS2_filesize: " . filesize($is_thumb ? $thumb_path : $content_path));

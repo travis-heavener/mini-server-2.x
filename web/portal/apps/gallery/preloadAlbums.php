@@ -33,7 +33,8 @@
         }
 
         // check for recycled content
-        $statement = $mysqli->prepare("SELECT `id`, MAX(`deletion_date`) FROM `$table` WHERE `deletion_date` IS NOT NULL;");
+        $statement = $mysqli->prepare("SELECT `id` FROM `$table` WHERE `deletion_date` IS NOT NULL "
+                    . "AND `deletion_date` > CURRENT_TIMESTAMP ORDER BY `deletion_date` DESC LIMIT 1;");
         $statement->execute();
         $recycled_rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
         $statement->close();

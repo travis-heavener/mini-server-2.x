@@ -5,7 +5,8 @@ const CONTENT = {
         "numPages": null // if not null, we've found the max per album
     },
     "selection": [], // array of selected elements' ids
-    "isSelecting": false
+    "isSelecting": false,
+    "largeBlobs": [] // all BLOB urls for large preview content
 };
 
 const __PAGE_MAX_CONTENT = 50;
@@ -315,6 +316,7 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
 
     // base case, update src info
     const largeSrc = largeRes.url, {filesize} = largeRes.headers;
+    CONTENT.largeBlobs.push(largeSrc); // keep track of all BLOB urls
 
     // append large view
     let preview;
@@ -328,13 +330,9 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
                     data-mime="${thumbnailHeaders.mime}">`;
     }
 
-    $("body").append(
-        `<div class="large-content-container">
-            <h1>${thumbnailHeaders.name}</h1>
-            <h2>Encrypted size: ${formatByteSize(filesize)}</h2>
-            ${preview}
-        </div>`
-    );
+    $("#large-content-container > h1").html(thumbnailHeaders.name);
+    $("#large-content-container > h2").html(`Encrypted size: ${formatByteSize(filesize)}`);
+    $(preview).insertAfter("#large-content-container > h2");
 
     // bind events
     let textScrollInterval = null;
@@ -342,20 +340,26 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
     const closeView = () => {
         // free BLOB if not a video
         if (!isVideo) URL.revokeObjectURL(largeSrc);
-        $(".large-content-container").remove();
+        $("#large-content-container").css("display", "");
+        $("#large-content-container > " + (isVideo ? "video" : "img")).remove();
         $(window).off("keydown.closeLargeContent");
         if (textScrollInterval !== null) clearInterval(textScrollInterval);
+
+        // free all BLOB urls for large content
+        for (let url of CONTENT.largeBlobs)
+            URL.revokeObjectURL(url);
+        CONTENT.largeBlobs = []; // clear largeBlobs
     };
     
-    $(".large-content-container").click(
+    $("#large-content-container").click(
         function(e) { if (e.target === this) closeView(); }
     );
     $(window).on("keydown.closeLargeContent",
-        (e) => { if (e.originalEvent.code === "Escape") closeView(); }
+        (e) => { if (e.key === "Escape") closeView(); }
     );
 
     // bind text scroll event to file name
-    const h1 = $(".large-content-container > h1")[0];
+    const h1 = $("#large-content-container > h1")[0];
     const DELAY = 1.5e3, INITIAL_DELAY = 1e3, OFFSET_INC = 1;
     const RATE = 50; // in ms, interval callback rate
     
@@ -375,6 +379,9 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
             }
         }, RATE);
     }, INITIAL_DELAY);
+
+    // reveal container
+    $("#large-content-container").css("display", "flex");
 }
 
 /********************* album focusing & such *********************/

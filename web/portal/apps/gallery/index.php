@@ -84,13 +84,17 @@
             </form>
         </div>
 
-        <div id="edit-form-content">
-            <!--
-                NOTES TO SELF:
-                I made renameAlbum.php but have not tested it, 95% confident it works.
-                Also I need to add something to display the edit/remove album content (in this div)
-                as well as in index.js:470.
-            -->
+        <!-- for displaying large content (content injected via JS) -->
+        <div id="large-content-container">
+            <h1></h1>
+            <h2>Encrypted size:</h2>
+            <!-- preview inserted here -->
+            <div class="large-content-arrow">
+                <div></div><div></div>
+            </div>
+            <div class="large-content-arrow">
+                <div></div><div></div>
+            </div>
         </div>
 
         <?php include($_SERVER['DOCUMENT_ROOT'] . "/php/createFooter.php") ?>

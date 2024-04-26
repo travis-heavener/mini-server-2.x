@@ -280,8 +280,8 @@ body {
 
 /* large content container view */
 
-.large-content-container {
-    display: flex;
+#large-content-container {
+    display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -298,11 +298,11 @@ body {
     cursor: pointer;
 }
 
-.large-content-container > * {
+#large-content-container > * {
     cursor: default;
 }
 
-.large-content-container > h1 {
+#large-content-container > h1 {
     position: absolute;
     padding-top: calc(0.5 * var(--text-unit));
     top: 0;
@@ -311,7 +311,7 @@ body {
     font-weight: 700;
 }
 
-.large-content-container > h2 {
+#large-content-container > h2 {
     position: absolute;
     padding-bottom: calc(0.5 * var(--text-unit));
     top: calc(2.9 * var(--text-unit));
@@ -320,8 +320,8 @@ body {
     font-weight: 500;
 }
 
-.large-content-container > h1,
-.large-content-container > h2 {
+#large-content-container > h1,
+#large-content-container > h2 {
     padding-left: calc(0.75 * var(--text-unit));
     padding-right: calc(0.75 * var(--text-unit));
 
@@ -340,31 +340,54 @@ body {
     text-wrap: nowrap;
 }
 
-.large-content-container > img,
-.large-content-container > video {
+#large-content-container > img,
+#large-content-container > video {
     object-fit: contain;
     background-color: #f3f3f3;
     box-shadow:  2px  2px 16px #1118,
                 -2px -2px 16px #1118;
 }
 
-.large-content-container > video {
+#large-content-container > video {
     cursor: pointer;
 }
 
 @media screen and (orientation: landscape) {
-    .large-content-container > img,
-    .large-content-container > video {
+    #large-content-container > img,
+    #large-content-container > video {
         max-width: 70%;
         max-height: 70%;
     }
 }
 
 @media screen and (orientation: portrait) {
-    .large-content-container > img,
-    .large-content-container > video {
+    #large-content-container > img,
+    #large-content-container > video {
         max-width: 90%;
         max-height: 70%;
+    }
+}
+
+/* large content navigation arrows */
+
+.large-content-arrow {
+    --horiz-space: calc(2 * var(--text-unit));
+    
+    position: absolute;
+    
+    aspect-ratio: 0.25;
+    height: calc(10 * var(--text-unit));
+    
+    background-color: white;
+}
+
+.large-content-arrow:first-of-type {  left: var(--horiz-space);  }
+.large-content-arrow:last-of-type {  right: var(--horiz-space);  }
+
+@media screen and (orientation: portrait) {
+    .large-content-arrow {
+        --horiz-space: var(--text-unit) !important;
+        height: calc(5 * var(--text-unit)) !important;
     }
 }
 
@@ -616,7 +639,7 @@ body {
     justify-content: space-evenly;
     align-items: center;
 
-    width: 80%;
+    width: 60%;
     height: 80%;
 
     padding: var(--text-unit);
@@ -627,6 +650,8 @@ body {
 
     cursor: default;
 }
+
+@media screen and (orientation: portrait) {  #upload-form {  width: 80%;  }  }
 
 #upload-form > h1 {
     color: #111;

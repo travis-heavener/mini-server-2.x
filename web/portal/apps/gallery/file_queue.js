@@ -41,6 +41,11 @@ class FileQueue {
     start() {
         // if not currently awaiting a promise, start with this item
         if (this.#currentPromise === null) {
+            // bind beforeunload event
+            $(window).on("beforeunload.__FILE_QUEUE", e => {
+                e.preventDefault();
+                return true; // truthy value to trigger dialog
+            });
             this.#processNext();
             return true;
         }
@@ -78,6 +83,7 @@ class FileQueue {
         // if empty, return
         if (this.empty()) {
             this.#currentPromise = null;
+            $(window).off("beforeunload.__FILE_QUEUE"); // disable reload dialog
             return;
         }
 

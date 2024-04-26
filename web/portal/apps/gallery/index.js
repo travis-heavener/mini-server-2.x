@@ -206,7 +206,7 @@ async function loadContent({albumName, page}, willClearBody=false) {
 
         // queue ajax call (rather than awaiting, this allows all image placeholders AND thus content to load at once instead of one-by-one)
         resolveSrcToBlob(ids[i], true)
-            .then(({url, headers}) => buildContentElem(url, headers, preloadInfo[i].mime, elem))
+            .then(({url, headers}) => buildContentElem(url, headers, elem))
             .catch(handleError);
     }
 
@@ -222,14 +222,15 @@ async function loadContent({albumName, page}, willClearBody=false) {
 }
 
 // separated from above method, creates element to hold BLOB data
-function buildContentElem(url, headers, mime, elem) {
+function buildContentElem(url, headers, elem) {
     const wrapper = elem.parentElement;
     const id = parseInt(headers.id);
+    const {name, mime} = headers;
 
     // append extra metadata
     $(elem).attr("data-content-id", id);
-    $(elem).attr("data-fname", headers.name);
-    $(elem).attr("data-mime", headers.mime);
+    $(elem).attr("data-fname", name);
+    $(elem).attr("data-mime", mime);
 
     if (url === null) {
         elem.src = "/assets/app-icons/gallery.png"; // load default icon
@@ -284,7 +285,7 @@ function buildContentElem(url, headers, mime, elem) {
         }
         
         // base case, allow each wrapper container to focus in large view
-        showLargeContent(id, elem, headers);
+        showLargeContent(id, name, mime);
     });
 }
 
@@ -298,64 +299,96 @@ function jumpToPage(page) {
 }
 
 // show a larger, full-size preview of a picture/video
-async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
-    const isVideo = $(thumbnailElem).attr("data-mime").startsWith("video");
-    
-    // load large src
-    const largeRes = await resolveSrcToBlob(contentID, false);
-    if (largeRes.url === null || largeRes.headers.isDefaultIcon) {
-        // free BLOB url
-        if (largeRes.url !== null) URL.revokeObjectURL(largeRes.url);
-
-        // an error occured grabbing the image, so prevent loading
-        handleError("Content Resolve Issue\nThe requested \
-                    content could not be fetched from the server. Try reloading \
-                    the page.");
-        return;
+async function showLargeContent(contentID, name, mime) {
+    // if empty, generate content placeholder data to keep track of BLOBs
+    if (CONTENT.largeBlobs.length === 0) {
+        CONTENT.largeBlobs = [...$(".content-container > img, .content-container > video")]
+                            .map(elem => ({
+                                "id": parseInt($(elem).attr("data-content-id")),
+                                "url": null, "filesize": 0,
+                                "name": "", "mime": ""
+                            }));
     }
 
-    // base case, update src info
-    const largeSrc = largeRes.url, {filesize} = largeRes.headers;
-    CONTENT.largeBlobs.push(largeSrc); // keep track of all BLOB urls
-
-    // append large view
-    let preview;
+    // grab content metadata
+    let blobArrayIndex = -1;
+    let largeSrc, filesize;
     
-    if (isVideo) {
-        preview = `<video class="noselect" controls src="${largeSrc}" data-content-id="${contentID}"
-                    data-fname="${thumbnailHeaders.name}" data-mime="${thumbnailHeaders.mime}">`;
-    } else {
-        preview = `<img class="noselect" draggable="false" src="${largeSrc}"
-                    data-content-id="${contentID}" data-fname="${thumbnailHeaders.name}"
-                    data-mime="${thumbnailHeaders.mime}">`;
+    // load large src if not in array
+    const len = Object.keys(CONTENT.largeBlobs).length;
+    for (let i = 0; i < len; i++) {
+        if (CONTENT.largeBlobs[i].id === contentID) {
+            blobArrayIndex = i;
+            largeSrc = CONTENT.largeBlobs[i].url;
+            ({filesize, name, mime} = CONTENT.largeBlobs[i]); // parenthesis for destructuring
+            break;
+        }
     }
 
-    $("#large-content-container > h1").html(thumbnailHeaders.name);
+    // not loaded yet, so get source
+    if (largeSrc === null) {
+        const largeRes = await resolveSrcToBlob(contentID, false);
+        if (largeRes.url === null || largeRes.headers.isDefaultIcon) {
+            if (largeRes.url !== null) URL.revokeObjectURL(largeRes.url);
+
+            // an error occured grabbing the image, so prevent loading
+            handleError("Content Resolve Issue\nThe requested \
+                        content could not be fetched from the server. Try reloading \
+                        the page.");
+            return;
+        }
+
+        // base case, was found
+        largeSrc = largeRes.url;
+        ({filesize, name, mime} = largeRes.headers);
+        CONTENT.largeBlobs[blobArrayIndex].url = largeSrc;
+        CONTENT.largeBlobs[blobArrayIndex].filesize = filesize;
+        CONTENT.largeBlobs[blobArrayIndex].name = name;
+        CONTENT.largeBlobs[blobArrayIndex].mime = mime;
+    }
+
+    // update text
+    $("#large-content-container > h1").html(name);
     $("#large-content-container > h2").html(`Encrypted size: ${formatByteSize(filesize)}`);
+
+    // append large content
+    const isVideo = mime.startsWith("video");
+    const preview = isVideo ? `<video class="noselect" controls src="${largeSrc}"
+                    data-content-id="${contentID}" data-fname="${name}" data-mime="${mime}">`
+                    : `<img class="noselect" draggable="false" src="${largeSrc}"
+                    data-content-id="${contentID}" data-fname="${name}" data-mime="${mime}">`;
+
     $(preview).insertAfter("#large-content-container > h2");
 
-    // bind events
+    // unbind existing events
+    $("#large-content-container").off("click");
+    $(".large-content-arrow").off("click");
+    $(window).off("keyup.closeLargeContent keyup.changeContent");
+    
+    // bind events for text scroll
     let textScrollInterval = null;
     
-    const closeView = () => {
-        // free BLOB if not a video
-        if (!isVideo) URL.revokeObjectURL(largeSrc);
-        $("#large-content-container").css("display", "");
+    const closeView = (clearBlobs=true) => {
+        // hide content
+        if (clearBlobs)
+            $("#large-content-container").css("display", "");
         $("#large-content-container > " + (isVideo ? "video" : "img")).remove();
-        $(window).off("keydown.closeLargeContent");
+        $(window).off("keyup.closeLargeContent keyup.changeContent");
         if (textScrollInterval !== null) clearInterval(textScrollInterval);
 
         // free all BLOB urls for large content
-        for (let url of CONTENT.largeBlobs)
-            URL.revokeObjectURL(url);
-        CONTENT.largeBlobs = []; // clear largeBlobs
+        if (clearBlobs) {
+            for (let contentData of CONTENT.largeBlobs) URL.revokeObjectURL(contentData.url);
+            CONTENT.largeBlobs = []; // clear largeBlobs
+        }
     };
-    
+
+    // rebind events
     $("#large-content-container").click(
-        function(e) { if (e.target === this) closeView(); }
+        function(e) { if (e.target === this) closeView(true); }
     );
-    $(window).on("keydown.closeLargeContent",
-        (e) => { if (e.key === "Escape") closeView(); }
+    $(window).on("keyup.closeLargeContent",
+        (e) => { if (e.key === "Escape") closeView(true); }
     );
 
     // bind text scroll event to file name
@@ -363,7 +396,8 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
     const DELAY = 1.5e3, INITIAL_DELAY = 1e3, OFFSET_INC = 1;
     const RATE = 50; // in ms, interval callback rate
     
-    setTimeout(() => {
+    // set textScrollInterval twice here, just clears the timeout instead if too early
+    textScrollInterval = setTimeout(() => {
         // store interval
         let offset = 0, lastStopped = 0;
         textScrollInterval = setInterval(() => {
@@ -379,6 +413,31 @@ async function showLargeContent(contentID, thumbnailElem, thumbnailHeaders) {
             }
         }, RATE);
     }, INITIAL_DELAY);
+
+    // bind events to nav arrows
+    const isFirstElem = CONTENT.largeBlobs[0].id === contentID;
+    const isLastElem = CONTENT.largeBlobs[CONTENT.largeBlobs.length-1].id === contentID;
+    $(".large-content-arrow:first-of-type").attr("data-is-disabled", isFirstElem);
+    $(".large-content-arrow:last-of-type").attr("data-is-disabled", isLastElem);
+
+    const changeContent = (index) => { // reload large content
+        if (index < 0 || index >= CONTENT.largeBlobs.length) return;
+        let contentData = CONTENT.largeBlobs[index];
+        closeView(false); // close this view but don't free blobs yet
+        showLargeContent(contentData.id, contentData.name, contentData.mime);
+    };
+
+    $(".large-content-arrow:first-of-type").one("click", () => changeContent(blobArrayIndex-1));
+    $(".large-content-arrow:last-of-type").one("click", () => changeContent(blobArrayIndex+1));
+    $(window).on("keyup.changeContent", e => {
+        if (e.key === "ArrowLeft") {
+            changeContent(blobArrayIndex-1);
+            e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+            changeContent(blobArrayIndex+1);
+            e.preventDefault();
+        }
+    });
 
     // reveal container
     $("#large-content-container").css("display", "flex");

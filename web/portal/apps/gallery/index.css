@@ -295,7 +295,6 @@ body {
     background-color: #1119;
 
     z-index: 9999999999;
-    cursor: pointer;
 }
 
 #large-content-container > * {
@@ -363,7 +362,7 @@ body {
 @media screen and (orientation: portrait) {
     #large-content-container > img,
     #large-content-container > video {
-        max-width: 90%;
+        max-width: 65%;
         max-height: 70%;
     }
 }
@@ -371,23 +370,50 @@ body {
 /* large content navigation arrows */
 
 .large-content-arrow {
-    --horiz-space: calc(2 * var(--text-unit));
-    
+    --horiz-space: calc(3 * var(--text-unit));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
     position: absolute;
     
     aspect-ratio: 0.25;
-    height: calc(10 * var(--text-unit));
-    
-    background-color: white;
+    height: calc(16 * var(--text-unit));
+    cursor: pointer !important;
+}
+
+.large-content-arrow > div {
+    --angle: 20deg;
+    --gap: 4%;
+    width: 30%;
+    height: 30%;
+    background-color: #f3f3f3;
+}
+
+.large-content-arrow[data-is-disabled="true"] {  cursor: default !important;  }
+.large-content-arrow[data-is-disabled="true"] > div {
+    cursor: default;
+    background-color: #aaa;
+}
+
+.large-content-arrow > div:first-of-type {
+    transform-origin: 50% 100%;
+    translate: 0 var(--gap);
+    transform: rotate(var(--angle));
+}
+.large-content-arrow > div:last-of-type {
+    transform-origin: 50% 0%;
+    translate: 0 calc(-1 * var(--gap));
+    transform: rotate(calc(-1 * var(--angle)));
 }
 
 .large-content-arrow:first-of-type {  left: var(--horiz-space);  }
-.large-content-arrow:last-of-type {  right: var(--horiz-space);  }
+.large-content-arrow:last-of-type {  right: var(--horiz-space); rotate: 180deg;  }
 
 @media screen and (orientation: portrait) {
     .large-content-arrow {
         --horiz-space: var(--text-unit) !important;
-        height: calc(5 * var(--text-unit)) !important;
+        height: calc(10 * var(--text-unit)) !important;
     }
 }
 

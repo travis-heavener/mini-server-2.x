@@ -89,10 +89,10 @@
             <h1></h1>
             <h2>Encrypted size:</h2>
             <!-- preview inserted here -->
-            <div class="large-content-arrow">
+            <div class="large-content-arrow" title="Seek previous">
                 <div></div><div></div>
             </div>
-            <div class="large-content-arrow">
+            <div class="large-content-arrow" title="Seek next">
                 <div></div><div></div>
             </div>
         </div>

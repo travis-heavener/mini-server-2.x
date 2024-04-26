@@ -31,7 +31,7 @@ def log(msg):
 def main():
     # load envs
     env_path = join(dirname(__file__), "../../../config/.env")
-    load_dotenv(env_path)
+    load_dotenv(env_path, override=True)
 
     # generate log path
     global LOG_PATH

@@ -35,10 +35,11 @@ def main():
 
     # generate log path
     global LOG_PATH
-    now_str = datetime.now().strftime("%m-%d-%Y_%H-%M-%S.log")
-    LOG_PATH = join(dirname(os.getenv("LOG_PATH")), "apps", "gallery", now_str)
+    LOG_PATH = join(dirname(os.getenv("LOG_PATH")), "apps", "gallery", "latest.log")
 
-    log("Starting Gallery App Recycle Bin audit...")
+    now_str = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    log("=" * 16 + f" [{now_str}] " + "=" * 16)
+    log("Starting Recycle Bin audit...")
 
     # establish connection
     try:
@@ -89,7 +90,7 @@ def main():
         log(f"    [{table}]: Removed {len(ids)} row(s) and associated files.")
     
     # log completion
-    log("Gallery App Recycle Bin audit complete.")
+    log("Recycle Bin audit complete.")
 
 if __name__ == "__main__":
     try:

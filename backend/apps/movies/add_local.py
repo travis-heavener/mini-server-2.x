@@ -56,10 +56,12 @@ def main(src_path):
     runtime_sec = get_runtime_ms(src_path) / 1e3
 
     # 5. grab thumbnail from video via ffmepg
+    max_dim = max(THUMB_WIDTH, THUMB_HEIGHT)
+    min_dim = min(THUMB_WIDTH, THUMB_HEIGHT)
     process = subprocess.Popen(
         f"cd {CONTENT_DIR} && \
           ffmpeg -y -hide_banner -loglevel error -i \"{src_path}\" -vf \"crop='min(in_w,in_h)':'min(in_w,in_h)', \
-          scale={THUMB_SIZE}:{THUMB_SIZE}\" -vframes 1 -ss {int(runtime_sec/2)} {THUMB_NAME}",
+          scale={max_dim}:{max_dim}, crop={THUMB_WIDTH}:{THUMB_HEIGHT}\" -vframes 1 -ss {int(runtime_sec/2)} {THUMB_NAME}",
         shell=True
     )
     process.wait()

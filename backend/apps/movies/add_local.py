@@ -52,7 +52,7 @@ def main(src_path):
     Path(CONTENT_DIR).mkdir(exist_ok=True)
 
     # 4. execute ffmpeg to take temp DVD file and break into stream in source dir
-    title, year, runtime, thumb_url = hls_gen(src_path, True, CONTENT_DIR, True)
+    title, year, runtime = hls_gen(src_path, True, CONTENT_DIR, True)[0:3]
 
     # 5. grab thumbnail from video via ffmepg
     process = subprocess.Popen(

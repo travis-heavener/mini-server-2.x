@@ -5,10 +5,9 @@ import subprocess
 from consts import *
 
 # gets the runtime of a video file
-def get_runtime(path):
+def get_runtime_ms(path):
     info = MediaInfo.parse(path)
-    ms = info.tracks[0].duration
-    return round(ms / 6e4) # ms -> min
+    return info.tracks[0].duration
 
 def hls_gen(SRC_PATH, keep_mkv, CONTENT_DIR=None, skip_thumb=False):
     CONTENT_DIR = CONTENT_DIR if CONTENT_DIR != None else os.path.dirname(SRC_PATH)
@@ -24,7 +23,7 @@ def hls_gen(SRC_PATH, keep_mkv, CONTENT_DIR=None, skip_thumb=False):
     # extract film metadata
     title = input("Enter film title: ")
     year = input("Enter film year: ")
-    runtime = get_runtime(SRC_PATH)
+    runtime = round(get_runtime_ms(SRC_PATH) / 6e4) # ms -> min
     thumb_url = input("Enter thumbnail image URL: ") if not skip_thumb else None
 
     # remove the temp mkv file

@@ -53,12 +53,13 @@ def main(src_path):
 
     # 4. execute ffmpeg to take temp DVD file and break into stream in source dir
     title, year, runtime = hls_gen(src_path, True, CONTENT_DIR, True)[0:3]
+    runtime_sec = get_runtime_ms(src_path) / 1e3
 
     # 5. grab thumbnail from video via ffmepg
     process = subprocess.Popen(
         f"cd {CONTENT_DIR} && \
           ffmpeg -y -hide_banner -loglevel error -i \"{src_path}\" -vf \"crop='min(in_w,in_h)':'min(in_w,in_h)', \
-          scale={THUMB_SIZE}:{THUMB_SIZE}\" -vframes 1 -ss 00:00:00.00 {THUMB_NAME}",
+          scale={THUMB_SIZE}:{THUMB_SIZE}\" -vframes 1 -ss {int(runtime_sec/2)} {THUMB_NAME}",
         shell=True
     )
     process.wait()

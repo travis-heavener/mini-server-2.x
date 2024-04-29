@@ -92,6 +92,8 @@ def main():
     # log completion
     log("Recycle Bin audit complete.")
 
+    db.close()
+
 if __name__ == "__main__":
     try:
         main()

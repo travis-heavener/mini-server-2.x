@@ -10,7 +10,7 @@ from sys import argv
 from consts import *
 from hls_converter import *
 
-def main(DISC_DEVICE_NAME, DISC_TITLES, keep_mkv):
+def main(src_path):
     # 1. load envs
     env_path = join(dirname(__file__), "../../../config/.env")
     load_dotenv(env_path, override=True)
@@ -51,28 +51,19 @@ def main(DISC_DEVICE_NAME, DISC_TITLES, keep_mkv):
     # base case, create new content directory
     Path(CONTENT_DIR).mkdir(exist_ok=True)
 
-    # 4. execute script in shell to rip current DVD to content dir temporarily
-    process = subprocess.Popen(f"makemkvcon mkv dev:{DISC_DEVICE_NAME} {DISC_TITLES} {CONTENT_DIR}", shell=True)
-    process.wait()
+    # 4. execute ffmpeg to take temp DVD file and break into stream in source dir
+    title, year, runtime, thumb_url = hls_gen(src_path, True, CONTENT_DIR, True)
 
-    # 4.A get the newly created MKV_PATH
-    files = glob.glob(join(CONTENT_DIR, "*.mkv"))
-    MKV_PATH = max(files, key=os.path.getctime)
-    print("Temp file created at: " + MKV_PATH)
-
-    # 5. execute ffmpeg to take temp DVD file and break into stream in source dir
-    title, year, runtime, thumb_url = hls_gen(MKV_PATH, keep_mkv)
-
-    # 6. create thumbnail image
+    # 5. grab thumbnail from video via ffmepg
     process = subprocess.Popen(
         f"cd {CONTENT_DIR} && \
-          ffmpeg -y -hide_banner -loglevel error -i \"{thumb_url}\" -vf \"crop='min(in_w,in_h)':'min(in_w,in_h)', \
-          scale={THUMB_SIZE}:{THUMB_SIZE}\" {THUMB_NAME}",
+          ffmpeg -y -hide_banner -loglevel error -i \"{src_path}\" -vf \"crop='min(in_w,in_h)':'min(in_w,in_h)', \
+          scale={THUMB_SIZE}:{THUMB_SIZE}\" -vframes 1 -ss 00:00:00.00 {THUMB_NAME}",
         shell=True
     )
     process.wait()
 
-    # 7. add film to database
+    # 6. add film to database
     cursor.execute(
         "INSERT INTO `film_library` (`title`, `year`, `runtime`) VALUES (%s, %s, %s);",
         (title, year, runtime)
@@ -82,16 +73,8 @@ def main(DISC_DEVICE_NAME, DISC_TITLES, keep_mkv):
     db.close()
 
 if __name__ == "__main__":
-    # grab USB device name from args
     if len(argv) < 2:
-        print("Invalid usage: missing \"OS Device Name\" argument for CD/ROM drive.")
+        print("Invalid usage: missing source file path.")
         exit(1)
-    
-    if len(argv) < 3:
-        print("Invalid usage: missing title numeric argument for DVD. Get it via MakeMKV.")
-        exit(1)
-    
-    # allow 4th arg "--keep" to prevent deleting mkv temp file
-    keep_mkv = len(argv) >= 4 and argv[3] == "--keep"
 
-    main(argv[1], argv[2], keep_mkv)
+    main(argv[1])

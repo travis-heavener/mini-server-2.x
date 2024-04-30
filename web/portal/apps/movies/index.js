@@ -1,6 +1,6 @@
 $(document).ready(() => {
     // bind text scroll to all content H1s
-    $(".film-icon-wrapper > h1").each(function() { bindTextScroll(this) });
+    $(".film-icon-wrapper h1").each(function() { bindTextScroll(this) });
 });
 
 // binds a text scroll interval to the element given

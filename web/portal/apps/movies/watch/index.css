@@ -1,0 +1,65 @@
+body {
+    width: 100vw;
+    min-height: 100vh;
+    overflow: hidden;
+
+    background: rgb(48,48,48);
+    background: linear-gradient(126deg, #333 0%, #232323 52%, #1e1e1e 64%, #232323 76%);
+
+    background-position: 0 0;
+    background-size: 100% 100%;
+    background-attachment: fixed;
+}
+
+/* override default styling for header & footer colors */
+#header-content {  background-color: #171717 !important;  }
+#footer-content {  background-color: #303030 !important;  }
+#footer-content > p {  color: #f8f8f8 !important;  }
+#footer-content > p > a {  color: #beadff !important;  }
+
+/************* BEGIN MAIN CONTENT STYLING *************/
+
+#main-content {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    height: calc( 100vh - var(--header-height) - var(--footer-height) );
+}
+
+#main-content > video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+}
+
+#play-overlay {
+    display: none;
+    --color: #bbb;
+    aspect-ratio: 1;
+    z-index: 99999999;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#play-overlay:hover > * {  --color: #f1f1f1;  }
+#play-overlay > * {  transition: 0.1s fill, 0.1s stroke;  }
+
+#play-overlay > circle {
+    stroke: var(--color);
+    fill: transparent;
+}
+
+#play-overlay > polygon {
+    stroke: transparent;
+    fill: var(--color);
+}
+
+@media screen and (orientation: landscape) {  #play-overlay {  width: 10%;  }  }
+@media screen and (orientation: portrait) {  #play-overlay {  width: 20%;  }  }
+
+/************* END MAIN CONTENT STYLING *************/

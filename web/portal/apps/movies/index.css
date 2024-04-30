@@ -49,7 +49,7 @@ body {
     height: calc(1.9 * var(--item-size));
 }
 
-.film-icon-wrapper > img {
+.film-icon-wrapper img {
     margin-bottom: calc(var(--item-size) * 0.04);
     
     width: var(--item-size);
@@ -62,8 +62,12 @@ body {
     transition: 0.2s filter;
 }
 
-.film-icon-wrapper:hover > img {
+.film-icon-wrapper:hover img {
     filter: brightness(110%) drop-shadow(0 0 6px #0008);
+}
+
+a:has(.film-icon-wrapper) {
+    text-decoration: none;
 }
 
 .film-icon-wrapper > h1,

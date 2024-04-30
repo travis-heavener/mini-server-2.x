@@ -3,3 +3,4 @@ media/*
 media-*.zip
 logs/*
 __pycache__/
+web/movies/*

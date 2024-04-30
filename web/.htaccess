@@ -18,7 +18,7 @@ Satisfy all
 ErrorDocument 403 /errors/404.html
 
 # remove index.php & such after in url (https://stackoverflow.com/a/9619319)
-Options +FollowSymLinks -MultiViews
+Options +FollowSymLinks -MultiViews -Indexes
 
 # Turn mod_rewrite on
 RewriteEngine On

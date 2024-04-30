@@ -33,11 +33,13 @@ foreach ($result as $row) {
         $runtime_text = "<1 minute";
 
     echo "
-        <div class='film-icon-wrapper' data-film-id='$id'>
-            <img src='$src_b64'>
-            <h1>$title</h1>
-            <h2>$year</h2>
-            <h2>$runtime_text</h2>
-        </div>
+        <a href='./watch/index.php?id=$id'>
+            <div class='film-icon-wrapper' data-film-id='$id'>
+                <img src='$src_b64'>
+                <h1>$title</h1>
+                <h2>$year</h2>
+                <h2>$runtime_text</h2>
+            </div>
+        </a>
     ";
 }

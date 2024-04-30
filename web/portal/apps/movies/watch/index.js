@@ -150,7 +150,7 @@ function bindKeyEvents() {
                 break;
             }
             case "ArrowRight": {
-                const mult = e.shiftKey && e.ctrlKey ? 1 : e.shiftKey ? shiftSeekMult : e.ctrlKey ? ctrlSeekMult : 1;
+                const mult = e.shiftKey && !e.ctrlKey ? shiftSeekMult : e.ctrlKey && !e.shiftKey ? ctrlSeekMult : 1;
                 video.currentTime = Math.min(video.currentTime + seekStep * mult, video.duration);
                 break;
             }

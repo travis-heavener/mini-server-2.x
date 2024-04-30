@@ -2,25 +2,36 @@
 
 @font-face {
     font-family: Poppins;
-    src: url("/assets/fonts/Poppins-Medium.woff");
+    src: url("/assets/fonts/Poppins-Regular.woff2") format("woff2"),
+         url("/assets/fonts/Poppins-Regular.woff") format("woff");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: Poppins;
+    src: url("/assets/fonts/Poppins-Medium.woff2") format("woff2"),
+         url("/assets/fonts/Poppins-Medium.woff") format("woff");
     font-weight: 500;
 }
 
 @font-face {
     font-family: Poppins;
-    src: url("/assets/fonts/Poppins-Bold.woff");
+    src: url("/assets/fonts/Poppins-Bold.woff2") format("woff2"),
+         url("/assets/fonts/Poppins-Bold.woff") format("woff");
     font-weight: 700;
 }
 
 @font-face {
     font-family: Ubuntu;
-    src: url("/assets/fonts/Ubuntu-Regular.woff");
+    src: url("/assets/fonts/Ubuntu-Regular.woff2") format("woff2"),
+         url("/assets/fonts/Ubuntu-Regular.woff") format("woff");
     font-weight: 400;
 }
 
 @font-face {
     font-family: "Digital-7";
-    src: url("/assets/fonts/Digital-7.woff");
+    src: url("/assets/fonts/Digital-7.woff2") format("woff2"),
+         url("/assets/fonts/Digital-7.woff") format("woff");
     font-weight: 400;
 }
 
@@ -297,7 +308,7 @@ body {
     background-color: #626cdf;
 }
 
-#header-content > img {
+#header-content img {
     width: auto;
     height: 88%;
     aspect-ratio: 1;
@@ -308,19 +319,31 @@ body {
     transition: 0.2s filter;
 }
 
-#header-content > #logo-img {
+#header-content > a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+#header-content > a:has(#logo-img) {
     margin-right: auto; /* fix to left-hand side */
 }
 
-#header-content > #my-account-img {
+#header-content #waffle-img {
+    margin-right: 0.25%;
+    height: 65% !important;
+}
+
+#header-content #my-account-img {
     clip-path: circle(50%); /* fix circular hitbox (also clips image, this isn't an issue though) */
 }
 
-#header-content > img:hover {
+#header-content img:hover {
     filter: brightness(110%);
 }
 
-#header-content > img:active {
+#header-content img:active {
     filter: brightness(95%);
 }
 

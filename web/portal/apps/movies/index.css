@@ -1,0 +1,99 @@
+body {
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    background: rgb(48,48,48);
+    background: linear-gradient(126deg, #333 0%, #232323 52%, #1e1e1e 64%, #232323 76%);
+
+    background-position: 0 0;
+    background-size: 100% 100%;
+    background-attachment: fixed;
+}
+
+/* override default styling for header & footer colors */
+#header-content {  background-color: #171717 !important;  }
+#footer-content {  background-color: #303030 !important;  }
+#footer-content > p {  color: #f8f8f8 !important;  }
+#footer-content > p > a {  color: #beadff !important;  }
+
+/************* BEGIN MAIN CONTENT STYLING *************/
+
+#main-content {
+    padding: calc(0.15 * var(--item-size)) calc(0.25 * var(--item-size));
+    width: 100%;
+    min-height: calc( 100vh - var(--header-height) - var(--footer-height) );
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#main-content > #film-icons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: calc(0.15 * var(--item-size));
+
+    width: calc(100% - 2 * var(--x-margin));
+}
+
+.film-icon-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+
+    width: var(--item-size);
+    height: calc(1.9 * var(--item-size));
+}
+
+.film-icon-wrapper > img {
+    margin-bottom: calc(var(--item-size) * 0.04);
+    
+    width: var(--item-size);
+    aspect-ratio: 2/3;
+    
+    border-radius: calc(0.035 * var(--item-size));
+    filter: brightness(100%) drop-shadow(0 0 6px #0008);
+    
+    cursor: pointer;
+    transition: 0.2s filter;
+}
+
+.film-icon-wrapper:hover > img {
+    filter: brightness(110%) drop-shadow(0 0 6px #0008);
+}
+
+.film-icon-wrapper > h1,
+.film-icon-wrapper > h2 {
+    width: 100%;
+    
+    font-size: calc(var(--item-size) * 0.08);
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    text-shadow: 2px 2px 3px #000a;
+    
+    cursor: pointer;
+    transition: 0.15s color;
+    
+    /* for text overflow scrolling */
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    overflow: hidden;
+}
+
+.film-icon-wrapper > h1 {  color: #f6f6f6;  }
+.film-icon-wrapper:hover > h1 {  color: #f7901b; text-overflow: clip;  }
+.film-icon-wrapper > h2 {  color: #9b9b9b;  }
+.film-icon-wrapper:hover > h2 {  color: #cc6c12;  }
+
+@media screen and (orientation: landscape) {
+    #main-content {  --item-size: 180px;  }
+}
+@media screen and (orientation: portrait) {
+    #main-content {  --item-size: min(35vw, 140px);  }
+}
+
+/************* END MAIN CONTENT STYLING *************/

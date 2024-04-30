@@ -61,6 +61,19 @@ html {
          -moz-user-select: none; /* Old versions of Firefox */
           -ms-user-select: none; /* Internet Explorer/Edge */
               user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    /* thanks SO (https://stackoverflow.com/a/32548403) */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
 }
 
 /* thanks https://www.w3schools.com/howto/howto_css_hide_arrow_number.asp */
@@ -375,3 +388,45 @@ body {
         font-size: calc(0.65 * var(--text-unit));
     }
 }
+
+/***************** START MEDIA QUERIES *****************/
+
+@media screen and (orientation: landscape) {
+    @media (max-width: 479px) {  body { --text-unit: 3px; }  }
+    @media (min-width: 480px) {  body { --text-unit: 4px; }  }
+    @media (min-width: 576px) {  body { --text-unit: 5px; }  }
+    @media (min-width: 768px) {  body { --text-unit: 6px; }  }
+    @media (min-width: 960px) {  body { --text-unit: 7px; }  }
+    @media (min-width: 1080px) {  body { --text-unit: 8px; }  }
+    @media (min-width: 1200px) {  body { --text-unit: 10px; }  }
+    @media (min-width: 1400px) {  body { --text-unit: 12px; }  }
+    @media (min-width: 1800px) {  body { --text-unit: 14px; }  }
+    @media (min-width: 2400px) {  body { --text-unit: 18px; }  }
+    @media (min-width: 2800px) {  body { --text-unit: 22px; }  }
+    @media (min-width: 3800px) {  body { --text-unit: 28px; }  }
+    @media (min-width: 5600px) {  body { --text-unit: 44px; }  }
+    @media (min-width: 7600px) {  body { --text-unit: 58px; }  }
+}
+
+@media screen and (orientation: portrait) {
+    @media (max-width: 359px) {  body { --text-unit: 6px; }  }
+    @media (min-width: 360px) {  body { --text-unit: 8px; }  }
+    @media (min-width: 480px) {  body { --text-unit: 9px; }  }
+    @media (min-width: 576px) {  body { --text-unit: 10px; }  }
+    @media (min-width: 768px) {  body { --text-unit: 12px; }  }
+    @media (min-width: 1200px) {  body { --text-unit: 14px; }  }
+    @media (min-width: 1400px) {  body { --text-unit: 16px; }  }
+    @media (min-width: 1800px) {  body { --text-unit: 18px; }  }
+    @media (min-width: 2400px) {  body { --text-unit: 20px; }  }
+}
+
+/***************** END MEDIA QUERIES *****************/
+/***************** START WEBKIT SCROLLBAR *****************/
+
+::-webkit-scrollbar { width: var(--text-unit); }
+::-webkit-scrollbar-track { background-color: #ddd; }
+::-webkit-scrollbar-thumb { background-color: #494949; }
+::-webkit-scrollbar-thumb:hover { background-color: #383838; }
+::-webkit-scrollbar-thumb:active { background-color: #272727; }
+
+/***************** END WEBKIT SCROLLBAR *****************/

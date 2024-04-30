@@ -22,10 +22,20 @@
         <?php include($_SERVER["DOCUMENT_ROOT"] . "/php/createHeader.php") ?>
 
         <div id="main-content">
-            <video id="video-container"></video>
-            <svg id="play-overlay" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50%" cy="50%" r="43%" stroke-width="7%" />
-                <polygon points="38,33 67,50 38,67" />
+            <div class="video-container">
+                <video id="video-out"></video>
+
+                <div class="video-control-bar">
+                    <svg class="video-play-icon" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+                        <polygon class="svg-play-icon" points="0.5,0 9.5,5 0.5,10" />
+                        <rect class="svg-pause-icon" x="1.25" y="0" width="2.75" height="10" />
+                        <rect class="svg-pause-icon" x="6.25" y="0" width="2.75" height="10" />
+                    </svg>
+                </div>
+            </div>
+
+            <svg class="play-overlay" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="1,0 9,5 1,10" />
             </svg>
         </div>
 

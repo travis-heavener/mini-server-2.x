@@ -20,46 +20,91 @@ body {
 /************* BEGIN MAIN CONTENT STYLING *************/
 
 #main-content {
-    position: relative;
-
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 
-    width: 100%;
-    height: calc( 100vh - var(--header-height) - var(--footer-height) );
-}
+    --container-width: 100%;
+    --container-height: calc( 100vh - var(--header-height) - var(--footer-height) );
 
-#main-content > video {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+    width: var(--container-width);
+    height: var(--container-height);
     background-color: #000;
 }
 
-#play-overlay {
-    display: none;
+.video-container {
+    display: flex;
+    position: relative;
+}
+
+.video-container > video {
+    max-width: var(--container-width);
+    max-height: var(--container-height);
+}
+
+.play-overlay {
     --color: #bbb;
+
+    display: none;
+    position: absolute;
+
     aspect-ratio: 1;
-    z-index: 99999999;
-    border-radius: 50%;
     cursor: pointer;
+    z-index: 99999999;
 }
 
-#play-overlay:hover > * {  --color: #f1f1f1;  }
-#play-overlay > * {  transition: 0.1s fill, 0.1s stroke;  }
+.play-overlay:hover > * {  --color: #f1f1f1;  }
+.play-overlay > * {  transition: 0.1s fill;  }
 
-#play-overlay > circle {
-    stroke: var(--color);
-    fill: transparent;
-}
-
-#play-overlay > polygon {
+.play-overlay > polygon {
     stroke: transparent;
     fill: var(--color);
 }
 
-@media screen and (orientation: landscape) {  #play-overlay {  width: 10%;  }  }
-@media screen and (orientation: portrait) {  #play-overlay {  width: 20%;  }  }
+@media screen and (orientation: landscape) {  .play-overlay {  width: 10%;  }  }
+@media screen and (orientation: portrait) {  .play-overlay {  width: 20%;  }  }
+
+/******** video controls styling ********/
+
+/* thanks https://stackoverflow.com/a/19493459 */
+#video-out::-webkit-media-controls {
+    display:none !important;
+}
+
+.video-control-bar {
+    --height: calc(var(--container-height) * 0.06);
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--height);
+    background-color: #0009;
+}
+
+.video-control-bar > svg {
+    --color: #f1f1f1;
+    position: absolute;
+    aspect-ratio: 1;
+    cursor: pointer;
+    z-index: 99999999;
+}
+
+.video-play-icon {
+    left: calc(0.3 * var(--height));
+    top: calc(0.22 * var(--height));
+    height: calc(0.56 * var(--height));
+    aspect-ratio: 1;
+}
+
+/* hide pause icon by default */
+.svg-pause-icon { display: none; }
+
+.video-control-bar polygon,
+.video-control-bar rect {
+    stroke: transparent;
+    fill: var(--color);
+}
 
 /************* END MAIN CONTENT STYLING *************/

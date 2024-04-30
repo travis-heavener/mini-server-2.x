@@ -160,4 +160,32 @@ function formatByteSize(bytes=0) {
     return (raw / (2 ** (10*i))).toFixed(1) + " " + suffixes[i];
 }
 
+/**
+ * Thanks to https://stackoverflow.com/a/6039930 (for requestFullscreen) and
+ * https://stackoverflow.com/a/36672683 (for exitFullscreen) help with handling cross-compatibility.
+ */
+
+/**
+ * Returns true if the document is fullscreened, false otherwise.
+ */
+const getIsFullscreen = () => !(document.fullscreenElement === null || document.webkitFullscreenElement === null);
+
+/**
+ * Returns a function that, when called, will exit fullscreen.
+ * 
+ * NOTE: This will raise an exception if the document is not in fullscreen mode.
+ */
+const getExitFullscreenFunc = () => {
+    return (document.exitFullscreen || document.webkitExitFullscreen ||
+            document.mozCancelFullScreen || document.msExitFullscreen).bind(document);
+};
+    
+/**
+ * Returns a function that, when called, will request fullscreen on the provided element.
+ */
+const getRequestFullscreenFunc = (elem) => {
+    return (elem.requestFullscreen || elem.mozRequestFullScreen || elem.mozRequestFullScreen ||
+            elem.webkitRequestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen).bind(elem);
+};
+
 /*************** END MISC ***************/

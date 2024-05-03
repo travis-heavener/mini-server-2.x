@@ -2,31 +2,20 @@
 Order Deny,Allow
 Deny from all
 Allow from 192.168.1.0/24
-Allow from 127.0.0.1
-
-# school internal ip (pc)
-Allow from 128.113.194.92
-
-# school phone ip
-Allow from 129.161.243.104
-
 Allow from 10.0.0.0/24
+Allow from 127.0.0.1
 Allow from ::1
+
 Satisfy all
 
 # Custom ErrorDocument to prevent default 403 from hinting that an asset exists
 ErrorDocument 403 /errors/404.html
 
-# remove index.php & such after in url (https://stackoverflow.com/a/9619319)
 Options +FollowSymLinks -MultiViews -Indexes
 
-# Turn mod_rewrite on
+# remove index.php from end of URLs (thanks https://stackoverflow.com/a/9619319)
 RewriteEngine On
-RewriteBase /
 
-RewriteCond %{REQUEST_FILENAME} !-f
+# Remove trailing slash if not a directory
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?$1 [L,QSA]
-
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*)/index\.php [NC]
-RewriteRule ^ %1 [R=301,L]
+RewriteRule ^(.*)/$ /$1 [L,R=301]

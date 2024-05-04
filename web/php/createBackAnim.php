@@ -11,11 +11,12 @@
             body {
                 --back-anim-rot: 0deg;
                 background-image:
-                    linear-gradient(calc(225deg + var(--back-anim-rot)), #535edbcc, #0000 80%),
-                    linear-gradient(calc(135deg + var(--back-anim-rot)), #ff0c, #0000 80%),
-                    linear-gradient(calc(330deg + var(--back-anim-rot)), #eb1d1dcc, #0000 80%);
+                    linear-gradient(calc(0deg   + var(--back-anim-rot)), #ed7b00ee, #0000 80%),
+                    linear-gradient(calc(90deg  + var(--back-anim-rot)), #741eb1ee, #0000 80%),
+                    linear-gradient(calc(180deg + var(--back-anim-rot)), #b51b6aee, #0000 80%),
+                    linear-gradient(calc(270deg + var(--back-anim-rot)), #e73164ee, #0000 80%);
                 
-                animation: 20s linear backAnim infinite running;
+                animation: 30s linear backAnim infinite running;
                 
                 background-position: center;
                 background-repeat: no-repeat;

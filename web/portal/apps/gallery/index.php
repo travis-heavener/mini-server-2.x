@@ -5,7 +5,6 @@
         <?php
             include_once($_SERVER['DOCUMENT_ROOT'] . "/php/requireAuth.php");
             include_once($_SERVER['DOCUMENT_ROOT'] . "/php/importAssets.php"); // import other assets & add meta tag, jQuery, & preloads
-            include_once($_SERVER['DOCUMENT_ROOT'] . "/php/createBackAnim.php"); // add background animation
             
             $user_data = check_auth(); // actually call to check the auth
             verify_perms($user_data); // verify the user has access to this page

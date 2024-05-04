@@ -318,7 +318,7 @@ body {
 
     height: var(--header-height);
 
-    background-color: #626cdf;
+    background-color: #252525;
 }
 
 #header-content img {
@@ -348,17 +348,8 @@ body {
     height: 65% !important;
 }
 
-#header-content #my-account-img {
-    clip-path: circle(50%); /* fix circular hitbox (also clips image, this isn't an issue though) */
-}
-
-#header-content img:hover {
-    filter: brightness(110%);
-}
-
-#header-content img:active {
-    filter: brightness(95%);
-}
+#header-content img:hover {  filter: brightness(110%);  }
+#header-content img:active {  filter: brightness(95%);  }
 
 /* footer content */
 

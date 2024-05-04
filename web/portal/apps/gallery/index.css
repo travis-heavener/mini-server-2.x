@@ -6,13 +6,9 @@ body {
 }
 
 /* override default styling for header & footer colors */
-#header-content {
-    background-color: #111e !important;
-}
-
-#footer-content {
-    background-color: #999d !important;
-}
+#header-content {  background-color: #111 !important;  }
+#footer-content {  background-color: #444 !important;  }
+#footer-content > p {  color: #f2f2f2 !important;  }
 
 #main-content {
     --picker-width: calc(17 * var(--text-unit));
@@ -41,7 +37,7 @@ body {
 
     padding: var(--text-unit);
     
-    background-color: #1a1a1aee;
+    background-color: #1a1a1a;
 
     overflow-x: hidden;
     overflow-y: auto;
@@ -184,7 +180,7 @@ body {
     padding: var(--padding);
 
     height: 100%;
-    background-color: #666b;
+    background: linear-gradient(126deg, #333 0%, #232323 52%, #1e1e1e 64%, #232323 76%);
     overflow-x: hidden;
     overflow-y: auto;
 

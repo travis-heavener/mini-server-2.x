@@ -5,10 +5,12 @@ body {
     overflow-y: auto;
 }
 
+
 /* override default styling for header & footer colors */
 #header-content {  background-color: #111 !important;  }
-#footer-content {  background-color: #444 !important;  }
-#footer-content > p {  color: #f2f2f2 !important;  }
+#footer-content {  background-color: #303030 !important;  }
+#footer-content > p {  color: #f8f8f8 !important;  }
+#footer-content > p > a {  color: #beadff !important;  }
 
 #main-content {
     --picker-width: calc(17 * var(--text-unit));

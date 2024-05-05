@@ -11,11 +11,16 @@ Satisfy all
 # Custom ErrorDocument to prevent default 403 from hinting that an asset exists
 ErrorDocument 403 /errors/404.html
 
+# FollowSymLinks needed for RewriteEngine
 Options +FollowSymLinks -MultiViews -Indexes
 
 # remove index.php from end of URLs (thanks https://stackoverflow.com/a/9619319)
 RewriteEngine On
+RewriteBase /
 
-# Remove trailing slash if not a directory
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)/$ /$1 [L,R=301]
+RewriteRule ^(.*)$ index.php?$1 [L,QSA]
+
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*)/index\.php [NC]
+RewriteRule ^ %1 [R=301,L]
